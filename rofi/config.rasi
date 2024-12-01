@@ -1,13 +1,17 @@
-/* Rofi config file */
-configuration {
-    font: "Source Sans Pro 12";
+configuration{
+    modi: "window,drun";
+    icon-theme: "Oranchelo";
     show-icons: true;
-    display-window: "Window";
-    display-drun: "Search";
+    terminal: "alacritty";
+    drun-display-format: "{icon} {name}";
+    location: 0;
+    disable-history: false;
+    hide-scrollbar: true;
+    display-drun: "   Apps ";
+    display-run: "   Run ";
+    display-window: " 󰕰  Window";
+    display-Network: " 󰤨  Network";
+    sidebar-mode: true;
 }
 
-@theme "oxide"
-
-listview {
-    lines: 12;
-}
+@theme "catppuccin-mocha"

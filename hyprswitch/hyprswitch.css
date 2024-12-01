@@ -1,0 +1,14 @@
+.client {
+    font-size: 16px;
+    font-weight: normal;
+  
+    border-radius: var(--border-radius);
+    background-color: var(--bg-color);
+    border: 3px solid var(--border-color);
+  }
+  .client:hover {
+    background-color: var(--bg-color-hover);
+  }
+  .client_active {
+    border: 3px solid var(--border-color-active);
+  }
