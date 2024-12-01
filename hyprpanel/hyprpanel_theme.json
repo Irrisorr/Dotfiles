@@ -1,0 +1,13 @@
+{
+  "theme.bar.menus.background": "#11111b",
+  "theme.bar.menus.border.color": "#313244",
+  "theme.bar.buttons.style": "default",
+  "theme.bar.background": "#11111b",
+  "theme.bar.menus.menu.media.card.color": "#1e1e2e",
+  "theme.bar.buttons.dashboard.icon": "#b4befe",
+  "theme.bar.buttons.workspaces.available": "#b4befe",
+  "theme.bar.buttons.bluetooth.text": "#caa6f7",
+  "theme.bar.buttons.bluetooth.icon": "#caa6f7",
+  "theme.bar.buttons.modules.cpuTemp.text": "#f38ba8",
+  "theme.bar.buttons.modules.cpuTemp.icon": "#f38ba8"
+}

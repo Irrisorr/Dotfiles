@@ -2,8 +2,8 @@ import os
 import re
 
 # Путь к файлам конфигурации
-hyprpaper_conf_path = os.path.expanduser('~/.config/hypr/hyprpaper.conf')  # Убедитесь, что путь правильный
-hyprlock_conf_path = os.path.expanduser('~/.config/hypr/hyprlock.conf')    # Убедитесь, что путь правильный
+hyprpaper_conf_path = os.path.expanduser('~/.config/hypr/hyprpaper.conf')
+hyprlock_conf_path = os.path.expanduser('~/.config/hypr/hyprlock.conf')  
 
 def get_preload_path():
     with open(hyprpaper_conf_path, 'r') as file:

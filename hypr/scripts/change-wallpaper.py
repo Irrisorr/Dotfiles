@@ -54,9 +54,15 @@ def set_wallpaper():
         subprocess.run(['killall', 'hyprpaper'])
         # Запускаем hyprpaper с новой конфигурацией
         subprocess.run(["hyprctl", "dispatch", "exec", "hyprpaper"])
-        messagebox.showinfo("Успех", "Обои успешно установлены!")
+
+        # Автоматический запуск скрипта update-hyprlock.py
+        update_hyprlock_script = os.path.expanduser("~/.config/hypr/scripts/update-hyprlock.py")  # Укажите путь к скрипту
+        subprocess.run(['python3', update_hyprlock_script], check=True)
+
+        messagebox.showinfo("Успех", "Обои успешно установлены и конфигурация Hyprlock обновлена!")
     except Exception as e:
         messagebox.showerror("Ошибка", f"Не удалось записать конфигурацию: {e}")
+
 
 def select_all(event):
     wallpaper_text.tag_add("sel", "1.0", "end")
