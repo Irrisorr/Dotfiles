@@ -1,0 +1,18 @@
+# Browsers
+zen-browser-bin
+
+# IDE's
+visual-studio-code-bin
+intellij-idea-ultimate-edition
+postman-bin
+
+# Media
+vesktop-bin
+spotify
+zoom
+
+# Offices
+freeoffice
+
+# Hypr Ecosystem
+hyprshot

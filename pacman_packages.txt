@@ -1,0 +1,77 @@
+#others
+unzip
+gvfs
+python-pip
+github-cli
+jdk21-openjdk
+maven
+fastfetch
+figlet
+playerctl
+fish
+xdg-desktop-portal
+xdg-user-dirs
+xdg-user-dirs-gtk
+
+# Browsers
+vivaldi
+
+# File managers
+# Thunar
+thunar
+tumbler
+thunar-archive-plugin
+thunar-volman
+ark
+
+# Games
+steam
+
+# Media
+# iMe (fork of telegram) or telegram-desktop
+
+# Notes
+obsidian
+
+# Drawing
+rnote
+
+# Polkit
+polkit-gnome
+
+# Runners
+wofi
+
+# Settings
+baobab
+blueman
+pavucontrol
+nwg-displays
+
+# Sync
+syncthing
+
+# System
+gnome-calculator
+gnome-system-monitor
+obs-studio
+swayimg
+vlc
+wlogout
+
+# Terminals
+kitty
+
+# VM's
+gnome-boxes
+
+# Hypr Ecosystem
+hyprpaper
+hyprlock
+xdg-desktop-portal-hyprland
+
+# Desktop
+qt5-graphicaleffects
+qt5-quickcontrols2
+qt5-svg
+sddm 
