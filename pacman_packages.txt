@@ -64,6 +64,7 @@ kitty
 
 # VM's
 gnome-boxes
+scrcpy
 
 # Hypr Ecosystem
 hyprpaper

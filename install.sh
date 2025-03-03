@@ -193,6 +193,26 @@ else
     echo ":: yay_packages.txt not found, skipping installation of additional yay packages..."
 fi
 
+# RustDesk installation
+print_styled_message "Installing RustDesk"
+if confirm_action "install RustDesk version 1.3.7"; then
+    mkdir -p ~/Downloads/apps
+    cd ~/Downloads/apps
+    
+    print_styled_message "Downloading RustDesk 1.3.7"
+    RUSTDESK_URL="https://github.com/rustdesk/rustdesk/releases/download/1.3.7/rustdesk-1.3.7-0-x86_64.pkg.tar.zst"
+    RUSTDESK_PKG="rustdesk-1.3.7-0-x86_64.pkg.tar.zst"
+    
+    execute_command wget -O "$RUSTDESK_PKG" "$RUSTDESK_URL"
+    
+    print_styled_message "Installing RustDesk package"
+    execute_command sudo pacman -U --noconfirm "$RUSTDESK_PKG"
+    
+    print_success_message "RustDesk 1.3.7 installed successfully"
+    
+    cd - > /dev/null # Return to original directory
+fi
+
 # Configuring GTK
 print_styled_message "Configuring GTK (removing window control buttons)"
 if confirm_action "configure GTK"; then
@@ -213,6 +233,13 @@ fi
 print_styled_message "Enabling SDDM"
 if confirm_action "enable SDDM"; then
     execute_command sudo systemctl enable sddm
+fi
+
+# Enabling Bluetooth service
+print_styled_message "Enabling Bluetooth service"
+if confirm_action "enable Bluetooth service"; then
+    execute_command sudo systemctl enable bluetooth.service
+    print_success_message "Bluetooth service enabled"
 fi
 
 # Application configurations
@@ -286,6 +313,24 @@ if command -v kitty &>/dev/null; then
     if confirm_action "configure kitty"; then
         mkdir -p ~/.config/kitty
         create_symlink "$(pwd)/kitty" "$HOME/.config/kitty"
+    fi
+fi
+
+# hyprswitch configuration
+if [ -d "$(pwd)/hyprswitch" ]; then
+    print_styled_message "Configuring hyprswitch"
+    if confirm_action "configure hyprswitch"; then
+        mkdir -p ~/.config/hypr
+        create_symlink "$(pwd)/hyprswitch" "$HOME/.config/hyprswitch"
+    fi
+fi
+
+# hypapnel configuration
+if [ -d "$(pwd)/hypapnel" ]; then
+    print_styled_message "Configuring hypapnel"
+    if confirm_action "configure hypapnel"; then
+        mkdir -p ~/.config/hypr
+        create_symlink "$(pwd)/hypapnel" "$HOME/.config/hypapnel"
     fi
 fi
 

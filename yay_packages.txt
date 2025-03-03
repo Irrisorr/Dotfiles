@@ -5,6 +5,8 @@ zen-browser-bin
 visual-studio-code-bin
 intellij-idea-ultimate-edition
 postman-bin
+podman 
+podman-desktop
 
 # Media
 vesktop-bin
@@ -13,6 +15,9 @@ zoom
 
 # Offices
 freeoffice
+
+# Virtual Machines
+waydroid
 
 # Hypr Ecosystem
 hyprshot
