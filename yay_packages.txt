@@ -16,3 +16,4 @@ freeoffice
 
 # Hypr Ecosystem
 hyprshot
+hyprswitch

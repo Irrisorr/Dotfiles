@@ -227,29 +227,6 @@ if command -v thunar &>/dev/null; then
     fi
 fi
 
-# iMe Desktop installation
-print_styled_message "Installing iMe Desktop"
-if confirm_action "install iMe Desktop"; then
-    mkdir -p ~/Downloads/apps
-    cd ~/Downloads/apps
-    
-    print_styled_message "Downloading iMe Desktop"
-    execute_command wget -O iMe-desktop.tar.xz https://imem.app/download/desktop/linux
-    
-    print_styled_message "Extracting iMe Desktop"
-    execute_command tar -xf iMe-desktop.tar.xz
-    
-    print_styled_message "Running iMe Desktop to create desktop file"
-    echo ":: Starting iMe Desktop, it will be terminated after 2 seconds..."
-    cd iMeDesktop
-    ./iMe &
-    IME_PID=$!
-    sleep 2
-    kill $IME_PID
-    print_success_message "iMe Desktop desktop file created"
-    cd $(pwd) # Return to original directory
-fi
-
 # Zoom configuration
 if command -v zoom &>/dev/null || [ -f ~/.config/zoomus.conf ]; then
     print_styled_message "Configuring Zoom"
@@ -399,4 +376,12 @@ if confirm_action "start polkit agent"; then
     print_success_message "Polkit agent started"
 fi
 
-print_styled_message "Configuration complete! Restart your computer for changes to take effect."
+# Make post-installation script executable
+if [ -f "$(pwd)/post_install.sh" ]; then
+    print_styled_message "Making post-installation script executable"
+    chmod +x "$(pwd)/post_install.sh"
+    print_success_message "Post-installation script is ready to use"
+    echo ":: After reboot, run ./post_install.sh to complete additional setup tasks"
+fi
+
+print_styled_message "Installation complete! Restart your computer for changes to take effect."
