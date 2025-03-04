@@ -430,3 +430,75 @@ if [ -f "$(pwd)/post_install.sh" ]; then
 fi
 
 print_styled_message "Installation complete! Restart your computer for changes to take effect."
+
+# Function to convert Russian XDG directories to English
+convert_xdg_dirs_to_english() {
+    print_step "Converting XDG user directories to English..."
+    if confirm "Do you want to convert XDG user directories to English?"; then
+
+        # Set English XDG directories
+        cat > ~/.config/user-dirs.dirs << EOL
+XDG_DESKTOP_DIR="$HOME/Desktop"
+XDG_DOWNLOAD_DIR="$HOME/Downloads"
+XDG_TEMPLATES_DIR="$HOME/Templates"
+XDG_PUBLICSHARE_DIR="$HOME/Public"
+XDG_DOCUMENTS_DIR="$HOME/Documents"
+XDG_MUSIC_DIR="$HOME/Music"
+XDG_PICTURES_DIR="$HOME/Pictures"
+XDG_VIDEOS_DIR="$HOME/Videos"
+EOL
+
+        # Create English directories
+        mkdir -p ~/Desktop ~/Downloads ~/Templates ~/Public ~/Documents ~/Music ~/Pictures ~/Videos
+
+        # Move files from Russian to English directories if they exist
+        mv -n "$HOME/Рабочий стол"/* "$HOME/Desktop" 2>/dev/null || true
+        mv -n "$HOME/Загрузки"/* "$HOME/Downloads" 2>/dev/null || true
+        mv -n "$HOME/Шаблоны"/* "$HOME/Templates" 2>/dev/null || true
+        mv -n "$HOME/Общедоступные"/* "$HOME/Public" 2>/dev/null || true
+        mv -n "$HOME/Документы"/* "$HOME/Documents" 2>/dev/null || true
+        mv -n "$HOME/Музыка"/* "$HOME/Music" 2>/dev/null || true
+        mv -n "$HOME/Изображения"/* "$HOME/Pictures" 2>/dev/null || true
+        mv -n "$HOME/Видео"/* "$HOME/Videos" 2>/dev/null || true
+
+        # Remove empty Russian directories
+        rmdir "$HOME/Рабочий стол" "$HOME/Загрузки" "$HOME/Шаблоны" "$HOME/Общедоступные" \
+              "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео" 2>/dev/null || true
+
+        # Create symbolic link in HyprDots
+        ln -sf ~/.config/user-dirs.dirs "$INSTALL_DIR/user-dirs.dirs"
+        print_success "XDG user directories converted to English successfully!"
+    fi
+}
+
+# Function to setup mimeinfo.cache
+setup_mimeinfo_cache() {
+    print_step "Setting up mimeinfo.cache..."
+    if confirm "Do you want to setup mimeinfo.cache with Zen Browser as default PDF viewer?"; then
+        # Create a copy of mimeinfo.cache
+        sudo cp /usr/share/applications/mimeinfo.cache "$INSTALL_DIR/mimeinfo.cache"
+        
+        # Update PDF association
+        sed -i 's|application/pdf=.*|application/pdf=zen.desktop|' "$INSTALL_DIR/mimeinfo.cache"
+        print_success "mimeinfo.cache setup completed!"
+    fi
+}
+
+# Create symbolic links for hyprpanel
+create_hyprpanel_symlink() {
+    print_step "Creating symbolic link for hyprpanel..."
+    if confirm "Do you want to create a symbolic link for hyprpanel?"; then
+        if [ -d "$INSTALL_DIR/hyprpanel" ]; then
+            mkdir -p ~/.config/hypr/
+            ln -sf "$INSTALL_DIR/hyprpanel" ~/.config/hypr/@hyprpanel
+            print_success "hyprpanel symbolic link created successfully!"
+        else
+            print_error "hyprpanel directory not found in $INSTALL_DIR"
+        fi
+    fi
+}
+
+# Add new functions to main installation process
+convert_xdg_dirs_to_english
+setup_mimeinfo_cache
+create_hyprpanel_symlink

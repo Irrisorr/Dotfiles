@@ -21,3 +21,4 @@ waydroid
 # Hypr Ecosystem
 hyprshot
 hyprswitch
+hyprpanel

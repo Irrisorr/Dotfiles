@@ -1,4 +1,8 @@
 #others
+cmake
+meson
+cpio
+pkg-config
 unzip
 gvfs
 python-pip
@@ -13,6 +17,9 @@ xdg-desktop-portal
 xdg-user-dirs
 xdg-user-dirs-gtk
 podman
+brightnessctl
+hyprpicker
+tk
 
 # Browsers
 vivaldi
@@ -48,6 +55,7 @@ baobab
 blueman
 pavucontrol
 nwg-displays
+nwg-look
 
 # Sync
 syncthing
