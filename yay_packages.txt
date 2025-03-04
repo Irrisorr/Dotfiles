@@ -21,4 +21,4 @@ waydroid
 # Hypr Ecosystem
 hyprshot
 hyprswitch
-hyprpanel
+ags-hyprpanel-git
