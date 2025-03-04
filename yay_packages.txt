@@ -5,8 +5,7 @@ zen-browser-bin
 visual-studio-code-bin
 intellij-idea-ultimate-edition
 postman-bin
-podman 
-podman-desktop
+podman-desktop-bin
 
 # Media
 vesktop-bin
