@@ -242,6 +242,13 @@ if confirm_action "enable Bluetooth service"; then
     print_success_message "Bluetooth service enabled"
 fi
 
+# Enable hyprpm
+print_styled_message "Enable hyprpm"
+if confirm_action "enable hyprpm"; then
+    execute_command hyprpm update -s -v
+    print_success_message "Enable hyprpm"
+fi
+
 # Application configurations
 print_styled_message "Configuring applications"
 
@@ -370,6 +377,14 @@ if command -v fish &>/dev/null; then
     fi
 fi
 
+# Git configuration
+print_styled_message "Configuring Git"
+if confirm_action "configure Git"; then
+    execute_command git config --global user.name "Irrisorr"
+    execute_command git config --global user.email "zakharkevichg@gmail.com"
+    print_success_message "Polkit agent started"
+fi
+
 # hyprpaper configuration
 if command -v hyprpaper &>/dev/null; then
     print_styled_message "Configuring hyprpaper"
@@ -421,20 +436,10 @@ if confirm_action "start polkit agent"; then
     print_success_message "Polkit agent started"
 fi
 
-# Make post-installation script executable
-if [ -f "$(pwd)/post_install.sh" ]; then
-    print_styled_message "Making post-installation script executable"
-    chmod +x "$(pwd)/post_install.sh"
-    print_success_message "Post-installation script is ready to use"
-    echo ":: After reboot, run ./post_install.sh to complete additional setup tasks"
-fi
-
-print_styled_message "Installation complete! Restart your computer for changes to take effect."
-
 # Function to convert Russian XDG directories to English
 convert_xdg_dirs_to_english() {
-    print_step "Converting XDG user directories to English..."
-    if confirm "Do you want to convert XDG user directories to English?"; then
+    print_styled_message "Converting XDG user directories to English..."
+    if confirm_action "Do you want to convert XDG user directories to English?"; then
 
         # Set English XDG directories
         cat > ~/.config/user-dirs.dirs << EOL
@@ -467,24 +472,33 @@ EOL
 
         # Create symbolic link in HyprDots
         ln -sf ~/.config/user-dirs.dirs "$INSTALL_DIR/user-dirs.dirs"
-        print_success "XDG user directories converted to English successfully!"
+        check_success "XDG user directories converted to English successfully!"
     fi
 }
 
 # Function to setup mimeinfo.cache
 setup_mimeinfo_cache() {
-    print_step "Setting up mimeinfo.cache..."
-    if confirm "Do you want to setup mimeinfo.cache with Zen Browser as default PDF viewer?"; then
+    print_styled_message "Setting up mimeinfo.cache..."
+    if confirm_action "Do you want to setup mimeinfo.cache with Zen Browser as default PDF viewer?"; then
         # Create a copy of mimeinfo.cache
         sudo cp /usr/share/applications/mimeinfo.cache "$INSTALL_DIR/mimeinfo.cache"
         
         # Update PDF association
         sed -i 's|application/pdf=.*|application/pdf=zen.desktop|' "$INSTALL_DIR/mimeinfo.cache"
-        print_success "mimeinfo.cache setup completed!"
+        check_success "mimeinfo.cache setup completed!"
     fi
 }
 
 # Add new functions to main installation process
 convert_xdg_dirs_to_english
 setup_mimeinfo_cache
-create_hyprpanel_symlink
+
+# Make post-installation script executable
+if [ -f "$(pwd)/post_install.sh" ]; then
+    print_styled_message "Making post-installation script executable"
+    chmod +x "$(pwd)/post_install.sh"
+    print_success_message "Post-installation script is ready to use"
+    echo ":: After reboot, run ./post_install.sh to complete additional setup tasks"
+fi
+
+print_styled_message "Installation complete! Restart your computer for changes to take effect."

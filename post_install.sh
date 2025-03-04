@@ -146,6 +146,11 @@ if confirm_action "install hypr-dynamic-cursors plugin"; then
     print_success_message "hypr-dynamic-cursors plugin installed and enabled"
 fi
 
-# Additional post-installation tasks can be added here
+#Auth github via Github-cli
+print_styled_message "Auth github via Github-cli (Browser required)"
+if confirm_action "auth github via Github-cli"; then
+    execute_command gh auth login
+    print_success_message "Github-cli auth success"
+fi
 
 print_styled_message "Post-installation tasks complete!" 
