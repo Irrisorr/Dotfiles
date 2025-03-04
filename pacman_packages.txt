@@ -18,7 +18,6 @@ xdg-user-dirs
 xdg-user-dirs-gtk
 podman
 brightnessctl
-hyprpicker
 tk
 
 # Browsers
@@ -79,6 +78,7 @@ scrcpy
 hyprpaper
 hyprlock
 xdg-desktop-portal-hyprland
+hyprpicker
 
 # Desktop
 qt5-graphicaleffects
