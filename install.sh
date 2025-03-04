@@ -326,11 +326,11 @@ if [ -d "$(pwd)/hyprswitch" ]; then
 fi
 
 # hypapnel configuration
-if [ -d "$(pwd)/hypapnel" ]; then
-    print_styled_message "Configuring hypapnel"
-    if confirm_action "configure hypapnel"; then
+if [ -d "$(pwd)/hyprpanel" ]; then
+    print_styled_message "Configuring hyprpanel"
+    if confirm_action "configure hyprpanel"; then
         mkdir -p ~/.config/hypr
-        create_symlink "$(pwd)/hypapnel" "$HOME/.config/hypapnel"
+        create_symlink "$(pwd)/hyprpanel" "$HOME/.config/hyprpanel"
     fi
 fi
 
@@ -481,20 +481,6 @@ setup_mimeinfo_cache() {
         # Update PDF association
         sed -i 's|application/pdf=.*|application/pdf=zen.desktop|' "$INSTALL_DIR/mimeinfo.cache"
         print_success "mimeinfo.cache setup completed!"
-    fi
-}
-
-# Create symbolic links for hyprpanel
-create_hyprpanel_symlink() {
-    print_step "Creating symbolic link for hyprpanel..."
-    if confirm "Do you want to create a symbolic link for hyprpanel?"; then
-        if [ -d "$INSTALL_DIR/hyprpanel" ]; then
-            mkdir -p ~/.config/hypr/
-            ln -sf "$INSTALL_DIR/hyprpanel" ~/.config/hypr/@hyprpanel
-            print_success "hyprpanel symbolic link created successfully!"
-        else
-            print_error "hyprpanel directory not found in $INSTALL_DIR"
-        fi
     fi
 }
 
