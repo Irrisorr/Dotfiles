@@ -1,1 +1,343 @@
-/home/irrisorr/.config/niri/config.kdl
+// https://github.com/YaLTeR/niri/wiki/Configuration:-Introduction
+
+prefer-no-csd
+
+// ================================ OUTPUT ================================
+// find names of outputs: niri msg outputs
+output "eDP-1" {
+    focus-at-startup
+    mode "1920x1080@60.008"
+    scale 1
+    transform "normal"
+    // automatically.
+    position x=0 y=0
+}
+
+/- output "DP-1" {
+    mode "1920x1080@74.973"
+    scale 0.75
+    transform "normal"
+    position x=1100 y=-1440 // y = 1080 / $scale (if ur default is 1920x1080, for )
+}
+
+output "DP-1" {
+    mode "1920x1080@74.973"
+    scale 0.75
+    transform "normal"
+    position x=-300 y=-1440 // y = 1080 / $scale (if ur default is 1920x1080, for )
+}
+
+
+
+spawn-at-startup "waybar"
+spawn-at-startup "syncthing"
+spawn-sh-at-startup "clipse -listen"
+
+// ================================ INPUT ================================
+input {
+    focus-follows-mouse //max-scroll-amount="0%" // Focuses windows under cursor, max-scroll-amount=0 for not change focus at the borer of the window when fullscreen
+    warp-mouse-to-focus // Makes the mouse warp to newly focused windows
+    workspace-auto-back-and-forth // switching to the same workspace by index twice will switch back to the previous workspace
+    keyboard {
+        xkb {
+            layout "pl,ru"
+            options "grp:win_space_toggle, ctrl:swap_lalt_lctl"
+        }
+        numlock
+    }
+
+    touchpad {
+        natural-scroll
+        accel-speed 0.1
+        scroll-factor 0.4
+        tap // tap-to-click
+        middle-emulation // left and right mouse buttons at once
+        //drag-lock // lifting the finger off for a short time while dragging will not drop the dragged item
+    }
+
+    /-tablet {
+        map-to-input "eDP-1"
+    }
+}
+
+// ================================ OVERVIEW ================================
+overview{
+    zoom 0.35
+    backdrop-color "#46487aff"
+}
+
+
+// ================================ ENVIRONMENT ================================
+environment {
+    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    QT_QPA_PLATFORM "wayland"
+}
+
+
+// ================================ BINDS ================================
+screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d %H:%M:%S.png"
+binds {
+    // apps
+    Mod+Return { spawn "kitty"; }
+    Mod+B { spawn "firefox"; }
+    Mod+E { spawn "nautilus"; }
+    Mod+C { spawn "code"; }
+    Mod+N { spawn "obsidian"; }
+    Mod+M { spawn "spotify"; }
+    Mod+Shift+T { spawn "Telegram"; } 
+    Alt+Space { spawn "wofi"; }
+    Mod+Shift+L { spawn "wlogout"; }
+    Mod+V hotkey-overlay-title="clipboard 'clipse'" { spawn-sh "kitty --class clipse -e 'clipse'"; }// подправить
+    Mod+Shift+Slash hotkey-overlay-title="show hotkey overlay" { show-hotkey-overlay; }
+    Mod+L { spawn "hyprlock"; }
+
+    // window's actions
+    Mod+Q { close-window; }// hide the application UI like in a fulscreen mode
+    Mod+R { switch-preset-column-width; }
+    Mod+Shift+R { switch-preset-window-height; }
+    Mod+Ctrl+R { reset-window-height; }
+    Mod+F { maximize-column; }
+    Mod+Ctrl+Shift+F hotkey-overlay-title="Toggle windowed (fake) fullscreen on the focused window"{ toggle-windowed-fullscreen; }// Toggle windowed (fake) fullscreen on the focused window
+    Mod+Shift+F hotkey-overlay-title="fullscreen focused window"         { fullscreen-window; }
+    Mod+Ctrl+F hotkey-overlay-title="expand column to available width" { expand-column-to-available-width; }
+    Mod+Tab hotkey-overlay-title="focus previous window"                        { focus-window-previous; }
+    Mod+Left hotkey-overlay-title="go to left window"                  { focus-column-left; }
+    Mod+Right hotkey-overlay-title="go to right window"                       { focus-column-right; }
+    Mod+Shift+Left hotkey-overlay-title="move window left"                  { move-column-left; }
+    Mod+Shift+Right hotkey-overlay-title="move window right"                  { move-column-right; }
+    Mod+Shift+Down hotkey-overlay-title="move window to workspace down" { move-window-to-workspace-down; }
+    Mod+Shift+Up hotkey-overlay-title="move window to workspace up" { move-window-to-workspace-up; }
+    Mod+G hotkey-overlay-title="toggle column tabbed (group)" { toggle-column-tabbed-display; }
+    Mod+T hotkey-overlay-title="toggle window floating"       { toggle-window-floating; }
+    Mod+Minus hotkey-overlay-title="window width -10%" { set-column-width "-10%"; }
+    Mod+Equal hotkey-overlay-title="window width +10%" { set-column-width "+10%"; }
+    Mod+Shift+TouchpadScrollDown hotkey-overlay-title="window width +10%" { set-column-width "+10%"; }
+    Mod+Shift+TouchpadScrollUp hotkey-overlay-title="window width -10%" { set-column-width "-10%"; }
+    Mod+Shift+Minus hotkey-overlay-title="window height -10%" { set-window-height "-10%"; }
+    Mod+Shift+Equal hotkey-overlay-title="window height +10%" { set-window-height "+10%"; }
+
+    // workspace's actions
+    Mod+O repeat=false hotkey-overlay-title="toggle overview (workspaces)"              { toggle-overview; }// repeat=false for not holding down a bind will make it trigger repeatedly
+    Mod+Down hotkey-overlay-title="switch worspace down"     { focus-workspace-down; }
+    Mod+Up hotkey-overlay-title="switch worspace up"       { focus-workspace-up; }
+    Mod+Ctrl+Down hotkey-overlay-title="move workspace down" { move-workspace-down; }
+    Mod+Ctrl+Up hotkey-overlay-title="move workspace up"  { move-workspace-up; }   
+    Mod+Shift+Page_Up hotkey-overlay-title="move workspace to monitor up"  { move-workspace-to-monitor-up; }
+    Mod+Shift+Page_Down hotkey-overlay-title="move workspace to monitor down" { move-workspace-to-monitor-down; }
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+Ctrl+1 { move-column-to-workspace 1; }
+    Mod+Ctrl+2 { move-column-to-workspace 2; }
+    Mod+Ctrl+3 { move-column-to-workspace 3; }
+    Mod+Ctrl+4 { move-column-to-workspace 4; }
+    Mod+Ctrl+5 { move-column-to-workspace 5; }
+    Mod+Ctrl+6 { move-column-to-workspace 6; }
+    Mod+Ctrl+7 { move-column-to-workspace 7; }
+    Mod+Ctrl+8 { move-column-to-workspace 8; }
+    Mod+Ctrl+9 { move-column-to-workspace 9; }
+
+    // screenshots
+    Mod+Shift+S hotkey-overlay-title="screenshot (ctrl+c only for copy wout saving)"  { screenshot; }// ctrl+c for copy to clipboard and not write to disc 
+    Mod+Print hotkey-overlay-title="screenshot screen" { screenshot-screen; }
+    Alt+Print hotkey-overlay-title="screenshot window" { screenshot-window; }
+
+    // for screencasts
+    Mod+Backspace { spawn-sh "niri msg action set-dynamic-cast-window --id $(niri msg --json pick-window | jq .id)"; }
+
+    // audio
+    Mod+TouchpadScrollDown allow-when-locked=true hotkey-overlay-title="-volume" { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+"; }
+    Mod+TouchpadScrollUp   allow-when-locked=true hotkey-overlay-title="+volume" { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02-"; }
+    XF86AudioRaiseVolume   allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
+    XF86AudioLowerVolume   allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
+    XF86AudioMute          allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute       allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+
+    // Powers off the monitors. To turn them back on, do any input like
+    // moving the mouse or pressing any other key.
+    Mod+Shift+P { power-off-monitors; }
+}
+
+
+// ================================ LAYOUT ================================
+layout {
+    gaps 10
+    background-color "transparent"
+    center-focused-column "never"
+    always-center-single-column
+    default-column-width { proportion 1.0; }
+    preset-column-widths {
+        // proportion 0.33333
+        proportion 0.5
+        // proportion 0.66667
+        proportion 1.0
+    }
+
+    focus-ring {
+        width 3
+        // active-color "#7fc8ff"
+        // inactive-color "#505050"
+        active-gradient from="#16ffed" to="#792faaff" angle=45 in="oklch shorter hue"
+    }
+
+    shadow {
+        on
+        softness 200
+        spread 70
+        offset x=0 y=5
+        color "#0007"
+    }
+
+    insert-hint {
+        gradient from="#16ffed" to="#792faaff" angle=45 in="oklch shorter hue" relative-to="workspace-view"
+    }
+    
+    struts {
+        // left 64
+        // right 64
+        // top 64
+        // bottom 64
+    }
+}
+
+cursor {
+    xcursor-theme "Bibata-Modern-Ice"
+    xcursor-size 24
+    hide-after-inactive-ms 3000
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+
+// ================================ WINDOW RULES ================================
+window-rule { // corner radius for all windows
+    geometry-corner-radius 18
+    clip-to-geometry true
+}
+
+window-rule { // block from screencasting
+    match app-id=r#"firefox$"# title="^Santander"
+    match app-id=r#"zen-browser$"# title="^Santander"
+    match app-id="obsidian"
+    match app-id="clipse"
+    block-out-from "screencast"
+}
+
+window-rule { // Picture in picture
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    match app-id=r#"firefox$"# title="^Картинка в картинке$"
+    match app-id=r#"zen-browser$"# title="^Picture-in-Picture$"
+    match app-id=r#"zen-browser$"# title="^Картинка в картинке$"
+    open-floating true
+}
+
+window-rule { // clipse
+    match app-id="clipse"
+    open-floating true
+    default-column-width { fixed 622; }
+    default-window-height { fixed 652; }
+}
+
+window-rule { // kitty
+    match app-id="kitty"
+    default-column-width { proportion 0.5; }
+}
+
+window-rule { // obsidian
+    match app-id="obsidian"
+    scroll-factor 0.2
+}
+
+window-rule { // Telegram autostart on dp-1
+    match app-id=r#"^org\.telegram\.desktop$"#
+    exclude app-id=r#"^org\.telegram\.desktop$"# title="Просмотр медиа"
+
+    open-on-output "DP-1"
+}
+
+window-rule { // Telegram media
+    match app-id=r#"^org\.telegram\.desktop$"# title="Просмотр медиа"
+    open-floating true
+}
+
+window-rule {
+    match is-window-cast-target=true
+
+    focus-ring {
+        active-color "#f38ba8"
+        inactive-color "#7d0d2d"
+    }
+
+    border {
+        inactive-color "#7d0d2d"
+    }
+
+    shadow {
+        color "#7d0d2d70"
+    }
+
+    tab-indicator {
+        active-color "#f38ba8"
+        inactive-color "#7d0d2d"
+    }
+}
+
+
+// ================================ ANIMATIONS ================================
+animations {
+    
+    workspace-switch {
+        spring damping-ratio=1.0 stiffness=400 epsilon=0.0001
+    }
+
+    window-open {
+        curve "ease-out-expo"
+    }
+
+    window-close {
+        curve "ease-out-quad"
+    }
+
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    }
+
+    window-movement {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    }
+
+    window-resize {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    }
+
+    config-notification-open-close {
+        spring damping-ratio=0.6 stiffness=1000 epsilon=0.001
+    }
+
+    exit-confirmation-open-close {
+        spring damping-ratio=0.6 stiffness=500 epsilon=0.01
+    }
+
+    screenshot-ui-open {
+        duration-ms 200
+        curve "ease-out-quad"
+    }
+
+    overview-open-close {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    }
+}
+
+gestures {
+    hot-corners {
+        off
+    }
+}
