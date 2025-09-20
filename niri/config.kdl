@@ -41,7 +41,7 @@ input {
     keyboard {
         xkb {
             layout "pl,ru"
-            options "grp:win_space_toggle, ctrl:swap_lalt_lctl"
+            options "grp:win_space_toggle, ctrl:swap_lalt_lctl, caps:swapescape"
         }
         numlock
     }
