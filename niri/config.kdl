@@ -13,14 +13,14 @@ output "eDP-1" {
     position x=0 y=0
 }
 
-/- output "DP-1" {
-    mode "1920x1080@74.973"
+/- output "DP-1" { // work monitor
+    mode "2560x1440@59.951"
     scale 0.75
     transform "normal"
-    position x=1100 y=-1440 // y = 1080 / $scale (if ur default is 1920x1080, for )
+    position x=-700 y=-1920
 }
 
-output "DP-1" {
+output "DP-1" { // home monitor
     mode "1920x1080@74.973"
     scale 0.75
     transform "normal"
@@ -35,7 +35,7 @@ spawn-sh-at-startup "clipse -listen"
 
 // ================================ INPUT ================================
 input {
-    focus-follows-mouse //max-scroll-amount="0%" // Focuses windows under cursor, max-scroll-amount=0 for not change focus at the borer of the window when fullscreen
+    focus-follows-mouse max-scroll-amount="80%" // Focuses windows under cursor, max-scroll-amount=0 for not change focus at the borer of the window when fullscreen
     warp-mouse-to-focus // Makes the mouse warp to newly focused windows
     workspace-auto-back-and-forth // switching to the same workspace by index twice will switch back to the previous workspace
     keyboard {
@@ -69,8 +69,13 @@ overview{
 
 // ================================ ENVIRONMENT ================================
 environment {
-    ELECTRON_OZONE_PLATFORM_HINT "auto"
+    //ELECTRON_OZONE_PLATFORM_HINT "auto"
+    ELECTRON_OZONE_PLATFORM_HINT "wayland"
     QT_QPA_PLATFORM "wayland"
+    ELECTRON_ENABLE_WAYLAND "1"
+    MOZ_ENABLE_WAYLAND "1"
+    GDK_BACKEND "wayland"
+    OBSIDIAN_USE_WAYLAND "1"
 }
 
 
