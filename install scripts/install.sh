@@ -9,14 +9,15 @@ system_update
 if ! command -v yay &>/dev/null; then
   print_styled_message "Installing yay"
   if confirm_action "install yay"; then
-    git clone https://aur.archlinux.org/yay.git
+    origin_dir=$(pwd)
+    git clone https://aur.archlinux.org/yay.git ~/yay
     check_success "Cloning yay repository"
 
-    cd yay
+    cd ~/yay
     makepkg -si --noconfirm
     check_success "Installing yay"
-    cd ..
     rm -rf yay
+    cd origin_dir
   fi
 else
   print_styled_message "yay is already installed, skipping..."
