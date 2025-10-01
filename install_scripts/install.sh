@@ -60,15 +60,7 @@ fi
 print_styled_message "Configuring SDDM"
 if confirm_action "copy SDDM theme"; then
   execute_command sudo cp -r $(pwd)/../sddm/corners /usr/share/sddm/themes/
-fi
-
-print_styled_message "Configuring SDDM config"
-if confirm_action "configure SDDM config"; then
   execute_command sudo cp $(pwd)/../sddm/default.conf /usr/lib/sddm/sddm.conf.d/default.conf
-fi
-
-print_styled_message "Enabling SDDM"
-if confirm_action "enable SDDM"; then
   execute_command sudo systemctl enable sddm
 fi
 
