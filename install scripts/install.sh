@@ -59,12 +59,12 @@ fi
 # Configuring SDDM
 print_styled_message "Configuring SDDM"
 if confirm_action "copy SDDM theme"; then
-  execute_command sudo cp -r $(pwd)/sddm/corners /usr/share/sddm/themes/
+  execute_command sudo cp -r $(pwd)/../sddm/corners /usr/share/sddm/themes/
 fi
 
 print_styled_message "Configuring SDDM config"
 if confirm_action "configure SDDM config"; then
-  execute_command sudo cp $(pwd)/sddm/default.conf /usr/lib/sddm/sddm.conf.d/default.conf
+  execute_command sudo cp $(pwd)/../sddm/default.conf /usr/lib/sddm/sddm.conf.d/default.conf
 fi
 
 print_styled_message "Enabling SDDM"
@@ -92,7 +92,7 @@ if [ "$window_manager" == "hyprland" ]; then
   print_styled_message "Creating symbolic link to Hyprland configuration"
   if confirm_action "create symbolic link to Hyprland configuration"; then
     mkdir -p ~/.config
-    execute_command ln -sf $(pwd)/hypr ~/.config/hypr
+    execute_command ln -sf $(pwd)/../hypr ~/.config/hypr
   fi
 
   if command -v nwg-displays &>/dev/null; then
@@ -116,7 +116,7 @@ if [ "$window_manager" == "hyprland" ]; then
     print_styled_message "Configuring hyprswitch"
     if confirm_action "configure hyprswitch"; then
       mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/hyprswitch" "$HOME/.config/hyprswitch"
+      create_symlink "$(pwd)/../hyprswitch" "$HOME/.config/hyprswitch"
     fi
   fi
 
@@ -124,7 +124,7 @@ if [ "$window_manager" == "hyprland" ]; then
     print_styled_message "Configuring hyprpanel"
     if confirm_action "configure hyprpanel"; then
       mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/hyprpanel" "$HOME/.config/hyprpanel"
+      create_symlink "$(pwd)/../hyprpanel" "$HOME/.config/hyprpanel"
     fi
   fi
 
@@ -132,7 +132,7 @@ if [ "$window_manager" == "hyprland" ]; then
     print_styled_message "Configuring hyprpaper"
     if confirm_action "configure hyprpaper"; then
       mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/hyprpaper" "$HOME/.config/hyprpaper"
+      create_symlink "$(pwd)/../hyprpaper" "$HOME/.config/hyprpaper"
 
       print_styled_message "Creating wallpaper changer desktop entry"
       if confirm_action "create wallpaper changer desktop entry"; then
@@ -159,7 +159,7 @@ EOF
     print_styled_message "Configuring hyprlock"
     if confirm_action "configure hyprlock"; then
       mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/hyprlock" "$HOME/.config/hyprlock"
+      create_symlink "$(pwd)/../hyprlock" "$HOME/.config/hyprlock"
     fi
   fi
 
@@ -187,7 +187,7 @@ if command -v thunar &>/dev/null; then
   print_styled_message "Configuring Thunar"
   if confirm_action "configure Thunar"; then
     mkdir -p ~/.config/Thunar
-    create_symlink "$(pwd)/thunar/uca.xml" "$HOME/.config/Thunar/uca.xml"
+    create_symlink "$(pwd)/../thunar/uca.xml" "$HOME/.config/Thunar/uca.xml"
   fi
 fi
 
@@ -213,7 +213,7 @@ if command -v wofi &>/dev/null; then
   print_styled_message "Configuring Wofi"
   if confirm_action "configure Wofi"; then
     mkdir -p ~/.config/wofi
-    create_symlink "$(pwd)/wofi" "$HOME/.config/wofi"
+    create_symlink "$(pwd)/../wofi" "$HOME/.config/wofi"
   fi
 fi
 
@@ -222,7 +222,7 @@ if command -v wlogout &>/dev/null; then
   print_styled_message "Configuring wlogout"
   if confirm_action "configure wlogout"; then
     mkdir -p ~/.config/wlogout
-    create_symlink "$(pwd)/wlogout" "$HOME/.config/wlogout"
+    create_symlink "$(pwd)/../wlogout" "$HOME/.config/wlogout"
   fi
 fi
 
@@ -231,7 +231,7 @@ if command -v kitty &>/dev/null; then
   print_styled_message "Configuring kitty"
   if confirm_action "configure kitty"; then
     mkdir -p ~/.config/kitty
-    create_symlink "$(pwd)/kitty" "$HOME/.config/kitty"
+    create_symlink "$(pwd)/../kitty" "$HOME/.config/kitty"
   fi
 fi
 
@@ -258,7 +258,7 @@ if command -v fastfetch &>/dev/null; then
   print_styled_message "Configuring fastfetch"
   if confirm_action "configure fastfetch"; then
     mkdir -p ~/.config/fastfetch
-    create_symlink "$(pwd)/fastfetch" "$HOME/.config/fastfetch"
+    create_symlink "$(pwd)/../fastfetch" "$HOME/.config/fastfetch"
   fi
 fi
 
@@ -267,7 +267,7 @@ if command -v fish &>/dev/null; then
   print_styled_message "Configuring fish"
   if confirm_action "configure fish"; then
     mkdir -p ~/.config/fish
-    create_symlink "$(pwd)/fish" "$HOME/.config/fish"
+    create_symlink "$(pwd)/../fish" "$HOME/.config/fish"
   fi
 fi
 
