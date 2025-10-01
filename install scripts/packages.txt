@@ -1,0 +1,110 @@
+# Browsers
+zen-browser-bin
+firefox
+vivaldi
+
+# Terminals
+kitty
+
+# Runners
+wofi
+
+# Sync
+syncthing
+
+# IDE's
+visual-studio-code-bin
+intellij-idea-ultimate-edition
+postman-bin
+podman-desktop-bin
+podman
+
+# Media
+telegram-desktop
+iMe (fork of telegram)
+vesktop-bin
+spotify
+zoom
+
+# Notes and Offices
+obsidian
+freeoffice
+rnote
+
+# Themes
+graphite-gtk-theme
+vimix-gtk-themes
+adwaita-qt6
+
+# Cursors
+bibata-cursor-theme
+
+# Icons
+papirus-icon-theme
+
+# Fonts
+ttf-jetbrains-mono-nerd
+
+# File managers
+thunar
+tumbler
+thunar-archive-plugin
+thunar-volman
+ark
+
+# Virtual Machines
+gnome-boxes
+scrcpy
+waydroid
+
+# System
+gnome-calculator
+gnome-system-monitor
+obs-studio
+swayimg
+vlc
+wlogout
+
+# Settings
+baobab
+blueman
+pavucontrol
+nwg-displays
+nwg-look
+polkit-gnome
+
+# Games and Launchers
+steam
+
+# Hypr Ecosystem
+hyprshot
+hyprswitch
+ags-hyprpanel-git
+hyprpaper
+hyprlock
+xdg-desktop-portal-hyprland
+hyprpicker
+
+# Additional Packages
+cmake
+meson
+cpio
+pkg-config
+unzip
+gvfs
+python-pip
+github-cli
+jdk21-openjdk
+maven
+fastfetch
+figlet
+playerctl
+fish
+xdg-desktop-portal
+xdg-user-dirs
+xdg-user-dirs-gtk
+brightnessctl
+qt5-graphicaleffects
+qt5-quickcontrols2
+qt5-svg
+sddm 

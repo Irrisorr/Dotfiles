@@ -62,17 +62,17 @@ execute_command() {
 }
 
 choose_action() {
-  gum choose "$@"
+  gum choose "$@" </dev/tty
 }
 
 choose_action_no_limit() {
-  gum choose --no-limit "$@"
+  gum choose --no-limit "$@" </dev/tty
 }
 
 confirm_action() {
   local message=$1
   if $HAS_GUM; then
-    if gum confirm "Do you want to $message?"; then
+    if gum confirm "Do you want to $message?" </dev/tty; then
       return 0
     else
       echo ":: Skipping: $message"
@@ -116,18 +116,47 @@ system_update() {
   fi
 }
 
-install_pacman() {
-  print_styled_message "Installing additional packages via pacman"
-  if [ -f "$(pwd)/pacman_packages.txt" ]; then
-    PACMAN_PACKAGES=($(cat "$(pwd)/pacman_packages.txt" | grep -v "^#" | tr '\n' ' '))
-    if [ ${#PACMAN_PACKAGES[@]} -gt 0 ]; then
-      if confirm_action "install additional packages via pacman"; then
-        execute_command sudo pacman -S --noconfirm "${PACMAN_PACKAGES[@]}"
-      fi
-    else
-      echo ":: No packages found in pacman_packages.txt, skipping..."
-    fi
-  else
-    echo ":: pacman_packages.txt not found, skipping installation of additional pacman packages..."
+choose_from_file() {
+  local category_to_find="$1"
+  local package_file="$(pwd)/packages.txt"
+
+  local app_list
+  app_list=$(awk -v category="$category_to_find" '
+    BEGIN { p=0 }
+    /^#/ {
+        if (p) { exit }
+        gsub(/^#\s*/, "");
+        if ($0 == category) { p=1 }
+        next
+    }
+    p { print }
+  ' "$package_file")
+
+  if [ -z "$app_list" ]; then
+    echo ":: Category '$category_to_find' is empty or not found"
+    return
   fi
+
+  local options_array=()
+  while IFS= read -r line; do
+    options_array+=("$line")
+  done <<<"$app_list"
+
+  choose_action_no_limit "${options_array[@]}"
+}
+
+process_all_pkg_categories() {
+  local package_file="$(pwd)/packages.txt"
+  all_categories=$(grep '^#' "$package_file" | sed 's/^#\s*//')
+
+  while IFS= read -r category; do
+    print_styled_message "Installing $category"
+    if confirm_action "install $category"; then
+      packages=$(choose_from_file "$category")
+      if [ -n "$packages" ]; then
+        execute_command yay -S --noconfirm $(echo "$packages" | sed 's/\s(.*)//' | tr '\n' ' ')
+      fi
+    fi
+    echo ""
+  done < <(echo "$all_categories")
 }

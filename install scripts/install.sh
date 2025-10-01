@@ -28,50 +28,8 @@ if confirm_action "install window manager"; then
   execute_command sudo pacman -S --noconfirm $window_manager
 fi
 
-print_styled_message "Installing themes"
-if confirm_action "install GTK theme"; then
-  gtk_theme=$(choose_action_no_limit graphite-gtk-theme vimix-gtk-themes)
-  execute_command yay -S --noconfirm $gtk_theme
-fi
+process_all_pkg_categories
 
-if confirm_action "install QT themes"; then
-  qt_theme=$(choose_action_no_limit adwaita-qt6)
-  execute_command yay -S --noconfirm $qt_theme
-fi
-
-print_styled_message "Installing cursors"
-if confirm_action "install cursor theme"; then
-  cursor=$(choose_action_no_limit bibata-cursor-theme)
-  execute_command yay -S --noconfirm $cursor
-fi
-
-print_styled_message "Installing icons"
-if confirm_action "install icon theme"; then
-  icon=$(choose_action_no_limit papirus-icon-theme)
-  execute_command sudo pacman -S --noconfirm $icon
-fi
-
-print_styled_message "Installing fonts"
-if confirm_action "install fonts"; then
-  fonts=$(choose_action_no_limit ttf-jetbrains-mono-nerd)
-  execute_command sudo pacman -S --noconfirm $fonts
-fi
-
-print_styled_message "Installing additional packages via yay"
-if [ -f "$(pwd)/yay_packages.txt" ]; then
-  YAY_PACKAGES=($(cat "$(pwd)/yay_packages.txt" | grep -v "^#" | tr '\n' ' '))
-  if [ ${#YAY_PACKAGES[@]} -gt 0 ]; then
-    if confirm_action "install additional packages via yay"; then
-      execute_command yay -S --noconfirm "${YAY_PACKAGES[@]}"
-    fi
-  else
-    echo ":: No packages found in yay_packages.txt, skipping..."
-  fi
-else
-  echo ":: yay_packages.txt not found, skipping installation of additional yay packages..."
-fi
-
-# RustDesk installation
 print_styled_message "Installing RustDesk"
 if confirm_action "install RustDesk version 1.3.7"; then
   mkdir -p ~/Downloads/apps
@@ -120,17 +78,104 @@ if confirm_action "enable Bluetooth service"; then
   print_success_message "Bluetooth service enabled"
 fi
 
-# Enable hyprpm
-print_styled_message "Enable hyprpm"
-if confirm_action "enable hyprpm"; then
-  execute_command hyprpm update -s -v
-  print_success_message "Enable hyprpm"
-fi
+if [ "$window_manager" == "hyprland" ]; then
 
-print_styled_message "Creating symbolic link to Hyprland configuration"
-if confirm_action "create symbolic link to Hyprland configuration"; then
-  mkdir -p ~/.config
-  execute_command ln -sf $(pwd)/hypr ~/.config/hypr
+  print_styled_message "Configuring hyprland and apps/plugins for it"
+
+  print_styled_message "Enable hyprpm"
+  if confirm_action "enable hyprpm"; then
+    execute_command hyprpm update -s -v
+    print_success_message "Enable hyprpm"
+  fi
+
+  print_styled_message "Creating symbolic link to Hyprland configuration"
+  if confirm_action "create symbolic link to Hyprland configuration"; then
+    mkdir -p ~/.config
+    execute_command ln -sf $(pwd)/hypr ~/.config/hypr
+  fi
+
+  if command -v nwg-displays &>/dev/null; then
+    print_styled_message "Configuring nwg-displays"
+    if confirm_action "configure nwg-displays"; then
+      # Find Python version
+      PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
+      NWG_DISPLAYS_PATH="/usr/lib/python${PYTHON_VERSION}/site-packages/nwg_displays/main.py"
+
+      if [ -f "$NWG_DISPLAYS_PATH" ]; then
+        print_styled_message "Modifying nwg-displays configuration"
+        sudo sed -i 's|hypr_config_dir = os.path.join(get_config_home(), "hypr")|hypr_config_dir = os.path.join(get_config_home(), "hypr/conf")|g' "$NWG_DISPLAYS_PATH"
+        print_success_message "nwg-displays configured"
+      else
+        print_error_message "nwg-displays main.py not found at $NWG_DISPLAYS_PATH"
+      fi
+    fi
+  fi
+
+  if [ -d "$(pwd)/hyprswitch" ]; then
+    print_styled_message "Configuring hyprswitch"
+    if confirm_action "configure hyprswitch"; then
+      mkdir -p ~/.config/hypr
+      create_symlink "$(pwd)/hyprswitch" "$HOME/.config/hyprswitch"
+    fi
+  fi
+
+  if [ -d "$(pwd)/hyprpanel" ]; then
+    print_styled_message "Configuring hyprpanel"
+    if confirm_action "configure hyprpanel"; then
+      mkdir -p ~/.config/hypr
+      create_symlink "$(pwd)/hyprpanel" "$HOME/.config/hyprpanel"
+    fi
+  fi
+
+  if command -v hyprpaper &>/dev/null; then
+    print_styled_message "Configuring hyprpaper"
+    if confirm_action "configure hyprpaper"; then
+      mkdir -p ~/.config/hypr
+      create_symlink "$(pwd)/hyprpaper" "$HOME/.config/hyprpaper"
+
+      print_styled_message "Creating wallpaper changer desktop entry"
+      if confirm_action "create wallpaper changer desktop entry"; then
+        DESKTOP_FILE="/usr/share/applications/Wallpaper changer.desktop"
+
+        sudo tee "$DESKTOP_FILE" >/dev/null <<EOF
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Hyprpaper Wallpaper Setter
+Comment=Приложение для установки обоев через Hyprpaper
+Exec=python3 $HOME/.config/hypr/scripts/change-wallpaper.py
+Icon=$HOME/Desktop/icon EnjAction.png
+Terminal=false
+Categories=Utility;
+EOF
+        sudo chmod ugo+x "$DESKTOP_FILE"
+        print_success_message "Wallpaper changer desktop entry created"
+      fi
+    fi
+  fi
+
+  if command -v hyprlock &>/dev/null; then
+    print_styled_message "Configuring hyprlock"
+    if confirm_action "configure hyprlock"; then
+      mkdir -p ~/.config/hypr
+      create_symlink "$(pwd)/hyprlock" "$HOME/.config/hyprlock"
+    fi
+  fi
+
+  # Installing Hyprland plugins
+  print_styled_message "Installing Hyprland plugins"
+
+  # hypr-dynamic-cursors plugin
+  print_styled_message "Installing hypr-dynamic-cursors plugin"
+  if confirm_action "install hypr-dynamic-cursors plugin"; then
+    print_styled_message "Adding hypr-dynamic-cursors plugin"
+    execute_command hyprpm add https://github.com/virtcode/hypr-dynamic-cursors
+
+    print_styled_message "Enabling hypr-dynamic-cursors plugin"
+    execute_command hyprpm enable dynamic-cursors
+
+    print_success_message "hypr-dynamic-cursors plugin installed and enabled"
+  fi
 fi
 
 # Application configurations
@@ -171,24 +216,6 @@ if command -v wofi &>/dev/null; then
   fi
 fi
 
-# nwg-displays configuration
-if command -v nwg-displays &>/dev/null; then
-  print_styled_message "Configuring nwg-displays"
-  if confirm_action "configure nwg-displays"; then
-    # Find Python version
-    PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-    NWG_DISPLAYS_PATH="/usr/lib/python${PYTHON_VERSION}/site-packages/nwg_displays/main.py"
-
-    if [ -f "$NWG_DISPLAYS_PATH" ]; then
-      print_styled_message "Modifying nwg-displays configuration"
-      sudo sed -i 's|hypr_config_dir = os.path.join(get_config_home(), "hypr")|hypr_config_dir = os.path.join(get_config_home(), "hypr/conf")|g' "$NWG_DISPLAYS_PATH"
-      print_success_message "nwg-displays configured"
-    else
-      print_error_message "nwg-displays main.py not found at $NWG_DISPLAYS_PATH"
-    fi
-  fi
-fi
-
 # wlogout configuration
 if command -v wlogout &>/dev/null; then
   print_styled_message "Configuring wlogout"
@@ -207,38 +234,20 @@ if command -v kitty &>/dev/null; then
   fi
 fi
 
-# hyprswitch configuration
-if [ -d "$(pwd)/hyprswitch" ]; then
-  print_styled_message "Configuring hyprswitch"
-  if confirm_action "configure hyprswitch"; then
-    mkdir -p ~/.config/hypr
-    create_symlink "$(pwd)/hyprswitch" "$HOME/.config/hyprswitch"
-  fi
-fi
-
-# hypapnel configuration
-if [ -d "$(pwd)/hyprpanel" ]; then
-  print_styled_message "Configuring hyprpanel"
-  if confirm_action "configure hyprpanel"; then
-    mkdir -p ~/.config/hypr
-    create_symlink "$(pwd)/hyprpanel" "$HOME/.config/hyprpanel"
-  fi
-fi
-
 # Java configuration
 if command -v java &>/dev/null; then
   print_styled_message "Configuring Java"
   if confirm_action "configure Java environment"; then
-    if [ -d "/usr/lib/jvm/java-21-openjdk" ]; then
-      echo 'export JAVA_HOME=/usr/lib/jvm/java-21-openjdk' >>~/.bashrc
-      echo 'export JAVA_HOME=/usr/lib/jvm/java-21-openjdk' >>~/.zshrc
+    if [ -d "/usr/lib/jvm/java-23-openjdk" ]; then
+      echo 'export JAVA_HOME=/usr/lib/jvm/java-23-openjdk' >>~/.bashrc
+      echo 'export JAVA_HOME=/usr/lib/jvm/java-23-openjdk' >>~/.zshrc
       if [ -d ~/.config/fish ]; then
         mkdir -p ~/.config/fish
-        echo 'set -x JAVA_HOME /usr/lib/jvm/java-21-openjdk' >>~/.config/fish/config.fish
+        echo 'set -x JAVA_HOME /usr/lib/jvm/java-23-openjdk' >>~/.config/fish/config.fish
       fi
       print_success_message "Java environment configured"
     else
-      print_error_message "Java 21 OpenJDK not found"
+      print_error_message "Java 23 OpenJDK not found"
     fi
   fi
 fi
@@ -267,43 +276,6 @@ if confirm_action "configure Git"; then
   execute_command git config --global user.name "Irrisorr"
   execute_command git config --global user.email "zakharkevichg@gmail.com"
   print_success_message "Polkit agent started"
-fi
-
-# hyprpaper configuration
-if command -v hyprpaper &>/dev/null; then
-  print_styled_message "Configuring hyprpaper"
-  if confirm_action "configure hyprpaper"; then
-    mkdir -p ~/.config/hypr
-    create_symlink "$(pwd)/hyprpaper" "$HOME/.config/hyprpaper"
-
-    print_styled_message "Creating wallpaper changer desktop entry"
-    if confirm_action "create wallpaper changer desktop entry"; then
-      DESKTOP_FILE="/usr/share/applications/Wallpaper changer.desktop"
-
-      sudo tee "$DESKTOP_FILE" >/dev/null <<EOF
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Hyprpaper Wallpaper Setter
-Comment=Приложение для установки обоев через Hyprpaper
-Exec=python3 $HOME/.config/hypr/scripts/change-wallpaper.py
-Icon=$HOME/Desktop/icon EnjAction.png
-Terminal=false
-Categories=Utility;
-EOF
-      sudo chmod ugo+x "$DESKTOP_FILE"
-      print_success_message "Wallpaper changer desktop entry created"
-    fi
-  fi
-fi
-
-# hyprlock configuration
-if command -v hyprlock &>/dev/null; then
-  print_styled_message "Configuring hyprlock"
-  if confirm_action "configure hyprlock"; then
-    mkdir -p ~/.config/hypr
-    create_symlink "$(pwd)/hyprlock" "$HOME/.config/hyprlock"
-  fi
 fi
 
 # Update user directories
@@ -377,12 +349,7 @@ setup_mimeinfo_cache() {
 convert_xdg_dirs_to_english
 setup_mimeinfo_cache
 
-# Make post-installation script executable
-if [ -f "$(pwd)/post_install.sh" ]; then
-  print_styled_message "Making post-installation script executable"
-  chmod +x "$(pwd)/post_install.sh"
-  print_success_message "Post-installation script is ready to use"
-  echo ":: After reboot, run ./post_install.sh to complete additional setup tasks"
-fi
-
 print_styled_message "Installation complete! Restart your computer for changes to take effect."
+if confirm_action "Do u want to reboot"; then
+  reboot
+fi
