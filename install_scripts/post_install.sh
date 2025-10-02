@@ -1,5 +1,9 @@
 #!/bin/bash
 
+. ./functions.sh
+
+system_update
+
 # Post-installation tasks
 print_styled_message "Post-Installation Tasks"
 
@@ -45,6 +49,21 @@ if confirm_action "install iMe Desktop"; then
   cd - >/dev/null # Return to original directory
 fi
 
+# Installing Hyprland plugins
+print_styled_message "Installing Hyprland plugins"
+
+# hypr-dynamic-cursors plugin
+print_styled_message "Installing hypr-dynamic-cursors plugin"
+if confirm_action "install hypr-dynamic-cursors plugin"; then
+  print_styled_message "Adding hypr-dynamic-cursors plugin"
+  execute_command hyprpm add https://github.com/virtcode/hypr-dynamic-cursors
+
+  print_styled_message "Enabling hypr-dynamic-cursors plugin"
+  execute_command hyprpm enable dynamic-cursors
+
+  print_success_message "hypr-dynamic-cursors plugin installed and enabled"
+fi
+
 #Auth github via Github-cli
 print_styled_message "Auth github via Github-cli (Browser required)"
 if confirm_action "auth github via Github-cli"; then
@@ -53,4 +72,3 @@ if confirm_action "auth github via Github-cli"; then
 fi
 
 print_styled_message "Post-installation tasks complete!"
-

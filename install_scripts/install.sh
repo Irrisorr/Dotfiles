@@ -154,21 +154,6 @@ EOF
       create_symlink "$(pwd)/../hyprlock" "$HOME/.config/hyprlock"
     fi
   fi
-
-  # Installing Hyprland plugins
-  print_styled_message "Installing Hyprland plugins"
-
-  # hypr-dynamic-cursors plugin
-  print_styled_message "Installing hypr-dynamic-cursors plugin"
-  if confirm_action "install hypr-dynamic-cursors plugin"; then
-    print_styled_message "Adding hypr-dynamic-cursors plugin"
-    execute_command hyprpm add https://github.com/virtcode/hypr-dynamic-cursors
-
-    print_styled_message "Enabling hypr-dynamic-cursors plugin"
-    execute_command hyprpm enable dynamic-cursors
-
-    print_success_message "hypr-dynamic-cursors plugin installed and enabled"
-  fi
 fi
 
 # Application configurations
