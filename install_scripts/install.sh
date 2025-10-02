@@ -245,6 +245,8 @@ if command -v fish &>/dev/null; then
   if confirm_action "configure fish"; then
     mkdir -p ~/.config/fish
     create_symlink "$(pwd)/../fish" "$HOME/.config/fish"
+    print_styled_message "Type below '/bin/fish'"
+    chsh
   fi
 fi
 
