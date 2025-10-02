@@ -253,7 +253,6 @@ print_styled_message "Configuring Git"
 if confirm_action "configure Git"; then
   execute_command git config --global user.name "Irrisorr"
   execute_command git config --global user.email "zakharkevichg@gmail.com"
-  print_success_message "Polkit agent started"
 fi
 
 # Update user directories
@@ -305,7 +304,7 @@ EOL
       "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео" 2>/dev/null || true
 
     # Create symbolic link in HyprDots
-    ln -sf ~/.config/user-dirs.dirs "$INSTALL_DIR/user-dirs.dirs"
+    ln -sf ~/.config/user-dirs.dirs "$(pwd)/user-dirs.dirs"
     check_success "XDG user directories converted to English successfully!"
   fi
 }
@@ -315,15 +314,14 @@ setup_mimeinfo_cache() {
   print_styled_message "Setting up mimeinfo.cache..."
   if confirm_action "Do you want to setup mimeinfo.cache with Zen Browser as default PDF viewer?"; then
     # Create a copy of mimeinfo.cache
-    sudo cp /usr/share/applications/mimeinfo.cache "$INSTALL_DIR/mimeinfo.cache"
+    sudo cp /usr/share/applications/mimeinfo.cache "$(pwd)/mimeinfo.cache"
 
     # Update PDF association
-    sed -i 's|application/pdf=.*|application/pdf=zen.desktop|' "$INSTALL_DIR/mimeinfo.cache"
+    sed -i 's|application/pdf=.*|application/pdf=zen.desktop|' "$(pwd)/mimeinfo.cache"
     check_success "mimeinfo.cache setup completed!"
   fi
 }
 
-# Add new functions to main installation process
 convert_xdg_dirs_to_english
 setup_mimeinfo_cache
 
