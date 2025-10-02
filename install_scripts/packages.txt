@@ -41,7 +41,6 @@ freeoffice
 rnote
 
 # Themes
-graphite-gtk-theme-git
 vimix-gtk-themes
 adwaita-qt6
 
