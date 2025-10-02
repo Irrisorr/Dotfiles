@@ -72,3 +72,8 @@ if confirm_action "auth github via Github-cli"; then
 fi
 
 print_styled_message "Post-installation tasks complete!"
+
+print_styled_message "Installation complete! Restart your computer for changes to take effect."
+if confirm_action "Do u want to reboot"; then
+  reboot
+fi

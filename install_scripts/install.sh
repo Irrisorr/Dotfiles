@@ -306,7 +306,7 @@ EOL
       "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео" 2>/dev/null || true
 
     # Create symbolic link in HyprDots
-    ln -sf ~/.config/user-dirs.dirs "$(pwd)/user-dirs.dirs"
+    ln -sf ~/.config/user-dirs.dirs "$(pwd)/../user-dirs.dirs"
     check_success "XDG user directories converted to English successfully!"
   fi
 }
@@ -316,10 +316,10 @@ setup_mimeinfo_cache() {
   print_styled_message "Setting up mimeinfo.cache..."
   if confirm_action "Do you want to setup mimeinfo.cache with Zen Browser as default PDF viewer?"; then
     # Create a copy of mimeinfo.cache
-    sudo cp /usr/share/applications/mimeinfo.cache "$(pwd)/mimeinfo.cache"
+    sudo cp /usr/share/applications/mimeinfo.cache "$(pwd)/../mimeinfo.cache"
 
     # Update PDF association
-    sed -i 's|application/pdf=.*|application/pdf=zen.desktop|' "$(pwd)/mimeinfo.cache"
+    sed -i 's|application/pdf=.*|application/pdf=zen.desktop|' "$(pwd)/../mimeinfo.cache"
     check_success "mimeinfo.cache setup completed!"
   fi
 }
