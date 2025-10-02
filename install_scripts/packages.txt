@@ -1,18 +1,25 @@
 # Browsers
-zen-browser-bin
+zen-browser-bin (based on firefox)
 firefox
-vivaldi
+vivaldi (based on chromium)
+google-chrome
 
-# Terminals
+# Terminals and shells
 kitty
+alacritty
+fish
 
 # Runners
 wofi
+rofi
+anyrun
+walker
 
 # Sync
-syncthing
+syncthing (sync service (f.e. for obsidian sync between devices))
 
 # IDE's
+neovim
 visual-studio-code-bin
 intellij-idea-ultimate-edition
 postman-bin
@@ -21,8 +28,10 @@ podman
 
 # Media
 telegram-desktop
-iMe (fork of telegram)
+slack
+iMe (fork of telegram with some features | DONT INSTALL HERE WILL BE LATER IF U WANT)
 vesktop-bin
+discord
 spotify
 zoom
 
@@ -32,7 +41,7 @@ freeoffice
 rnote
 
 # Themes
-graphite-gtk-theme
+graphite-gtk-theme-git
 vimix-gtk-themes
 adwaita-qt6
 
@@ -47,34 +56,39 @@ ttf-jetbrains-mono-nerd
 
 # File managers
 thunar
-tumbler
-thunar-archive-plugin
-thunar-volman
-ark
+tumbler (needs for thunar - file preview)
+thunar-archive-plugin (needs for thunar - adds archive operations)
+thunar-volman (needs for thunar - adds removable drives operations)
+dolphin
+ark (needd for dolphin - adds archive operations)
+nautilus
 
 # Virtual Machines
 gnome-boxes
-scrcpy
-waydroid
+scrcpy (display and control ur Android device | duplicating screen on laptop through cabel)
+waydroid (android vm for wayland)
 
 # System
 gnome-calculator
 gnome-system-monitor
+baobab (disk viewer | on GTK)
 obs-studio
-swayimg
-vlc
-wlogout
+swayimg (view images)
+vlc (view videos)
+wlogout (logout app for wayland)
+clipse (clipboard tui manager)
 
 # Settings
-baobab
-blueman
-pavucontrol
-nwg-displays
-nwg-look
-polkit-gnome
+blueman (on GTK | default on cinnamon)
+pavucontrol (audio control)
+nwg-displays (monitor control | ONLY FOR HYPRLAND OR SWAY)
+nwg-look (themes/icons/cursors etc. control)
+polkit-gnome (for apps that required gui roots)
+logmein-hamachi (VPN service)
 
 # Games and Launchers
 steam
+lutris
 
 # Hypr Ecosystem
 hyprshot
@@ -86,25 +100,25 @@ xdg-desktop-portal-hyprland
 hyprpicker
 
 # Additional Packages
-cmake
-meson
-cpio
-pkg-config
-unzip
-gvfs
+unzip (needs for thunar | for archive operations in tui)
+gvfs (needs for thunar | for removable drivers)
+gowall (tool to operate/convert the image (many features))
+inxi (tui app for get info about ur system)
+terminal-rain-lightning (tui rain in terminal)
+thefuck (tui app that fixes errors in previous console commands)
 python-pip
-github-cli
+github-cli (github client for terminal)
 jdk21-openjdk
-maven
-fastfetch
-figlet
-playerctl
-fish
-xdg-desktop-portal
-xdg-user-dirs
-xdg-user-dirs-gtk
-brightnessctl
-qt5-graphicaleffects
-qt5-quickcontrols2
-qt5-svg
-sddm 
+jdk23-openjdk
+maven (java project management)
+fastfetch (fast neofetch)
+figlet (for making large letters in terminal)
+playerctl (for control media player)
+xdg-desktop-portal (better install it)
+xdg-user-dirs (for home directories)
+xdg-user-dirs-gtk (for home gtk directories)
+brightnessctl (control brightness)
+sddm (welcome service on startup ur device) 
+qt5-graphicaleffects (needs for sddm)
+qt5-quickcontrols2 (needs for sddm)
+qt5-svg (needs for sddm)

@@ -66,7 +66,7 @@ choose_action() {
 }
 
 choose_action_no_limit() {
-  gum choose --no-limit "$@" </dev/tty
+  gum choose --no-limit --height 20 "$@" </dev/tty
 }
 
 confirm_action() {
