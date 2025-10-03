@@ -152,7 +152,7 @@ process_all_pkg_categories() {
   while IFS= read -r category; do
     print_styled_message "Installing $category"
     if confirm_action "install $category"; then
-      echo "Pick packages with SPACE and ENTER when pick everything what u want"
+      echo "Pick packages with SPACE and ENTER when picked everything what u want"
       packages=$(choose_from_file "$category")
       if [ -n "$packages" ]; then
         execute_command yay -S --noconfirm $(echo "$packages" | sed 's/\s(.*)//' | tr '\n' ' ')
