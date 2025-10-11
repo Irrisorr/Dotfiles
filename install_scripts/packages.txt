@@ -83,6 +83,7 @@ pavucontrol (audio control)
 nwg-displays (monitor control | ONLY FOR HYPRLAND OR SWAY)
 nwg-look (themes/icons/cursors etc. control)
 polkit-gnome (for apps that required gui roots)
+mate-polkit (for apps that required gui roots)
 logmein-hamachi (VPN service)
 
 # Games and Launchers
