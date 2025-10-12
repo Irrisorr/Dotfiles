@@ -46,6 +46,7 @@ spawn-at-startup "waybar"
 spawn-at-startup "syncthing"
 spawn-sh-at-startup "clipse -listen"
 spawn-sh-at-startup "killall xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-gnome xdg-desktop-portal-kde"
+spawn-sh-at-startup "rm -rf ~/.config/niri/dms"
 
 // ================================ INPUT ================================
 input {
