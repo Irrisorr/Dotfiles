@@ -91,6 +91,7 @@ environment {
     MOZ_ENABLE_WAYLAND "1"
     GDK_BACKEND "wayland"
     OBSIDIAN_USE_WAYLAND "1"
+    QT_QPA_PLATFORMTHEME "gtk3"
 }
 
 
