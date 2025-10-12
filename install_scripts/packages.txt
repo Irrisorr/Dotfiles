@@ -99,6 +99,9 @@ hyprlock
 xdg-desktop-portal-hyprland
 hyprpicker
 
+# niri Ecosystem
+dms-shell-git
+
 # Additional Packages
 unzip (needs for thunar | for archive operations in tui)
 gvfs (needs for thunar | for removable drivers)

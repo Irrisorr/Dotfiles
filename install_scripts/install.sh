@@ -71,6 +71,23 @@ if confirm_action "enable Bluetooth service"; then
   print_success_message "Bluetooth service enabled"
 fi
 
+if [ "$window_manager" == "niri" ]; then
+  print_styled_message "Configuring niri and apps/plugins for it"
+
+  print_styled_message "Creating symbolic link to niri configuration"
+  if confirm_action "create symbolic link to niri configuration"
+    create_symlink "$(pwd)/../niri" "~/.config/niri"
+    print_success_message "niri configured"
+  fi
+
+  print_styled_message "Configuring dms-shell (pabel-bar)"
+  if confirm_action "create symbolic link to dms-shell"
+    mkdir -p ~/.config/DankMaterialShell
+    create_symlink "$(pwd)/../DankMaterialShell" "~/.config/DankMaterialShell"
+    print_success_message "dms-shell configured"
+  fi
+fi
+
 if [ "$window_manager" == "hyprland" ]; then
 
   print_styled_message "Configuring hyprland and apps/plugins for it"
