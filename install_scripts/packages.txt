@@ -33,6 +33,7 @@ iMe (fork of telegram with some features | DONT INSTALL HERE WILL BE LATER IF U 
 vesktop-bin
 discord
 spotify
+spicetify-cli (extension for customize and add extensions for spotify client)
 zoom
 
 # Notes and Offices

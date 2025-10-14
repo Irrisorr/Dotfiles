@@ -97,20 +97,6 @@
     {
       "id": "workspaceSwitcher",
       "enabled": true
-    },
-    {
-      "id": "cpuUsage",
-      "enabled": true,
-      "minimumWidth": true
-    },
-    {
-      "id": "cpuTemp",
-      "enabled": true,
-      "minimumWidth": true
-    },
-    {
-      "id": "memUsage",
-      "enabled": true
     }
   ],
   "dankBarCenterWidgets": [
@@ -123,29 +109,29 @@
       "enabled": true
     },
     {
-      "id": "separator",
-      "enabled": true
-    },
-    {
-      "id": "weather",
-      "enabled": true
-    },
-    {
       "id": "dankPomodoroTimer",
       "enabled": true
+    },
+    {
+      "id": "separator",
+      "enabled": false
     }
   ],
   "dankBarRightWidgets": [
+    {
+      "id": "cpuTemp",
+      "enabled": true
+    },
+    {
+      "id": "cpuUsage",
+      "enabled": true
+    },
     {
       "id": "systemTray",
       "enabled": true
     },
     {
       "id": "privacyIndicator",
-      "enabled": true
-    },
-    {
-      "id": "clipboard",
       "enabled": true
     },
     {
@@ -163,6 +149,11 @@
     {
       "id": "launcherButton",
       "enabled": true
+    },
+    {
+      "id": "memUsage",
+      "enabled": true,
+      "minimumWidth": true
     }
   ],
   "appLauncherViewMode": "list",

@@ -75,13 +75,13 @@ if [ "$window_manager" == "niri" ]; then
   print_styled_message "Configuring niri and apps/plugins for it"
 
   print_styled_message "Creating symbolic link to niri configuration"
-  if confirm_action "create symbolic link to niri configuration"
+  if confirm_action "create symbolic link to niri configuration"; then
     create_symlink "$(pwd)/../niri" "~/.config/niri"
     print_success_message "niri configured"
   fi
 
   print_styled_message "Configuring dms-shell (pabel-bar)"
-  if confirm_action "create symbolic link to dms-shell"
+  if confirm_action "create symbolic link to dms-shell"; then
     mkdir -p ~/.config/DankMaterialShell
     create_symlink "$(pwd)/../DankMaterialShell" "~/.config/DankMaterialShell"
     print_success_message "dms-shell configured"
@@ -267,6 +267,15 @@ if command -v fish &>/dev/null; then
   fi
 fi
 
+# spicetify configuration
+if command -v spicetify-cli &>/dev/null; then
+  print_styled_message "Configuring spicetify"
+  if confirm_action "configure spicetify"; then
+    mkdir -p ~/.config/spicetify
+    create_symlink "$(pwd)/../spicetify" "$HOME/.config/spicetify"
+  fi
+fi
+
 # Git configuration
 print_styled_message "Configuring Git"
 if confirm_action "configure Git"; then
@@ -289,12 +298,12 @@ if confirm_action "start polkit agent"; then
 fi
 
 # Function to convert Russian XDG directories to English
-convert_xdg_dirs_to_english() {
-  print_styled_message "Converting XDG user directories to English..."
-  if confirm_action "Do you want to convert XDG user directories to English?"; then
 
-    # Set English XDG directories
-    cat >~/.config/user-dirs.dirs <<EOL
+print_styled_message "Converting XDG user directories to English..."
+if confirm_action "Do you want to convert XDG user directories to English?"; then
+
+  # Set English XDG directories
+  cat >~/.config/user-dirs.dirs <<EOL
 XDG_DESKTOP_DIR="$HOME/Desktop"
 XDG_DOWNLOAD_DIR="$HOME/Downloads"
 XDG_TEMPLATES_DIR="$HOME/Templates"
@@ -305,44 +314,43 @@ XDG_PICTURES_DIR="$HOME/Pictures"
 XDG_VIDEOS_DIR="$HOME/Videos"
 EOL
 
-    # Create English directories
-    mkdir -p ~/Desktop ~/Downloads ~/Templates ~/Public ~/Documents ~/Music ~/Pictures ~/Videos
+  # Create English directories
+  mkdir -p ~/Desktop ~/Downloads ~/Templates ~/Public ~/Documents ~/Music ~/Pictures ~/Videos
 
-    # Move files from Russian to English directories if they exist
-    mv -n "$HOME/Рабочий стол"/* "$HOME/Desktop" 2>/dev/null || true
-    mv -n "$HOME/Загрузки"/* "$HOME/Downloads" 2>/dev/null || true
-    mv -n "$HOME/Шаблоны"/* "$HOME/Templates" 2>/dev/null || true
-    mv -n "$HOME/Общедоступные"/* "$HOME/Public" 2>/dev/null || true
-    mv -n "$HOME/Документы"/* "$HOME/Documents" 2>/dev/null || true
-    mv -n "$HOME/Музыка"/* "$HOME/Music" 2>/dev/null || true
-    mv -n "$HOME/Изображения"/* "$HOME/Pictures" 2>/dev/null || true
-    mv -n "$HOME/Видео"/* "$HOME/Videos" 2>/dev/null || true
+  # Move files from Russian to English directories if they exist
+  mv -n "$HOME/Рабочий стол"/* "$HOME/Desktop" 2>/dev/null || true
+  mv -n "$HOME/Загрузки"/* "$HOME/Downloads" 2>/dev/null || true
+  mv -n "$HOME/Шаблоны"/* "$HOME/Templates" 2>/dev/null || true
+  mv -n "$HOME/Общедоступные"/* "$HOME/Public" 2>/dev/null || true
+  mv -n "$HOME/Документы"/* "$HOME/Documents" 2>/dev/null || true
+  mv -n "$HOME/Музыка"/* "$HOME/Music" 2>/dev/null || true
+  mv -n "$HOME/Изображения"/* "$HOME/Pictures" 2>/dev/null || true
+  mv -n "$HOME/Видео"/* "$HOME/Videos" 2>/dev/null || true
 
-    # Remove empty Russian directories
-    rmdir "$HOME/Рабочий стол" "$HOME/Загрузки" "$HOME/Шаблоны" "$HOME/Общедоступные" \
-      "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео" 2>/dev/null || true
+  # Remove empty Russian directories
+  rmdir "$HOME/Рабочий стол" "$HOME/Загрузки" "$HOME/Шаблоны" "$HOME/Общедоступные" \
+    "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео" 2>/dev/null || true
 
-    # Create symbolic link in HyprDots
-    ln -sf ~/.config/user-dirs.dirs "$(pwd)/../user-dirs.dirs"
-    check_success "XDG user directories converted to English successfully!"
-  fi
-}
+  # Create symbolic link in HyprDots
+  ln -sf ~/.config/user-dirs.dirs "$(pwd)/../user-dirs.dirs"
+  check_success "XDG user directories converted to English successfully!"
+fi
 
 # Function to setup mimeinfo.cache
-setup_mimeinfo_cache() {
-  print_styled_message "Setting up mimeinfo.cache..."
-  if confirm_action "Do you want to setup mimeinfo.cache with Zen Browser as default PDF viewer?"; then
-    # Create a copy of mimeinfo.cache
-    sudo cp /usr/share/applications/mimeinfo.cache "$(pwd)/../mimeinfo.cache"
+print_styled_message "Setting up mimeinfo.cache..."
+if confirm_action "Do you want to setup mimeinfo.cache with Zen Browser as default PDF viewer?"; then
+  # Create a copy of mimeinfo.cache
+  sudo cp /usr/share/applications/mimeinfo.cache "$(pwd)/../mimeinfo.cache"
 
-    # Update PDF association
-    sed -i 's|application/pdf=.*|application/pdf=zen.desktop|' "$(pwd)/../mimeinfo.cache"
-    check_success "mimeinfo.cache setup completed!"
-  fi
-}
+  # Update PDF association
+  sed -i 's|application/pdf=.*|application/pdf=zen.desktop|' "$(pwd)/../mimeinfo.cache"
+  check_success "mimeinfo.cache setup completed!"
+fi
 
-convert_xdg_dirs_to_english
-setup_mimeinfo_cache
+print_styled_message "Deleting .bak directories from the .config/"
+if confirm_action "Delete .bak directories?"; then
+  execute_command find ~/.config/ -type d -name "*.bak" -delete
+fi
 
 print_styled_message "Installation complete! Restart your computer for changes to take effect."
 if confirm_action "Do u want to reboot"; then
