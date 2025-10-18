@@ -106,7 +106,7 @@ binds {
     Mod+N { spawn "obsidian"; }
     Mod+M { spawn "spotify"; }
     Mod+Shift+T { spawn "Telegram"; } 
-    Alt+Space { spawn "wofi"; }
+    Alt+Space { spawn-sh "rofi -show"; }
     Mod+Shift+L { spawn "wlogout"; }
     Mod+V hotkey-overlay-title="clipboard 'clipse'" { spawn-sh "kitty --class clipse -e 'clipse'"; }// подправить
     Mod+Shift+Slash hotkey-overlay-title="show hotkey overlay" { show-hotkey-overlay; }

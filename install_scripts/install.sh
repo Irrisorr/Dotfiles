@@ -211,6 +211,13 @@ if command -v wofi &>/dev/null; then
   fi
 fi
 
+if command -v rofi &>/dev/null; then
+  print_styled_message "Configuring rofi"
+  if confirm_action "configure rofi"; then
+    create_symlink "$(pwd)/../rofi" "$HOME/.config/rofi"
+  fi
+fi
+
 # wlogout configuration
 if command -v wlogout &>/dev/null; then
   print_styled_message "Configuring wlogout"

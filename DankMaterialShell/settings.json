@@ -97,13 +97,13 @@
     {
       "id": "workspaceSwitcher",
       "enabled": true
-    }
-  ],
-  "dankBarCenterWidgets": [
+    },
     {
       "id": "music",
       "enabled": true
-    },
+    }
+  ],
+  "dankBarCenterWidgets": [
     {
       "id": "clock",
       "enabled": true
@@ -118,6 +118,10 @@
     }
   ],
   "dankBarRightWidgets": [
+    {
+      "id": "memUsage",
+      "enabled": true
+    },
     {
       "id": "cpuTemp",
       "enabled": true
@@ -149,11 +153,6 @@
     {
       "id": "launcherButton",
       "enabled": true
-    },
-    {
-      "id": "memUsage",
-      "enabled": true,
-      "minimumWidth": true
     }
   ],
   "appLauncherViewMode": "list",
