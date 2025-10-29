@@ -75,10 +75,21 @@ input {
     }
 }
 
+
 // ================================ OVERVIEW ================================
 overview{
     zoom 0.35
     backdrop-color "#46487aff"
+}
+
+
+// ================================ WORKSPACE ================================
+workspace "_media" {
+  open-on-output "DP-1"
+}
+
+workspace "browser" {
+  open-on-output "DP-1"
 }
 
 
@@ -106,7 +117,8 @@ binds {
     Mod+N { spawn "obsidian"; }
     Mod+M { spawn "spotify"; }
     Mod+Shift+T { spawn "Telegram"; } 
-    Alt+Space { spawn-sh "rofi -show"; }
+    Alt+Space { spawn-sh "rofi -show drun"; }
+    Ctrl+space { spawn-sh "rofi -show window"; }
     Mod+Shift+L { spawn "wlogout"; }
     Mod+V hotkey-overlay-title="clipboard 'clipse'" { spawn-sh "kitty --class clipse -e 'clipse'"; }// подправить
     Mod+Shift+Slash hotkey-overlay-title="show hotkey overlay" { show-hotkey-overlay; }
@@ -280,8 +292,15 @@ window-rule { // obsidian
 window-rule { // Telegram autostart on dp-1
     match app-id=r#"^org\.telegram\.desktop$"#
     exclude app-id=r#"^org\.telegram\.desktop$"# title="Просмотр медиа"
+    
+    open-on-workspace "_media"
+}
 
-    open-on-output "DP-1"
+window-rule {
+  match app-id=r#"zen-browser$"#
+  match app-id=r#"firefox$"#
+
+  open-on-workspace "browser"
 }
 
 window-rule { // Telegram media
