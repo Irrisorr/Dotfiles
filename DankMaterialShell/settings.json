@@ -2,8 +2,8 @@
   "currentThemeName": "purple",
   "customThemeFile": "",
   "matugenScheme": "scheme-tonal-spot",
-  "dankBarTransparency": 0,
-  "dankBarWidgetTransparency": 0.47,
+  "dankBarTransparency": 1,
+  "dankBarWidgetTransparency": 0.41,
   "popupTransparency": 1,
   "dockTransparency": 1,
   "use24HourClock": true,
@@ -97,27 +97,31 @@
     {
       "id": "workspaceSwitcher",
       "enabled": true
-    },
-    {
-      "id": "music",
-      "enabled": true
     }
   ],
   "dankBarCenterWidgets": [
+    {
+      "id": "music",
+      "enabled": true
+    },
     {
       "id": "clock",
       "enabled": true
     },
     {
-      "id": "dankPomodoroTimer",
+      "id": "separator",
       "enabled": true
     },
     {
-      "id": "separator",
-      "enabled": false
+      "id": "dankPomodoroTimer",
+      "enabled": true
     }
   ],
   "dankBarRightWidgets": [
+    {
+      "id": "systemTray",
+      "enabled": true
+    },
     {
       "id": "memUsage",
       "enabled": true
@@ -128,10 +132,6 @@
     },
     {
       "id": "cpuUsage",
-      "enabled": true
-    },
-    {
-      "id": "systemTray",
       "enabled": true
     },
     {
@@ -182,7 +182,7 @@
   "dockPosition": 1,
   "dockSpacing": 4,
   "dockBottomGap": 0,
-  "cornerRadius": 23,
+  "cornerRadius": 25,
   "notificationOverlayEnabled": false,
   "dankBarAutoHide": false,
   "dankBarOpenOnOverview": false,
@@ -190,9 +190,9 @@
   "dankBarSpacing": 0,
   "dankBarBottomGap": -6,
   "dankBarInnerPadding": 0,
-  "dankBarSquareCorners": false,
-  "dankBarNoBackground": false,
-  "dankBarGothCornersEnabled": false,
+  "dankBarSquareCorners": true,
+  "dankBarNoBackground": true,
+  "dankBarGothCornersEnabled": true,
   "dankBarBorderEnabled": false,
   "dankBarPosition": 2,
   "lockScreenShowPowerActions": true,
