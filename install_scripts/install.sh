@@ -86,6 +86,14 @@ if [ "$window_manager" == "niri" ]; then
     create_symlink "$(pwd)/../DankMaterialShell" "~/.config/DankMaterialShell"
     print_success_message "dms-shell configured"
   fi
+
+  if command -v hyprlock &>/dev/null; then
+    print_styled_message "Configuring hyprlock"
+    if confirm_action "configure hyprlock"; then
+      mkdir -p ~/.config/hypr
+      create_symlink "$(pwd)/../hypr/hyprlock.conf" "$HOME/.config/hypr/hyprlock.conf"
+    fi
+  fi
 fi
 
 if [ "$window_manager" == "hyprland" ]; then
@@ -141,7 +149,7 @@ if [ "$window_manager" == "hyprland" ]; then
     print_styled_message "Configuring hyprpaper"
     if confirm_action "configure hyprpaper"; then
       mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/../hyprpaper" "$HOME/.config/hyprpaper"
+      create_symlink "$(pwd)/..hypr//hyprpaper.conf" "$HOME/.config/hypr/hyprpaper.conf"
 
       print_styled_message "Creating wallpaper changer desktop entry"
       if confirm_action "create wallpaper changer desktop entry"; then
@@ -168,7 +176,7 @@ EOF
     print_styled_message "Configuring hyprlock"
     if confirm_action "configure hyprlock"; then
       mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/../hyprlock" "$HOME/.config/hyprlock"
+      create_symlink "$(pwd)/../hypr/hyprlock.conf" "$HOME/.config/hypr/hyprlock.conf"
     fi
   fi
 fi
