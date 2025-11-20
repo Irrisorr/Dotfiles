@@ -108,21 +108,22 @@ environment {
 
 // ================================ BINDS ================================
 screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d %H:%M:%S.png"
-binds {
+binds {        
     // apps
-    Mod+Return { spawn "kitty"; }
-    Mod+B { spawn "firefox"; }
-    Mod+E { spawn-sh "nautilus -w"; }
-    Mod+C { spawn "code"; }
-    Mod+N { spawn "obsidian"; }
-    Mod+M { spawn "spotify"; }
-    Mod+Shift+T { spawn "Telegram"; } 
-    Alt+Space { spawn-sh "rofi -show drun"; }
-    Ctrl+space { spawn-sh "rofi -show window"; }
-    Mod+Shift+L { spawn "wlogout"; }
-    Mod+V hotkey-overlay-title="clipboard 'clipse'" { spawn-sh "kitty --class clipse -e 'clipse'"; }// подправить
-    Mod+Shift+Slash hotkey-overlay-title="show hotkey overlay" { show-hotkey-overlay; }
-    Mod+L { spawn "hyprlock"; }
+    Mod+Return hotkey-overlay-title="<span background='red'>Kitty</span>" { spawn "kitty"; }
+    Mod+B hotkey-overlay-title="<span background='red'>Firefox</span>" { spawn "firefox"; }
+    Mod+E hotkey-overlay-title="<span background='red'>File Explorer (nautilus)</span>" { spawn-sh "nautilus -w"; }
+    Mod+C hotkey-overlay-title="<span background='red'>VSCode</span>" { spawn "code"; }
+    Mod+N hotkey-overlay-title="<span background='red'>Obsidian</span>" { spawn "obsidian"; }
+    Mod+M hotkey-overlay-title="<span background='red'>Spotify</span>" { spawn "spotify"; }
+    Mod+Shift+T hotkey-overlay-title="<span background='red'>Telegram (IMe)</span>" { spawn "Telegram"; } 
+    Alt+Space hotkey-overlay-title="<span background='red'>App launcher (rofi)</span>" { spawn-sh "rofi -show drun"; }
+    Ctrl+space hotkey-overlay-title="<span background='red'>Window manager (rofi)</span>" { spawn-sh "rofi -show window"; }
+    Mod+Shift+L hotkey-overlay-title="<span background='red'>Logout manager (Wlogout)</span>" { spawn "wlogout"; }
+    Mod+V  hotkey-overlay-title="<span background='red'>Clipboard (clipse)</span>" { spawn-sh "kitty --class clipse -e 'clipse'"; }
+    Mod+Shift+Slash hotkey-overlay-title="<span background='red'>Hotkey overlay</span>" { show-hotkey-overlay; }
+    Mod+L hotkey-overlay-title="<span background='red'>Lock manager (Hyprlock)</span>" { spawn "hyprlock"; }
+    Mod+J { spawn-sh "kitty nvim & niri msg action maximize-column";}
 
     // window's actions
     Mod+Q { close-window; }// hide the application UI like in a fulscreen mode

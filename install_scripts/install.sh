@@ -149,7 +149,7 @@ if [ "$window_manager" == "hyprland" ]; then
     print_styled_message "Configuring hyprpaper"
     if confirm_action "configure hyprpaper"; then
       mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/..hypr//hyprpaper.conf" "$HOME/.config/hypr/hyprpaper.conf"
+      create_symlink "$(pwd)/..hypr/hyprpaper.conf" "$HOME/.config/hypr/hyprpaper.conf"
 
       print_styled_message "Creating wallpaper changer desktop entry"
       if confirm_action "create wallpaper changer desktop entry"; then

@@ -101,7 +101,7 @@ xdg-desktop-portal-hyprland
 hyprpicker
 
 # niri Ecosystem
-dms-shell-git
+dms-shell-bin
 
 # Additional Packages
 unzip (needs for thunar | for archive operations in tui)
