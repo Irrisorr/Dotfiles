@@ -55,13 +55,15 @@ papirus-icon-theme
 ttf-jetbrains-mono-nerd
 
 # File managers
-thunar
-tumbler (needs for thunar - file preview)
+thunar                (xfce/gtk fm)
+tumbler               (needs for thunar - file preview)
 thunar-archive-plugin (needs for thunar - adds archive operations)
-thunar-volman (needs for thunar - adds removable drives operations)
-dolphin
-ark (needd for dolphin - adds archive operations)
-nautilus
+thunar-volman         (needs for thunar - adds removable drives operations)
+unzip                 (needs for thunar | for archive operations in tui)
+gvfs                  (needs for thunar | for removable drivers)
+dolphin               (kde/qt fm)
+ark                   (needd for dolphin - adds archive operations)
+nautilus              (gnome/gtk fm)
 
 # Virtual Machines
 gnome-boxes
@@ -79,12 +81,12 @@ wlogout (logout app for wayland)
 clipse (clipboard tui manager)
 
 # Settings
-blueman (on GTK | default on cinnamon)
 pavucontrol (audio control)
 nwg-displays (monitor control | ONLY FOR HYPRLAND OR SWAY)
 nwg-look (themes/icons/cursors etc. control)
 polkit-gnome (for apps that required gui roots)
 mate-polkit (for apps that required gui roots)
+fprintd (for setting ur fingerprint for lock-managers)
 logmein-hamachi (VPN service)
 
 # Games and Launchers
@@ -97,15 +99,22 @@ hyprswitch
 ags-hyprpanel-git
 hyprpaper
 hyprlock
+xdg-desktop-portal
+xdg-user-dirs (for home directories)
 xdg-desktop-portal-hyprland
 hyprpicker
 
 # niri Ecosystem
-dms-shell-bin
+xdg-desktop-portal (default portal)
+xdg-desktop-portal-gtk (implements most of the basic functionality)
+xdg-desktop-portal-gnome (required for screencasting support)
+xdg-user-dirs (for home directories)
+xdg-user-dirs-gtk (for home gtk directories)
+gnome-keyring (implements the Secret portal, required for certain apps to work)
+xwayland-satellite (to run X11 apps like Steam or Discord)
+dms-shell-bin (panel bar)
 
 # Additional Packages
-unzip (needs for thunar | for archive operations in tui)
-gvfs (needs for thunar | for removable drivers)
 gowall (tool to operate/convert the image (many features))
 inxi (tui app for get info about ur system)
 terminal-rain-lightning (tui rain in terminal)
@@ -118,11 +127,10 @@ maven (java project management)
 fastfetch (fast neofetch)
 figlet (for making large letters in terminal)
 playerctl (for control media player)
-xdg-desktop-portal (better install it)
-xdg-user-dirs (for home directories)
-xdg-user-dirs-gtk (for home gtk directories)
 brightnessctl (control brightness)
 sddm (welcome service on startup ur device) 
 qt5-graphicaleffects (needs for sddm)
 qt5-quickcontrols2 (needs for sddm)
 qt5-svg (needs for sddm)
+lsusb (tool for check model name of all bus devices like usb or fingerprint)
+libfprint-2-tod1-goodix (driver for my fingerprint device (27c6:550a: Shenzhen Goodix Technology))

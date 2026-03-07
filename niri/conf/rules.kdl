@@ -1,0 +1,110 @@
+
+// ██████╗░██╗░░░██╗██╗░░░░░███████╗░██████╗
+// ██╔══██╗██║░░░██║██║░░░░░██╔════╝██╔════╝
+// ██████╔╝██║░░░██║██║░░░░░█████╗░░╚█████╗░
+// ██╔══██╗██║░░░██║██║░░░░░██╔══╝░░░╚═══██╗
+// ██║░░██║╚██████╔╝███████╗███████╗██████╔╝
+// ╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝╚═════╝░
+
+
+// Corner radius for all windows
+window-rule {
+    geometry-corner-radius 18
+    clip-to-geometry true
+}
+
+// Blocked apps from screencasting
+window-rule {
+    match app-id=r#"firefox$"# title="^Santander"
+    match app-id=r#"zen$"# title="^Santander"
+    match app-id="obsidian"
+    match app-id="clipse"
+    block-out-from "screencast"
+}
+
+// Picture in picture mode
+window-rule {
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    match app-id=r#"firefox$"# title="^Картинка в картинке$"
+    match app-id=r#"zen$"# title="^Picture-in-Picture$"
+    match app-id=r#"zen$"# title="^Картинка в картинке$"
+    open-floating true
+}
+
+// Clipse
+window-rule {
+    match app-id="clipse"
+    open-floating true
+    default-column-width { fixed 622; }
+    default-window-height { fixed 652; }
+}
+
+// Kitty (terminal)
+window-rule {
+    match app-id="kitty"
+    default-column-width { proportion 0.5; }
+}
+
+// Obsidian
+window-rule {
+    match app-id="obsidian"
+    scroll-factor 0.2
+}
+
+// Apps that should open on the "_media" workspace
+window-rule {
+    match app-id=r#"^org\.telegram\.desktop$"#
+    match app-id=r#"^org\.ime\.desktop"#
+    match app-id=r#"spotify$"#
+    match app-id=r#"vesktop$"#
+    match app-id=r#"discord$"#
+    exclude app-id=r#"^org\.telegram\.desktop$"# title="Просмотр медиа"
+    
+    open-on-workspace "_media"
+}
+
+// Apps that should open on the "browser" workspace
+window-rule {
+  match app-id=r#"zen$"#
+  match app-id=r#"firefox$"#
+
+  open-on-workspace "browser"
+}
+
+// Apps that should open on the "ide" workspace
+window-rule {
+    match app-id=r#"code$"#
+    match app-id=r#"jetbrains-idea$"#
+
+    open-on-workspace "ide"
+}
+
+// Apps that should open on the "notes" workspace
+window-rule {
+    match app-id=r#"obsidian$"#
+    
+    open-on-workspace "notes"
+}
+
+// Indicate screencasted windows with red colors
+window-rule {
+    match is-window-cast-target=true
+
+    focus-ring {
+        active-color "#f38ba8"
+        inactive-color "#7d0d2d"
+    }
+
+    border {
+        inactive-color "#7d0d2d"
+    }
+
+    shadow {
+        color "#7d0d2d70"
+    }
+
+    tab-indicator {
+        active-color "#f38ba8"
+        inactive-color "#7d0d2d"
+    }
+}

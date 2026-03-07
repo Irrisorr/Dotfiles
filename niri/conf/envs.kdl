@@ -1,0 +1,18 @@
+
+// ███████╗███╗░░██╗██╗░░░██╗██╗██████╗░░█████╗░███╗░░██╗███╗░░░███╗███████╗███╗░░██╗████████╗
+// ██╔════╝████╗░██║██║░░░██║██║██╔══██╗██╔══██╗████╗░██║████╗░████║██╔════╝████╗░██║╚══██╔══╝
+// █████╗░░██╔██╗██║╚██╗░██╔╝██║██████╔╝██║░░██║██╔██╗██║██╔████╔██║█████╗░░██╔██╗██║░░░██║░░░
+// ██╔══╝░░██║╚████║░╚████╔╝░██║██╔══██╗██║░░██║██║╚████║██║╚██╔╝██║██╔══╝░░██║╚████║░░░██║░░░
+// ███████╗██║░╚███║░░╚██╔╝░░██║██║░░██║╚█████╔╝██║░╚███║██║░╚═╝░██║███████╗██║░╚███║░░░██║░░░
+// ╚══════╝╚═╝░░╚══╝░░░╚═╝░░░╚═╝╚═╝░░╚═╝░╚════╝░╚═╝░░╚══╝╚═╝░░░░░╚═╝╚══════╝╚═╝░░╚══╝░░░╚═╝░░░
+
+
+environment {
+    ELECTRON_OZONE_PLATFORM_HINT "auto" // Force Electron applications (like VS Code, Discord, Obsidian) to automatically detect and use the native Wayland display server on Linux
+    QT_QPA_PLATFORM "wayland"           // Force Qt-based applications (like KDE apps, VLC, OBS) to use the native Wayland display protocol instead of running through the XWayland compatibility layer
+    ELECTRON_ENABLE_WAYLAND "1"         // Forces Electron applications to run natively on the Wayland display protocol 
+    MOZ_ENABLE_WAYLAND "1"              // Force Mozilla applications (like Firefox) to use the native Wayland display protocol instead of running through the XWayland compatibility layer
+    GDK_BACKEND "wayland"               // Force GTK applications (like Gnome apps) to use the native Wayland display protocol instead of running through the XWayland compatibility layer
+    OBSIDIAN_USE_WAYLAND "1"            // Force Obsidian to use the native Wayland display protocol instead of running through the XWayland compatibility layer
+    QT_QPA_PLATFORMTHEME "gtk3"         // Force Qt applications to use the GTK3 platform theme for better integration with the desktop environment
+}

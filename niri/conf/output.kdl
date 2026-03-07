@@ -1,0 +1,32 @@
+
+// ░█████╗░██╗░░░██╗████████╗██████╗░██╗░░░██╗████████╗
+// ██╔══██╗██║░░░██║╚══██╔══╝██╔══██╗██║░░░██║╚══██╔══╝
+// ██║░░██║██║░░░██║░░░██║░░░██████╔╝██║░░░██║░░░██║░░░
+// ██║░░██║██║░░░██║░░░██║░░░██╔═══╝░██║░░░██║░░░██║░░░
+// ╚█████╔╝╚██████╔╝░░░██║░░░██║░░░░░╚██████╔╝░░░██║░░░
+// ░╚════╝░░╚═════╝░░░░╚═╝░░░╚═╝░░░░░░╚═════╝░░░░╚═╝░░░
+
+// find names of outputs: niri msg outputs
+
+
+output "eDP-1" {
+    focus-at-startup            // Focus this output by default when niri starts
+    mode "1920x1200@60.001"     // Monitor resolution and refresh rate
+    scale 1                     // Scale of the monitor (1 is 100%, 0.75 is 75%)
+    transform "normal"          // Rotate the output counter-clockwise
+    position x=0 y=0            // Position of the output in the global coordinate space
+}
+
+output "LG Electronics LG FHD 0x01010101" {     // Home monitor
+    mode "1920x1080@74.973"
+    scale 1
+    transform "normal"
+    position x=-000 y=-1080     // y = 1440 / $scale (if ur default is 1920x1080 but scale 0.75)
+}
+
+output "LG Electronics LG HDR WFHD 0x000278D4" { // Work monitor
+    mode "2560x1080@74.991"
+    scale 1
+    transform "normal"
+    position x=-600 y=-1080     // y = 1080 / $scale (if ur default is 1920x1080, for )
+}

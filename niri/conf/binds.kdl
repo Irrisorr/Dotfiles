@@ -1,0 +1,106 @@
+
+// ██╗░░██╗███████╗██╗░░░██╗░░░░██████╗░██╗███╗░░██╗██████╗░██╗███╗░░██╗░██████╗░░██████╗
+// ██║░██╔╝██╔════╝╚██╗░██╔╝░░░░██╔══██╗██║████╗░██║██╔══██╗██║████╗░██║██╔════╝░██╔════╝
+// █████═╝░█████╗░░░╚████╔╝░░░░░██████╦╝██║██╔██╗██║██║░░██║██║██╔██╗██║██║░░██╗░╚█████╗░
+// ██╔═██╗░██╔══╝░░░░╚██╔╝░░░░░░██╔══██╗██║██║╚████║██║░░██║██║██║╚████║██║░░╚██╗░╚═══██╗
+// ██║░╚██╗███████╗░░░██║░░░░░░░██████╦╝██║██║░╚███║██████╔╝██║██║░╚███║╚██████╔╝██████╔╝
+// ╚═╝░░╚═╝╚══════╝░░░╚═╝░░░░░░░╚═════╝░╚═╝╚═╝░░╚══╝╚═════╝░╚═╝╚═╝░░╚══╝░╚═════╝░╚═════╝░
+
+
+screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d %H:%M:%S.png"
+
+binds {
+    // apps
+    Mod+Return  hotkey-overlay-title="<span background='red'>Kitty</span>"      { spawn "kitty"; }
+    Mod+B       hotkey-overlay-title="<span background='red'>Zen-browser</span>"{ spawn "zen-browser"; }
+    Mod+C       hotkey-overlay-title="<span background='red'>VSCode</span>"     { spawn "code"; }
+    Mod+N       hotkey-overlay-title="<span background='red'>Obsidian</span>"   { spawn "obsidian"; }
+    Mod+M       hotkey-overlay-title="<span background='red'>Spotify</span>"    { spawn "spotify"; }
+    Mod+D       hotkey-overlay-title="<span background='red'>Vesktop</span>"    { spawn "vesktop"; }
+    Mod+E       hotkey-overlay-title="<span background='red'>File Explorer (nautilus)</span>" { spawn-sh "nautilus -w"; }
+    Mod+Shift+T hotkey-overlay-title="<span background='red'>iMe (Telegram)</span>"           { spawn-sh "~/Downloads/apps/iMeDesktop/iMe -- %u"; } 
+    Alt+Space   hotkey-overlay-title="<span background='red'>App launcher (rofi)</span>"      { spawn-sh "rofi -show drun"; }
+    Ctrl+space  hotkey-overlay-title="<span background='red'>Window manager (rofi)</span>"    { spawn-sh "rofi -show window"; }
+    Mod+Shift+L hotkey-overlay-title="<span background='red'>Logout manager (Wlogout)</span>" { spawn "wlogout"; }
+    Mod+V       hotkey-overlay-title="<span background='red'>Clipboard (clipse)</span>"       { spawn-sh "kitty --class clipse -e 'clipse'"; }
+    Mod+L       hotkey-overlay-title="<span background='red'>Lock manager (Hyprlock)</span>"  { spawn "hyprlock"; }
+    Mod+Shift+Slash hotkey-overlay-title="<span background='red'>Hotkey overlay</span>"       { show-hotkey-overlay; }
+
+    // window's actions
+    Mod+Q           { close-window; }
+    Mod+R           { switch-preset-column-width; }
+    Mod+Shift+R     { switch-preset-window-height; }
+    Mod+Ctrl+R      { reset-window-height; }
+    Mod+F           { maximize-column; }
+    Mod+Ctrl+Shift+F hotkey-overlay-title="Toggle windowed (fake) fullscreen on the focused window"{ toggle-windowed-fullscreen; } // Toggle windowed (fake) fullscreen on the focused window
+    Mod+Shift+F      hotkey-overlay-title="Fullscreen focused window"         { fullscreen-window; }
+    Mod+Ctrl+F       hotkey-overlay-title="Expand column to available width"  { expand-column-to-available-width; }
+    Mod+Tab          hotkey-overlay-title="Focus previous window"             { focus-window-previous; }
+    Mod+Left         hotkey-overlay-title="Go to left window"                 { focus-column-left; }
+    Mod+Right        hotkey-overlay-title="Go to right window"                { focus-column-right; }
+    Mod+Shift+Left   hotkey-overlay-title="Move window left"                  { move-column-left; }
+    Mod+Shift+Right  hotkey-overlay-title="Move window right"                 { move-column-right; }
+    Mod+Shift+Down   hotkey-overlay-title="Move window to workspace down"     { move-window-to-workspace-down; }
+    Mod+Shift+Up     hotkey-overlay-title="Move window to workspace up"       { move-window-to-workspace-up; }
+    Mod+G            hotkey-overlay-title="Toggle column tabbed (group)"      { toggle-column-tabbed-display; }
+    Mod+Shift+G      hotkey-overlay-title="Consume window into group"         { consume-window-into-column; }
+    Mod+Ctrl+G       hotkey-overlay-title="Expel window from group"           { expel-window-from-column; }
+    Mod+T            hotkey-overlay-title="Toggle window floating"            { toggle-window-floating; }
+    Mod+Minus        hotkey-overlay-title="Window width -10%"                 { set-column-width "-10%"; }
+    Mod+Equal        hotkey-overlay-title="Window width +10%"                 { set-column-width "+10%"; }
+    Mod+Shift+Equal  hotkey-overlay-title="Window height +10%"                { set-window-height "+10%"; }
+    Mod+Shift+Minus  hotkey-overlay-title="Window height -10%"                { set-window-height "-10%"; }
+    Mod+Shift+TouchpadScrollLeft    hotkey-overlay-title="Window width +5%"   { set-column-width "+5%"; }
+    Mod+Shift+TouchpadScrollRight   hotkey-overlay-title="Window width -5%"   { set-column-width "-5%"; }
+    Mod+Shift+TouchpadScrollUp      hotkey-overlay-title="Window height +5%"  { set-window-height "+5%"; }
+    Mod+Shift+TouchpadScrollDown    hotkey-overlay-title="Window height -5%"  { set-window-height "-5%"; }
+
+    // workspace's actions
+    Mod+O repeat=false  hotkey-overlay-title="toggle overview (workspaces)"   { toggle-overview; } // repeat=false for not holding down a bind will make it trigger repeatedly
+    Mod+Down            hotkey-overlay-title="switch worspace down"           { focus-workspace-down; }
+    Mod+Up              hotkey-overlay-title="switch worspace up"             { focus-workspace-up; }
+    Mod+Ctrl+Down       hotkey-overlay-title="move workspace down"            { move-workspace-down; }
+    Mod+Ctrl+Up         hotkey-overlay-title="move workspace up"              { move-workspace-up; }   
+    Mod+Shift+Page_Up   hotkey-overlay-title="move workspace to monitor up"   { move-workspace-to-monitor-up; }
+    Mod+Shift+Page_Down hotkey-overlay-title="move workspace to monitor down" { move-workspace-to-monitor-down; }
+    Mod+1 { focus-workspace 1; }
+    Mod+2 { focus-workspace 2; }
+    Mod+3 { focus-workspace 3; }
+    Mod+4 { focus-workspace 4; }
+    Mod+5 { focus-workspace 5; }
+    Mod+6 { focus-workspace 6; }
+    Mod+7 { focus-workspace 7; }
+    Mod+8 { focus-workspace 8; }
+    Mod+9 { focus-workspace 9; }
+    Mod+Ctrl+1 { move-column-to-workspace 1; }
+    Mod+Ctrl+2 { move-column-to-workspace 2; }
+    Mod+Ctrl+3 { move-column-to-workspace 3; }
+    Mod+Ctrl+4 { move-column-to-workspace 4; }
+    Mod+Ctrl+5 { move-column-to-workspace 5; }
+    Mod+Ctrl+6 { move-column-to-workspace 6; }
+    Mod+Ctrl+7 { move-column-to-workspace 7; }
+    Mod+Ctrl+8 { move-column-to-workspace 8; }
+    Mod+Ctrl+9 { move-column-to-workspace 9; }
+
+    // screenshots
+    Mod+Shift+S   hotkey-overlay-title="screenshot (ctrl+c only for copy wout saving)" { screenshot; }        // ctrl+c for copy to clipboard and not write to disc 
+    Mod+Shift+End hotkey-overlay-title="screenshot screen"                             { screenshot-screen; }
+    Mod+End       hotkey-overlay-title="screenshot window"                             { screenshot-window; }
+
+    // for screencasts
+    Mod+Backspace       hotkey-overlay-title="pick window for screencast"  { spawn-sh "niri msg action set-dynamic-cast-window --id $(niri msg --json pick-window | jq .id)"; }
+    Mod+Shift+Backspace hotkey-overlay-title="pick monitor for screencast" { spawn-sh "niri msg action set-dynamic-cast-monitor"; }
+    Mod+Alt+Backspace   hotkey-overlay-title="clear dynamic screencast"    { spawn-sh "niri msg action clear-dynamic-cast-target"; }
+
+    // audio
+    Mod+TouchpadScrollDown allow-when-locked=true hotkey-overlay-title="-volume" { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02+"; }
+    Mod+TouchpadScrollUp   allow-when-locked=true hotkey-overlay-title="+volume" { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.02-"; }
+    XF86AudioRaiseVolume   allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1+"; }
+    XF86AudioLowerVolume   allow-when-locked=true { spawn "wpctl" "set-volume" "@DEFAULT_AUDIO_SINK@" "0.1-"; }
+    XF86AudioMute          allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SINK@" "toggle"; }
+    XF86AudioMicMute       allow-when-locked=true { spawn "wpctl" "set-mute" "@DEFAULT_AUDIO_SOURCE@" "toggle"; }
+
+    // Powers off the monitors. To turn them back on, do any input like
+    // moving the mouse or pressing any other key.
+    Mod+Shift+P { power-off-monitors; }
+}
