@@ -70,7 +70,7 @@ gnome-boxes
 scrcpy (display and control ur Android device | duplicating screen on laptop through cabel)
 waydroid (android vm for wayland)
 
-# For System 
+# Packages For System 
 gnome-calculator
 gnome-system-monitor
 baobab (disk viewer | on GTK)
@@ -85,6 +85,7 @@ pavucontrol (audio control)
 nwg-look (themes/icons/cursors etc. control)
 polkit-gnome (for apps that required gui roots)
 mate-polkit (for apps that required gui roots)
+libfprint-2-tod1-goodix-v2 (driver for my fingerprint device (27c6:550a: Shenzhen Goodix Technology))
 fprintd (for setting ur fingerprint for lock-managers)
 logmein-hamachi (VPN service)
 
@@ -133,4 +134,3 @@ qt5-graphicaleffects (needs for sddm)
 qt5-quickcontrols2 (needs for sddm)
 qt5-svg (needs for sddm)
 usbutils (tool for check model name of all bus devices like usb or fingerprint)
-libfprint-2-tod1-goodix-v2 (driver for my fingerprint device (27c6:550a: Shenzhen Goodix Technology))
