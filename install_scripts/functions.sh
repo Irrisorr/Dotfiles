@@ -88,7 +88,7 @@ start_package_installation() {
     for category in "${!SELECTED_PACKAGES[@]}"; do
       print_styled_message "Installing from $category"
       local packages="${SELECTED_PACKAGES[$category]}"
-      execute_command yay -S --noconfirm $(echo "$packages" | sed 's/\s(.*)//' | tr '\n' ' ')
+      execute_script yay -S --noconfirm $(echo "$packages" | sed 's/\s(.*)//' | tr '\n' ' ')
     done
     
     print_success_message "All packages installed successfully!"
@@ -175,9 +175,22 @@ get_packages_from_category() {
 
 
 # Function to execute a command and check its success
-execute_command() {
+execute_script() {
   "$@"
   check_success "Command execution: $*"
+}
+
+
+# Funtcion to execute a command with confirmation and check its success
+execute_command() {
+  local message=$1
+  local script=$2
+  
+  print_styled_message "$message"
+  if confirm_action "$message"; then
+    bash -c ". $(pwd)/gum_functions.sh && . $(pwd)/functions.sh && $script"
+    check_success "$message"
+  fi
 }
 
 
@@ -204,10 +217,7 @@ create_symlink() {
 
 # Function to update the system using pacman
 system_update() {
-  print_styled_message "System Update"
-  if confirm_action "update the system"; then
-    execute_command sudo pacman -Syu --noconfirm
-  fi
+  execute_command "Update the system" 'sudo pacman -Syu --noconfirm'
 }
 
 
@@ -228,5 +238,59 @@ install_yay() {
     fi
   else
     print_styled_message "yay is already installed, skipping..."
+  fi
+}
+
+
+set_ru_font() {
+  local script="grep -q "^FONT=" /etc/vconsole.conf && \
+    sudo sed -i "s/^FONT=.*/FONT=cyr-sun16/" /etc/vconsole.conf || \
+    echo "FONT=cyr-sun16" | sudo tee -a /etc/vconsole.conf && \
+    systemctl restart systemd-vconsole-setup.service"
+  execute_command "Add font for cyrillic support" "$script"
+}
+
+
+convert_xdg_dirs_to_english() {
+  russian_dirs=("$HOME/Рабочий стол" "$HOME/Загрузки" "$HOME/Шаблоны" "$HOME/Общедоступные" "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео")
+  russian_exists=false
+
+  for dir in "${russian_dirs[@]}"; do
+    if [ -d "$dir" ]; then
+      russian_exists=true
+      break
+    fi
+  done
+
+  if [ "$russian_exists" = true ]; then
+    print_styled_message "Converting Russian XDG user directories to English"
+    if confirm_action "Do you want to convert XDG user directories to English?"; then
+
+      cat >~/.config/user-dirs.dirs <<EOL
+XDG_DESKTOP_DIR="$HOME/Desktop"
+XDG_DOWNLOAD_DIR="$HOME/Downloads"
+XDG_TEMPLATES_DIR="$HOME/Templates"
+XDG_PUBLICSHARE_DIR="$HOME/Public"
+XDG_DOCUMENTS_DIR="$HOME/Documents"
+XDG_MUSIC_DIR="$HOME/Music"
+XDG_PICTURES_DIR="$HOME/Pictures"
+XDG_VIDEOS_DIR="$HOME/Videos"
+EOL
+
+      mkdir -p ~/Desktop ~/Downloads ~/Templates ~/Public ~/Documents ~/Music ~/Pictures ~/Videos
+      mv -n "$HOME/Рабочий стол"/* "$HOME/Desktop" 2>/dev/null || true
+      mv -n "$HOME/Загрузки"/* "$HOME/Downloads" 2>/dev/null || true
+      mv -n "$HOME/Шаблоны"/* "$HOME/Templates" 2>/dev/null || true
+      mv -n "$HOME/Общедоступные"/* "$HOME/Public" 2>/dev/null || true
+      mv -n "$HOME/Документы"/* "$HOME/Documents" 2>/dev/null || true
+      mv -n "$HOME/Музыка"/* "$HOME/Music" 2>/dev/null || true
+      mv -n "$HOME/Изображения"/* "$HOME/Pictures" 2>/dev/null || true
+      mv -n "$HOME/Видео"/* "$HOME/Videos" 2>/dev/null || true
+
+      rmdir "$HOME/Рабочий стол" "$HOME/Загрузки" "$HOME/Шаблоны" "$HOME/Общедоступные" \
+        "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео" 2>/dev/null || true
+
+      check_success "XDG user directories converted to English successfully!"
+    fi
   fi
 }

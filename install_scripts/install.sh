@@ -1,107 +1,54 @@
 #!/bin/bash
 
 . ./functions.sh
-#TODO Разделить пакеты на niri & hyprland
-#TODO Дописать нужные вещи в функции
 
+set_ru_font
 system_update
 install_yay
 
+
+# Installing Window Manager
 print_styled_message "Installing Window Manager"
 if confirm_action "install window manager"; then
   window_manager=$(choose_action hyprland niri)
-  execute_command sudo pacman -S --noconfirm $window_manager
+  execute_script sudo pacman -S --noconfirm $window_manager
 fi
 
-# Interactive package selection
+# Installing packages
 print_styled_message "Package Installation"
 interactive_category_selection
 
-print_styled_message "Installing RustDesk"
-if confirm_action "install RustDesk version 1.3.7"; then
-  mkdir -p ~/Downloads/apps
-  cd ~/Downloads/apps
 
-  print_styled_message "Downloading RustDesk 1.3.7"
-  RUSTDESK_URL="https://github.com/rustdesk/rustdesk/releases/download/1.3.7/rustdesk-1.3.7-0-x86_64.pkg.tar.zst"
-  RUSTDESK_PKG="rustdesk-1.3.7-0-x86_64.pkg.tar.zst"
-
-  execute_command wget -O "$RUSTDESK_PKG" "$RUSTDESK_URL"
-
-  print_styled_message "Installing RustDesk package"
-  execute_command sudo pacman -U --noconfirm "$RUSTDESK_PKG"
-
-  print_success_message "RustDesk 1.3.7 installed successfully"
-
-  cd - >/dev/null # Return to original directory
-fi
-
-# Configuring GTK
-print_styled_message "Configuring GTK (removing window control buttons)"
-if confirm_action "configure GTK"; then
-  execute_command gsettings set org.gnome.desktop.wm.preferences button-layout ':'
-fi
-
-# Configuring SDDM
-print_styled_message "Configuring SDDM"
-if confirm_action "copy SDDM theme"; then
-  execute_command sudo cp -r $(pwd)/../sddm/corners /usr/share/sddm/themes/
-  execute_command sudo cp $(pwd)/../sddm/default.conf /usr/lib/sddm/sddm.conf.d/default.conf
-  execute_command sudo systemctl enable sddm
-fi
-
-# Enabling Bluetooth service
-print_styled_message "Enabling Bluetooth service"
-if confirm_action "enable Bluetooth service"; then
-  execute_command sudo systemctl enable bluetooth.service
-  print_success_message "Bluetooth service enabled"
-fi
-
+# Configuring niri ecosystem
 if [ "$window_manager" == "niri" ]; then
   print_styled_message "Configuring niri and apps/plugins for it"
 
-  print_styled_message "Creating symbolic link to niri configuration"
-  if confirm_action "create symbolic link to niri configuration"; then
-    create_symlink "$(pwd)/../niri" "~/.config/niri"
-    print_success_message "niri configured"
-  fi
+  execute_command "Configure niri directory" "create_symlink $(pwd)/../niri ~/.config/niri"
 
-  print_styled_message "Configuring dms-shell (pabel-bar)"
-  if confirm_action "create symbolic link to dms-shell"; then
-    mkdir -p ~/.config/DankMaterialShell
-    create_symlink "$(pwd)/../DankMaterialShell" "~/.config/DankMaterialShell"
-    print_success_message "dms-shell configured"
-  fi
+  execute_command "Configure dms-shell (panel-bar)" "mkdir -p ~/.config/DankMaterialShell && create_symlink $(pwd)/../DankMaterialShell ~/.config/DankMaterialShell"
 
   if command -v hyprlock &>/dev/null; then
-    print_styled_message "Configuring hyprlock"
-    if confirm_action "configure hyprlock"; then
-      mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/../hypr/hyprlock.conf" "$HOME/.config/hypr/hyprlock.conf"
-    fi
+    execute_command "Configure hyprlock" "mkdir -p ~/.config/hypr && create_symlink $(pwd)/../hypr/hyprlock.conf ~/.config/hypr/hyprlock.conf"
   fi
 fi
 
+
+# Configuring Hyprland ecosystem
 if [ "$window_manager" == "hyprland" ]; then
 
   print_styled_message "Configuring hyprland and apps/plugins for it"
 
-  print_styled_message "Enable hyprpm"
-  if confirm_action "enable hyprpm"; then
-    execute_command hyprpm update -s -v
-    print_success_message "Enable hyprpm"
-  fi
+  execute_command "Enable hyprpm (hyprland plugin manager)" "hyprpm update -s -v"
 
-  print_styled_message "Creating symbolic link to Hyprland configuration"
-  if confirm_action "create symbolic link to Hyprland configuration"; then
-    mkdir -p ~/.config
-    execute_command ln -sf $(pwd)/../hypr ~/.config/hypr
+  execute_command "Configure hyprland directory" "create_symlink $(pwd)/../hypr ~/.config/hypr"
+  
+  if command -v hyprlock &>/dev/null; then
+    execute_command "Configure hyprlock" "mkdir -p ~/.config/hypr && create_symlink $(pwd)/../hypr/hyprlock.conf ~/.config/hypr/hyprlock.conf"
   fi
 
   if command -v nwg-displays &>/dev/null; then
     print_styled_message "Configuring nwg-displays"
     if confirm_action "configure nwg-displays"; then
-      # Find Python version
       PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
       NWG_DISPLAYS_PATH="/usr/lib/python${PYTHON_VERSION}/site-packages/nwg_displays/main.py"
 
@@ -115,27 +62,11 @@ if [ "$window_manager" == "hyprland" ]; then
     fi
   fi
 
-  if [ -d "$(pwd)/hyprswitch" ]; then
-    print_styled_message "Configuring hyprswitch"
-    if confirm_action "configure hyprswitch"; then
-      mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/../hyprswitch" "$HOME/.config/hyprswitch"
-    fi
-  fi
-
-  if [ -d "$(pwd)/hyprpanel" ]; then
-    print_styled_message "Configuring hyprpanel"
-    if confirm_action "configure hyprpanel"; then
-      mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/../hyprpanel" "$HOME/.config/hyprpanel"
-    fi
-  fi
-
   if command -v hyprpaper &>/dev/null; then
     print_styled_message "Configuring hyprpaper"
     if confirm_action "configure hyprpaper"; then
       mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/..hypr/hyprpaper.conf" "$HOME/.config/hypr/hyprpaper.conf"
+      create_symlink "$(pwd)/..hypr/hyprpaper.conf" "~/.config/hypr/hyprpaper.conf"
 
       print_styled_message "Creating wallpaper changer desktop entry"
       if confirm_action "create wallpaper changer desktop entry"; then
@@ -158,25 +89,81 @@ EOF
     fi
   fi
 
-  if command -v hyprlock &>/dev/null; then
-    print_styled_message "Configuring hyprlock"
-    if confirm_action "configure hyprlock"; then
-      mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/../hypr/hyprlock.conf" "$HOME/.config/hypr/hyprlock.conf"
-    fi
-  fi
 fi
+
 
 # Application configurations
 print_styled_message "Configuring applications"
 
+# Configuring GTK
+execute_command "Configure GTK (removing window control buttons)" "gsettings set org.gnome.desktop.wm.preferences button-layout ':'"
+
+# Enabling Bluetooth service
+execute_command "Enable Bluetooth service" "sudo systemctl enable bluetooth.service"
+
+# Start GNOME polkit agent
+if command -v /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &>/dev/null; then
+  execute_command "Start GNOME polkit agent" "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &"
+fi
+
+# Start MATE polkit agent
+if command -v /usr/lib/mate-polkit/polkit-mate-authentication-agent-1 &>/dev/null; then
+  execute_command "Start MATE polkit agent" "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1 &"
+fi
+
+# Configuring SDDM
+if command -v sddm &>/dev/null; then
+  execute_command "Configure SDDM" "sudo cp -r $(pwd)/../sddm/corners /usr/share/sddm/themes/ && sudo cp $(pwd)/../sddm/default.conf /usr/lib/sddm/sddm.conf.d/default.conf && sudo systemctl enable sddm"
+fi
+
 # Thunar configuration
 if command -v thunar &>/dev/null; then
-  print_styled_message "Configuring Thunar"
-  if confirm_action "configure Thunar"; then
-    mkdir -p ~/.config/Thunar
-    create_symlink "$(pwd)/../thunar/uca.xml" "$HOME/.config/Thunar/uca.xml"
-  fi
+  execute_command "Configure Thunar" "mkdir -p ~/.config/Thunar && create_symlink $(pwd)/../thunar/uca.xml ~/.config/Thunar/uca.xml"
+fi
+
+# Wofi configuration
+if command -v wofi &>/dev/null; then
+  execute_command "Configure Wofi" "mkdir -p ~/.config/wofi && create_symlink $(pwd)/../wofi ~/.config/wofi"
+fi
+
+# Rofi configuration
+if command -v rofi &>/dev/null; then
+  execute_command "Configure Rofi" "mkdir -p ~/.config/rofi && create_symlink $(pwd)/../rofi ~/.config/rofi"
+fi
+
+# Wlogout configuration
+if command -v wlogout &>/dev/null; then
+  execute_command "Configure wlogout" "mkdir -p ~/.config/wlogout && create_symlink $(pwd)/../wlogout ~/.config/wlogout"
+fi
+
+# Kitty configuration
+if command -v kitty &>/dev/null; then
+  execute_command "Configure kitty" "mkdir -p ~/.config/kitty && create_symlink $(pwd)/../kitty ~/.config/kitty"
+fi
+
+# Fastfetch configuration
+if command -v fastfetch &>/dev/null; then
+  execute_command "Configure fastfetch" "mkdir -p ~/.config/fastfetch && create_symlink $(pwd)/../fastfetch ~/.config/fastfetch"
+fi
+
+# Fish configuration
+if command -v fish &>/dev/null; then
+  execute_command "Configure fish" "mkdir -p ~/.config/fish && create_symlink $(pwd)/../fish ~/.config/fish && chsh -s /bin/fish"
+fi
+
+# Spicetify configuration
+if command -v spicetify-cli &>/dev/null; then
+  execute_command "Configure spicetify" "mkdir -p ~/.config/spicetify && create_symlink $(pwd)/../spicetify ~/.config/spicetify"
+fi
+
+# Git configuration
+if command -v git &>/dev/null; then
+  execute_command "Configure Git" "git config --global user.name "Irrisorr" && git config --global user.email "zakharkevichg@gmail.com""
+fi
+
+# Update user directories
+if command -v xdg-user-dirs-update &>/dev/null; then
+  execute_command "Update user directories" "xdg-user-dirs-update"
 fi
 
 # Zoom configuration
@@ -196,37 +183,16 @@ if command -v zoom &>/dev/null || [ -f ~/.config/zoomus.conf ]; then
   fi
 fi
 
-# Wofi configuration
-if command -v wofi &>/dev/null; then
-  print_styled_message "Configuring Wofi"
-  if confirm_action "configure Wofi"; then
-    mkdir -p ~/.config/wofi
-    create_symlink "$(pwd)/../wofi" "$HOME/.config/wofi"
-  fi
-fi
-
-if command -v rofi &>/dev/null; then
-  print_styled_message "Configuring rofi"
-  if confirm_action "configure rofi"; then
-    create_symlink "$(pwd)/../rofi" "$HOME/.config/rofi"
-  fi
-fi
-
-# wlogout configuration
-if command -v wlogout &>/dev/null; then
-  print_styled_message "Configuring wlogout"
-  if confirm_action "configure wlogout"; then
-    mkdir -p ~/.config/wlogout
-    create_symlink "$(pwd)/../wlogout" "$HOME/.config/wlogout"
-  fi
-fi
-
-# kitty configuration
-if command -v kitty &>/dev/null; then
-  print_styled_message "Configuring kitty"
-  if confirm_action "configure kitty"; then
-    mkdir -p ~/.config/kitty
-    create_symlink "$(pwd)/../kitty" "$HOME/.config/kitty"
+# Enable fingerprint authentication
+if command -v fprintd-enroll &>/dev/null; then
+  print_styled_message "Fingerprint Configuration"
+  if confirm_action "configure fingerprint authentication"; then
+    execute_script sudo systemctl enable fprintd.service
+    print_styled_message "Place your finger several times to scan it"
+    execute_script fprintd-enroll
+    print_styled_message "Place your finger to verify it"
+    execute_script fprintd-verify
+    print_success_message "Fingerprint service enabled"
   fi
 fi
 
@@ -234,135 +200,63 @@ fi
 if command -v java &>/dev/null; then
   print_styled_message "Configuring Java"
   if confirm_action "configure Java environment"; then
-    if [ -d "/usr/lib/jvm/java-23-openjdk" ]; then
-      echo 'export JAVA_HOME=/usr/lib/jvm/java-23-openjdk' >>~/.bashrc
-      echo 'export JAVA_HOME=/usr/lib/jvm/java-23-openjdk' >>~/.zshrc
-      if [ -d ~/.config/fish ]; then
-        mkdir -p ~/.config/fish
-        echo 'set -x JAVA_HOME /usr/lib/jvm/java-23-openjdk' >>~/.config/fish/config.fish
+    java_dirs=($(find /usr/lib/jvm -maxdepth 1 -type d -name "*java*" ! -name "jvm" | sort))
+    
+    if [ ${#java_dirs[@]} -gt 0 ]; then
+      echo "Available Java versions:"
+      for i in "${!java_dirs[@]}"; do
+        echo "$((i+1))) ${java_dirs[$i]##*/}"
+      done
+      
+      read -p "Select Java version (enter number): " java_choice
+      
+      if [[ $java_choice =~ ^[0-9]+$ ]] && [ "$java_choice" -gt 0 ] && [ "$java_choice" -le ${#java_dirs[@]} ]; then
+        selected_java="${java_dirs[$((java_choice-1))]}"
+        
+        # Configure bashrc
+        if grep -q "export JAVA_HOME" ~/.bashrc; then
+          sed -i "s|export JAVA_HOME=.*|export JAVA_HOME=$selected_java|g" ~/.bashrc
+        else
+          echo "export JAVA_HOME=$selected_java" >>~/.bashrc
+        fi
+        
+        # Configure zshrc
+        if grep -q "export JAVA_HOME" ~/.zshrc; then
+          sed -i "s|export JAVA_HOME=.*|export JAVA_HOME=$selected_java|g" ~/.zshrc
+        else
+          echo "export JAVA_HOME=$selected_java" >>~/.zshrc
+        fi
+        
+        # Configure fish
+        if [ -d ~/.config/fish ]; then
+          mkdir -p ~/.config/fish
+          if grep -q "set -x JAVA_HOME" ~/.config/fish/config.fish; then
+            sed -i "s|set -x JAVA_HOME .*|set -x JAVA_HOME $selected_java|g" ~/.config/fish/config.fish
+          else
+            echo "set -x JAVA_HOME $selected_java" >>~/.config/fish/config.fish
+          fi
+        fi
+        
+        print_success_message "Java environment configured: $selected_java"
+      else
+        print_error_message "Invalid selection"
       fi
-      print_success_message "Java environment configured"
     else
-      print_error_message "Java 23 OpenJDK not found"
+      print_error_message "No Java installations found in /usr/lib/jvm"
     fi
   fi
 fi
 
-# fastfetch configuration
-if command -v fastfetch &>/dev/null; then
-  print_styled_message "Configuring fastfetch"
-  if confirm_action "configure fastfetch"; then
-    mkdir -p ~/.config/fastfetch
-    create_symlink "$(pwd)/../fastfetch" "$HOME/.config/fastfetch"
-  fi
-fi
+# Convert Russian XDG directories to English
+# Check if Russian directories exist
+convert_xdg_dirs_to_english
 
-# fish configuration
-if command -v fish &>/dev/null; then
-  print_styled_message "Configuring fish"
-  if confirm_action "configure fish"; then
-    mkdir -p ~/.config/fish
-    create_symlink "$(pwd)/../fish" "$HOME/.config/fish"
-    print_styled_message "Type below '/bin/fish'"
-    chsh
-  fi
-fi
 
-# spicetify configuration
-if command -v spicetify-cli &>/dev/null; then
-  print_styled_message "Configuring spicetify"
-  if confirm_action "configure spicetify"; then
-    mkdir -p ~/.config/spicetify
-    create_symlink "$(pwd)/../spicetify" "$HOME/.config/spicetify"
-  fi
-fi
+# Delete .bak directories from the .config/
+execute_command "Delete .bak directories from the .config/" "find ~/.config/ -type d -name "*.bak" -delete"
 
-# Git configuration
-print_styled_message "Configuring Git"
-if confirm_action "configure Git"; then
-  execute_command git config --global user.name "Irrisorr"
-  execute_command git config --global user.email "zakharkevichg@gmail.com"
-fi
 
-# Update user directories
-print_styled_message "Updating user directories"
-if confirm_action "update user directories"; then
-  execute_command xdg-user-dirs-update
-  print_styled_message "You can edit directory names in ~/.config/user-dirs.dirs"
-fi
 
-# Start polkit agent
-print_styled_message "Starting polkit agent"
-if confirm_action "start polkit agent"; then
-  execute_command /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
-  execute_command /usr/lib/mate-polkit/polkit-mate-authentication-agent-1 &
-  print_success_message "Polkit agent started"
-fi
-
-print_styled_message "Setting fingerprint"
-if confirm_action "set fingerprint"; then
-  execute_command sudo systemctl enable fprintd.service
-  print_styled_message "Place your finger several times to scan it"
-  execute_command fprintd-enroll
-  print_styled_message "Place your finger to verify it"
-  execute_command fprintd-verify
-  print_success_message "Fingerprint service enabled"
-fi
-
-# Function to convert Russian XDG directories to English
-
-print_styled_message "Converting XDG user directories to English..."
-if confirm_action "Do you want to convert XDG user directories to English?"; then
-
-  # Set English XDG directories
-  cat >~/.config/user-dirs.dirs <<EOL
-XDG_DESKTOP_DIR="$HOME/Desktop"
-XDG_DOWNLOAD_DIR="$HOME/Downloads"
-XDG_TEMPLATES_DIR="$HOME/Templates"
-XDG_PUBLICSHARE_DIR="$HOME/Public"
-XDG_DOCUMENTS_DIR="$HOME/Documents"
-XDG_MUSIC_DIR="$HOME/Music"
-XDG_PICTURES_DIR="$HOME/Pictures"
-XDG_VIDEOS_DIR="$HOME/Videos"
-EOL
-
-  # Create English directories
-  mkdir -p ~/Desktop ~/Downloads ~/Templates ~/Public ~/Documents ~/Music ~/Pictures ~/Videos
-
-  # Move files from Russian to English directories if they exist
-  mv -n "$HOME/Рабочий стол"/* "$HOME/Desktop" 2>/dev/null || true
-  mv -n "$HOME/Загрузки"/* "$HOME/Downloads" 2>/dev/null || true
-  mv -n "$HOME/Шаблоны"/* "$HOME/Templates" 2>/dev/null || true
-  mv -n "$HOME/Общедоступные"/* "$HOME/Public" 2>/dev/null || true
-  mv -n "$HOME/Документы"/* "$HOME/Documents" 2>/dev/null || true
-  mv -n "$HOME/Музыка"/* "$HOME/Music" 2>/dev/null || true
-  mv -n "$HOME/Изображения"/* "$HOME/Pictures" 2>/dev/null || true
-  mv -n "$HOME/Видео"/* "$HOME/Videos" 2>/dev/null || true
-
-  # Remove empty Russian directories
-  rmdir "$HOME/Рабочий стол" "$HOME/Загрузки" "$HOME/Шаблоны" "$HOME/Общедоступные" \
-    "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео" 2>/dev/null || true
-
-  # Create symbolic link in HyprDots
-  ln -sf ~/.config/user-dirs.dirs "$(pwd)/../user-dirs.dirs"
-  check_success "XDG user directories converted to English successfully!"
-fi
-
-# Function to setup mimeinfo.cache
-print_styled_message "Setting up mimeinfo.cache..."
-if confirm_action "Do you want to setup mimeinfo.cache with Zen Browser as default PDF viewer?"; then
-  # Create a copy of mimeinfo.cache
-  sudo cp /usr/share/applications/mimeinfo.cache "$(pwd)/../mimeinfo.cache"
-
-  # Update PDF association
-  sed -i 's|application/pdf=.*|application/pdf=zen.desktop|' "$(pwd)/../mimeinfo.cache"
-  check_success "mimeinfo.cache setup completed!"
-fi
-
-print_styled_message "Deleting .bak directories from the .config/"
-if confirm_action "Delete .bak directories?"; then
-  execute_command find ~/.config/ -type d -name "*.bak" -delete
-fi
 
 print_styled_message "Installation complete! Restart your computer for changes to take effect."
 if confirm_action "Do u want to reboot"; then

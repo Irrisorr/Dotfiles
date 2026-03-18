@@ -49,6 +49,25 @@ if confirm_action "install iMe Desktop"; then
   cd - >/dev/null # Return to original directory
 fi
 
+
+# Installing RustDesk
+print_styled_message "Installing RustDesk"
+if confirm_action "install RustDesk version 1.3.7"; then
+  mkdir -p ~/Downloads/apps
+  cd ~/Downloads/apps
+
+  print_styled_message "Downloading RustDesk 1.3.7"
+  RUSTDESK_URL="https://github.com/rustdesk/rustdesk/releases/download/1.3.7/rustdesk-1.3.7-0-x86_64.pkg.tar.zst"
+  RUSTDESK_PKG="rustdesk-1.3.7-0-x86_64.pkg.tar.zst"
+
+  execute_script wget -O "$RUSTDESK_PKG" "$RUSTDESK_URL"
+  print_styled_message "Installing RustDesk package"
+  execute_script sudo pacman -U --noconfirm "$RUSTDESK_PKG"
+  print_success_message "RustDesk 1.3.7 installed successfully"
+  cd - >/dev/null # Return to original directory
+fi
+
+
 # Installing Hyprland plugins
 print_styled_message "Installing Hyprland plugins"
 

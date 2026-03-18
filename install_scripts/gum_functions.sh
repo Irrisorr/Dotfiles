@@ -61,7 +61,7 @@ choose_action() {
 
 # Function to choose multiple options from a list using gum (using Space key and Enter for confirmation)
 choose_action_no_limit() {
-  gum choose --no-limit --height 20 "$@" </dev/tty
+  gum choose --no-limit "$@" </dev/tty
 }
 
 
