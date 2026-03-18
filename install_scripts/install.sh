@@ -5,23 +5,7 @@
 #TODO Дописать нужные вещи в функции
 
 system_update
-
-if ! command -v yay &>/dev/null; then
-  print_styled_message "Installing yay"
-  if confirm_action "install yay"; then
-    origin_dir="$(pwd)"
-    git clone https://aur.archlinux.org/yay.git ~/yay
-    check_success "Cloning yay repository"
-
-    cd ~/yay
-    makepkg -si --noconfirm
-    check_success "Installing yay"
-    rm -rf yay
-    cd $origin_dir
-  fi
-else
-  print_styled_message "yay is already installed, skipping..."
-fi
+install_yay
 
 print_styled_message "Installing Window Manager"
 if confirm_action "install window manager"; then
@@ -29,7 +13,9 @@ if confirm_action "install window manager"; then
   execute_command sudo pacman -S --noconfirm $window_manager
 fi
 
-process_all_pkg_categories
+# Interactive package selection
+print_styled_message "Package Installation"
+interactive_category_selection
 
 print_styled_message "Installing RustDesk"
 if confirm_action "install RustDesk version 1.3.7"; then
@@ -308,8 +294,19 @@ fi
 # Start polkit agent
 print_styled_message "Starting polkit agent"
 if confirm_action "start polkit agent"; then
-  /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+  execute_command /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &
+  execute_command /usr/lib/mate-polkit/polkit-mate-authentication-agent-1 &
   print_success_message "Polkit agent started"
+fi
+
+print_styled_message "Setting fingerprint"
+if confirm_action "set fingerprint"; then
+  execute_command sudo systemctl enable fprintd.service
+  print_styled_message "Place your finger several times to scan it"
+  execute_command fprintd-enroll
+  print_styled_message "Place your finger to verify it"
+  execute_command fprintd-verify
+  print_success_message "Fingerprint service enabled"
 fi
 
 # Function to convert Russian XDG directories to English
