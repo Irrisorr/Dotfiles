@@ -114,20 +114,20 @@ menu_second_level() {
 
 # Get all first-level actions (#=)
 get_first_level_actions() {
-  grep '^#= ' "$HOME/Dotfiles/install_scripts/install.sh" | sed 's/^#= //'
+  grep '^#= ' "$HOME/Dotfiles/install_scripts/main.sh" | sed 's/^#= //'
 }
 
 
 # Get all second-level actions (#==)
 get_second_level_actions() {
-  grep '^#== ' "$HOME/Dotfiles/install_scripts/install.sh" | sed 's/^#== //'
+  grep '^#== ' "$HOME/Dotfiles/install_scripts/main.sh" | sed 's/^#== //'
 }
 
 
 # Get command check for action (looks at the line after #==)
 get_command_check() {
   local action=$1
-  local install_file="$HOME/Dotfiles/install_scripts/install.sh"
+  local install_file="$HOME/Dotfiles/install_scripts/main.sh"
   
   grep -A 1 "^#== $action\$" "$install_file" | grep "if command -v" | sed 's/.*if command -v \([^ ]*\).*/\1/'
 }
@@ -158,11 +158,11 @@ execute_action_from_file() {
 }
 
 
-# Get action code from install.sh
+# Get action code from main.sh
 get_action_code_by_level() {
   local action=$1
   local level=$2
-  local install_file="$HOME/Dotfiles/install_scripts/install.sh"
+  local install_file="$HOME/Dotfiles/install_scripts/main.sh"
   local marker=$([ "$level" = "2" ] && echo "^#== " || echo "^#= ")
   
   awk -v marker="$marker" -v action="$action" '
