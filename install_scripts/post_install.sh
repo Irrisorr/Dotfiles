@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. ./functions.sh
+. $HOME/Dotfiles/install_scripts/functions.sh
 
 system_update
 
@@ -10,8 +10,8 @@ print_styled_message "Post-Installation Tasks"
 # iMe Desktop installation
 print_styled_message "Installing iMe Desktop"
 if confirm_action "install iMe Desktop"; then
-  mkdir -p ~/Downloads/apps
-  cd ~/Downloads/apps
+  mkdir -p $HOME/Downloads/apps
+  cd $HOME/Downloads/apps
 
   print_styled_message "Downloading iMe Desktop"
   echo ":: Opening browser to download iMe Desktop..."
@@ -23,19 +23,19 @@ if confirm_action "install iMe Desktop"; then
   read -p "Press Enter when download is complete: " dummy
 
   # Find the most recent iMe download
-  IME_ARCHIVE=$(find ~/Downloads -name "iMe*.tar.xz" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
+  IME_ARCHIVE=$(find $HOME/Downloads -name "iMe*.tar.xz" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
 
   if [ -z "$IME_ARCHIVE" ]; then
     print_error_message "iMe Desktop archive not found in Downloads folder"
-    echo ":: Please download iMe Desktop manually and extract it to ~/Downloads/apps/iMeDesktop"
+    echo ":: Please download iMe Desktop manually and extract it to $HOME/Downloads/apps/iMeDesktop"
   else
     print_styled_message "Extracting iMe Desktop"
-    execute_command tar -xf "$IME_ARCHIVE" -C ~/Downloads/apps
+    execute_command tar -xf "$IME_ARCHIVE" -C $HOME/Downloads/apps
 
-    if [ -d ~/Downloads/apps/iMeDesktop ]; then
+    if [ -d $HOME/Downloads/apps/iMeDesktop ]; then
       print_styled_message "Running iMe Desktop to create desktop file"
       echo ":: Starting iMe Desktop, it will be terminated after 2 seconds..."
-      cd ~/Downloads/apps/iMeDesktop
+      cd $HOME/Downloads/apps/iMeDesktop
       ./iMe &
       IME_PID=$!
       sleep 2
@@ -53,8 +53,8 @@ fi
 # Installing RustDesk
 print_styled_message "Installing RustDesk"
 if confirm_action "install RustDesk version 1.3.7"; then
-  mkdir -p ~/Downloads/apps
-  cd ~/Downloads/apps
+  mkdir -p $HOME/Downloads/apps
+  cd $HOME/Downloads/apps
 
   print_styled_message "Downloading RustDesk 1.3.7"
   RUSTDESK_URL="https://github.com/rustdesk/rustdesk/releases/download/1.3.7/rustdesk-1.3.7-0-x86_64.pkg.tar.zst"

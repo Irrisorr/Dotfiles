@@ -94,7 +94,7 @@ check_success() {
     print_success_message "$1"
   else
     print_error_message "$1"
-    exit 1
+    return 1
   fi
 }
 

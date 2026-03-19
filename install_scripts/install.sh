@@ -1,50 +1,66 @@
 #!/bin/bash
 
-. ./functions.sh
-. ./../scripts/scripts.sh
+. $HOME/Dotfiles/install_scripts/functions.sh
+. $HOME/Dotfiles/scripts/scripts.sh
 
-set_ru_font
+while true; do
+  menu_first_level
+  menu_second_level
+  if [ $? -ne 3 ]; then
+    break
+  fi
+done
+
+#= Update system
 system_update
+
+
+#= Install yay
 install_yay
 
 
-# Installing Window Manager
+#= Set Russian font for default Arch console
+set_ru_font
+
+
+#= Install packages
+package_category_selection
+
+
+#= Installing Window Manager
 print_styled_message "Installing Window Manager"
 if confirm_action "install window manager"; then
   window_manager=$(choose_action hyprland niri)
   execute_script sudo pacman -S --noconfirm $window_manager
+else return 2
 fi
 
-# Installing packages
-print_styled_message "Package Installation"
-interactive_category_selection
 
-
-# Configuring niri ecosystem
-if [ "$window_manager" == "niri" ]; then
+#== Configuring niri ecosystem
+if command -v niri &>/dev/null; then
   print_styled_message "Configuring niri and apps/plugins for it"
 
-  execute_command "Configure niri directory" "create_symlink $(pwd)/../niri ~/.config/niri"
+  execute_command "Configure niri directory" "create_symlink $HOME/Dotfiles/niri $HOME/.config/niri"
 
-  execute_command "Configure dms-shell (panel-bar)" "mkdir -p ~/.config/DankMaterialShell && create_symlink $(pwd)/../DankMaterialShell ~/.config/DankMaterialShell"
+  execute_command "Configure dms-shell (panel-bar)" "mkdir -p $HOME/.config/DankMaterialShell && create_symlink $HOME/Dotfiles/DankMaterialShell $HOME/.config/DankMaterialShell"
 
   if command -v hyprlock &>/dev/null; then
-    execute_command "Configure hyprlock" "mkdir -p ~/.config/hypr && create_symlink $(pwd)/../hypr/hyprlock.conf ~/.config/hypr/hyprlock.conf"
+    execute_command "Configure hyprlock" "mkdir -p $HOME/.config/hypr && create_symlink $HOME/Dotfiles/hypr/hyprlock.conf $HOME/.config/hypr/hyprlock.conf"
   fi
 fi
 
 
-# Configuring Hyprland ecosystem
-if [ "$window_manager" == "hyprland" ]; then
+#== Configuring Hyprland ecosystem
+if command -v hyprland &>/dev/null; then
 
   print_styled_message "Configuring hyprland and apps/plugins for it"
 
   execute_command "Enable hyprpm (hyprland plugin manager)" "hyprpm update -s -v"
 
-  execute_command "Configure hyprland directory" "create_symlink $(pwd)/../hypr ~/.config/hypr"
+  execute_command "Configure hyprland directory" "create_symlink $HOME/Dotfiles/hypr $HOME/.config/hypr"
   
   if command -v hyprlock &>/dev/null; then
-    execute_command "Configure hyprlock" "mkdir -p ~/.config/hypr && create_symlink $(pwd)/../hypr/hyprlock.conf ~/.config/hypr/hyprlock.conf"
+    execute_command "Configure hyprlock" "mkdir -p $HOME/.config/hypr && create_symlink $HOME/Dotfiles/hypr/hyprlock.conf $HOME/.config/hypr/hyprlock.conf"
   fi
 
   if command -v nwg-displays &>/dev/null; then
@@ -66,8 +82,8 @@ if [ "$window_manager" == "hyprland" ]; then
   if command -v hyprpaper &>/dev/null; then
     print_styled_message "Configuring hyprpaper"
     if confirm_action "configure hyprpaper"; then
-      mkdir -p ~/.config/hypr
-      create_symlink "$(pwd)/..hypr/hyprpaper.conf" "~/.config/hypr/hyprpaper.conf"
+      mkdir -p $HOME/.config/hypr
+      create_symlink "$HOME/Dotfiles/hypr/hyprpaper.conf" "$HOME/.config/hypr/hyprpaper.conf"
 
       print_styled_message "Creating wallpaper changer desktop entry"
       if confirm_action "create wallpaper changer desktop entry"; then
@@ -92,99 +108,95 @@ EOF
 
 fi
 
-
-# Application configurations
-print_styled_message "Configuring applications"
-
-# Configuring GTK
+#== Configuring GTK
 execute_command "Configure GTK (removing window control buttons)" "gsettings set org.gnome.desktop.wm.preferences button-layout ':'"
 
-# Enabling Bluetooth service
+#== Enabling Bluetooth service
 execute_command "Enable Bluetooth service" "sudo systemctl enable bluetooth.service"
 
-# Start GNOME polkit agent
+#== Start GNOME polkit agent
 if command -v /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &>/dev/null; then
   execute_command "Start GNOME polkit agent" "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &"
 fi
 
-# Start MATE polkit agent
+#== Start MATE polkit agent
 if command -v /usr/lib/mate-polkit/polkit-mate-authentication-agent-1 &>/dev/null; then
   execute_command "Start MATE polkit agent" "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1 &"
 fi
 
-# Configuring SDDM
+#== Configuring SDDM
 if command -v sddm &>/dev/null; then
-  execute_command "Configure SDDM" "sudo cp -r $(pwd)/../sddm/corners /usr/share/sddm/themes/ && sudo cp $(pwd)/../sddm/default.conf /usr/lib/sddm/sddm.conf.d/default.conf && sudo systemctl enable sddm"
+  execute_command "Configure SDDM" "sudo cp -r $HOME/Dotfiles/sddm/corners /usr/share/sddm/themes/ && sudo cp $HOME/Dotfiles/sddm/default.conf /usr/lib/sddm/sddm.conf.d/default.conf && sudo systemctl enable sddm"
 fi
 
-# Thunar configuration
+#== Thunar configuration
 if command -v thunar &>/dev/null; then
-  execute_command "Configure Thunar" "mkdir -p ~/.config/Thunar && create_symlink $(pwd)/../thunar/uca.xml ~/.config/Thunar/uca.xml"
+  execute_command "Configure Thunar" "mkdir -p $HOME/.config/Thunar && create_symlink $HOME/Dotfiles/thunar/uca.xml $HOME/.config/Thunar/uca.xml"
 fi
 
-# Wofi configuration
+#== Wofi configuration
 if command -v wofi &>/dev/null; then
-  execute_command "Configure Wofi" "mkdir -p ~/.config/wofi && create_symlink $(pwd)/../wofi ~/.config/wofi"
+  execute_command "Configure Wofi" "mkdir -p $HOME/.config/wofi && create_symlink $HOME/Dotfiles/wofi $HOME/.config/wofi"
 fi
 
-# Rofi configuration
+#== Rofi configuration
 if command -v rofi &>/dev/null; then
-  execute_command "Configure Rofi" "mkdir -p ~/.config/rofi && create_symlink $(pwd)/../rofi ~/.config/rofi"
+  execute_command "Configure Rofi" "mkdir -p $HOME/.config/rofi && create_symlink $HOME/Dotfiles/rofi $HOME/.config/rofi"
 fi
 
-# Wlogout configuration
+#== Wlogout configuration
 if command -v wlogout &>/dev/null; then
-  execute_command "Configure wlogout" "mkdir -p ~/.config/wlogout && create_symlink $(pwd)/../wlogout ~/.config/wlogout"
+  execute_command "Configure wlogout" "mkdir -p $HOME/.config/wlogout && create_symlink $HOME/Dotfiles/wlogout $HOME/.config/wlogout"
 fi
 
-# Kitty configuration
+#== Kitty configuration
 if command -v kitty &>/dev/null; then
-  execute_command "Configure kitty" "mkdir -p ~/.config/kitty && create_symlink $(pwd)/../kitty ~/.config/kitty"
+  execute_command "Configure kitty" "mkdir -p $HOME/.config/kitty && create_symlink $HOME/Dotfiles/kitty $HOME/.config/kitty"
 fi
 
-# Fastfetch configuration
+#== Fastfetch configuration
 if command -v fastfetch &>/dev/null; then
-  execute_command "Configure fastfetch" "mkdir -p ~/.config/fastfetch && create_symlink $(pwd)/../fastfetch ~/.config/fastfetch"
+  execute_command "Configure fastfetch" "mkdir -p $HOME/.config/fastfetch && create_symlink $HOME/Dotfiles/fastfetch $HOME/.config/fastfetch"
 fi
 
-# Fish configuration
+#== Fish configuration
 if command -v fish &>/dev/null; then
-  execute_command "Configure fish" "mkdir -p ~/.config/fish && create_symlink $(pwd)/../fish ~/.config/fish && chsh -s /bin/fish"
+  execute_command "Configure fish" "mkdir -p $HOME/.config/fish && create_symlink $HOME/Dotfiles/fish $HOME/.config/fish && chsh -s /bin/fish"
 fi
 
-# Spicetify configuration
+#== Spicetify configuration
 if command -v spicetify-cli &>/dev/null; then
-  execute_command "Configure spicetify" "mkdir -p ~/.config/spicetify && create_symlink $(pwd)/../spicetify ~/.config/spicetify"
+  execute_command "Configure spicetify" "mkdir -p $HOME/.config/spicetify && create_symlink $HOME/Dotfiles/spicetify $HOME/.config/spicetify"
 fi
 
-# Git configuration
+#== Git configuration
 if command -v git &>/dev/null; then
   execute_command "Configure Git" "git config --global user.name "Irrisorr" && git config --global user.email "zakharkevichg@gmail.com""
 fi
 
-# Update user directories
+#== Update user directories
 if command -v xdg-user-dirs-update &>/dev/null; then
   execute_command "Update user directories" "xdg-user-dirs-update"
 fi
 
-# Zoom configuration
-if command -v zoom &>/dev/null || [ -f ~/.config/zoomus.conf ]; then
+#== Zoom configuration
+if command -v zoom &>/dev/null || [ -f $HOME/.config/zoomus.conf ]; then
   print_styled_message "Configuring Zoom"
   if confirm_action "configure Zoom for Wayland"; then
-    if [ -f ~/.config/zoomus.conf ]; then
-      if grep -q "enableWaylandShare" ~/.config/zoomus.conf; then
-        sed -i 's/enableWaylandShare=.*/enableWaylandShare=true/' ~/.config/zoomus.conf
+    if [ -f $HOME/.config/zoomus.conf ]; then
+      if grep -q "enableWaylandShare" $HOME/.config/zoomus.conf; then
+        sed -i 's/enableWaylandShare=.*/enableWaylandShare=true/' $HOME/.config/zoomus.conf
       else
-        echo "enableWaylandShare=true" >>~/.config/zoomus.conf
+        echo "enableWaylandShare=true" >>$HOME/.config/zoomus.conf
       fi
     else
-      echo "enableWaylandShare=true" >~/.config/zoomus.conf
+      echo "enableWaylandShare=true" >$HOME/.config/zoomus.conf
     fi
     print_success_message "Zoom configured for Wayland"
   fi
 fi
 
-# Enable fingerprint authentication
+#== Enable fingerprint authentication
 if command -v fprintd-enroll &>/dev/null; then
   print_styled_message "Fingerprint Configuration"
   if confirm_action "configure fingerprint authentication"; then
@@ -197,23 +209,19 @@ if command -v fprintd-enroll &>/dev/null; then
   fi
 fi
 
-# Java configuration
+#== Java configuration
 if command -v java &>/dev/null; then
   set_java_env
 fi
 
-# Convert Russian XDG directories to English
-# Check if Russian directories exist
+#== Convert Russian XDG directories to English
 convert_xdg_dirs_to_english
 
 
-# Delete .bak directories from the .config/
-execute_command "Delete .bak directories from the .config/" "find ~/.config/ -type d -name "*.bak" -delete"
+#== Delete .bak directories from the .config/
+execute_command "Delete .bak directories from the .config/" "find $HOME/.config/ -type d -name "*.bak" -delete"
 
 
 
-
-print_styled_message "Installation complete! Restart your computer for changes to take effect."
-if confirm_action "Do u want to reboot"; then
-  reboot
-fi
+#== Reboot device for changes to take effect
+execute_command "Reboot device for changes to take effect" "reboot"

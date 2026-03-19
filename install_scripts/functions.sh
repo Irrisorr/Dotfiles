@@ -1,13 +1,190 @@
 #!/bin/bash
 
-. ./gum_functions.sh
+. $HOME/Dotfiles/install_scripts/gum_functions.sh
 
 
 declare -A SELECTED_PACKAGES
+declare -A ACTION_STATUS
+
+
+# Interactive menu for first level actions
+menu_first_level() {
+  local actions
+  actions=$(get_first_level_actions)
+  
+  while true; do
+    local options=()
+    
+    while IFS= read -r action; do
+      [ -z "$action" ] && continue
+      if [ "${ACTION_STATUS[$action]}" = "✓" ]; then
+        options+=("✓ $action")
+      elif [ "${ACTION_STATUS[$action]}" = "✗" ]; then
+        options+=("✗ $action")
+      else
+        options+=("  $action")
+      fi
+    done <<< "$actions"
+    
+    options+=("🚀 Continue to app configuration")
+    
+    local choice
+    if $HAS_GUM; then
+      choice=$(gum_choose_wrapper --height 20 "${options[@]}")
+    else
+      choice=$(choose_action_no_limit "${options[@]}")
+    fi
+    
+    [ $? -ne 0 ] && continue
+    
+    if [ "$choice" = "🚀 Continue to app configuration" ]; then
+      break
+    fi
+    
+    local action=$(echo "$choice" | sed 's/^[✓✗ ]\s*//')
+    execute_action_from_file "$action" "1"
+  done
+}
+
+
+# Interactive menu for second level actions
+menu_second_level() {
+  local actions
+  actions=$(get_second_level_actions)
+  
+  while true; do
+    local options=()
+    local available_actions=()
+    
+    while IFS= read -r action; do
+      [ -z "$action" ] && continue
+      
+      local cmd=$(get_command_check "$action")
+      local should_show=true
+      
+      if [ -n "$cmd" ]; then
+        command -v "$cmd" &>/dev/null
+        if [ $? -ne 0 ]; then
+          should_show=false
+        fi
+      fi
+      
+      if [ "$should_show" = true ]; then
+        available_actions+=("$action")
+        if [ "${ACTION_STATUS[$action]}" = "✓" ]; then
+          options+=("✓ $action")
+        elif [ "${ACTION_STATUS[$action]}" = "✗" ]; then
+          options+=("✗ $action")
+        else
+          options+=("  $action")
+        fi
+      fi
+    done <<< "$actions"
+    
+    if [ ${#available_actions[@]} -eq 0 ]; then
+      echo "No applications to configure"
+      break
+    fi
+    
+    options+=("⬅️ Back to main menu")
+    options+=("✅ Done (end script)")
+    
+    local choice
+    if $HAS_GUM; then
+      choice=$(gum_choose_wrapper --height 30 "${options[@]}")
+    else
+      choice=$(choose_action_no_limit "${options[@]}")
+    fi
+    
+    [ $? -ne 0 ] && continue
+    
+    if [ "$choice" = "✅ Done (end script)" ]; then
+      break
+    fi
+    
+    if [ "$choice" = "⬅️ Back to main menu" ]; then
+      return 3
+    fi
+    
+    local action=$(echo "$choice" | sed 's/^[✓✗ ]\s*//')
+    execute_action_from_file "$action" "2"
+  done
+}
+
+
+# Get all first-level actions (#=)
+get_first_level_actions() {
+  grep '^#= ' "$HOME/Dotfiles/install_scripts/install.sh" | sed 's/^#= //'
+}
+
+
+# Get all second-level actions (#==)
+get_second_level_actions() {
+  grep '^#== ' "$HOME/Dotfiles/install_scripts/install.sh" | sed 's/^#== //'
+}
+
+
+# Get command check for action (looks at the line after #==)
+get_command_check() {
+  local action=$1
+  local install_file="$HOME/Dotfiles/install_scripts/install.sh"
+  
+  grep -A 1 "^#== $action\$" "$install_file" | grep "if command -v" | sed 's/.*if command -v \([^ ]*\).*/\1/'
+}
+
+
+# Execute action and show result
+execute_action_from_file() {
+  local action=$1
+  local level=$2
+  
+  local code=$(get_action_code_by_level "$action" "$level")
+  
+  if [ -z "$code" ]; then
+    ACTION_STATUS[$action]="✗"
+    return 1
+  fi
+  
+  eval "$code"
+  local exit_code=$?
+  
+  if [ $exit_code -eq 0 ]; then
+    ACTION_STATUS[$action]="✓"
+  elif [ $exit_code -eq 1 ]; then
+    ACTION_STATUS[$action]=""
+  else
+    ACTION_STATUS[$action]="✗"
+  fi
+}
+
+
+# Get action code from install.sh
+get_action_code_by_level() {
+  local action=$1
+  local level=$2
+  local install_file="$HOME/Dotfiles/install_scripts/install.sh"
+  local marker=$([ "$level" = "2" ] && echo "^#== " || echo "^#= ")
+  
+  awk -v marker="$marker" -v action="$action" '
+    BEGIN { p=0; found=0 }
+    $0 ~ marker action "$" {
+      p=1
+      found=1
+      next
+    }
+    found && /^#[=]+/ {
+      exit
+    }
+    p {
+      print
+    }
+  ' "$install_file"
+}
+
 
 # Function to handle interactive category selection and package selection
-interactive_category_selection() {
-  local package_file="$(pwd)/packages.txt"
+package_category_selection() {
+  local package_file="$HOME/Dotfiles/install_scripts/packages.txt"
   
   while true; do
     local categories_array=()
@@ -26,8 +203,9 @@ interactive_category_selection() {
     category_status+=("⏭️ Skip Package Installation")
     category_status+=("🚀 Start Installation")
     
-    print_styled_message "Select Package Categories"
-    echo "Navigate with arrows, ENTER to confirm"
+    print_styled_message "Package Installation
+Select Package Categories
+Navigate with arrows, ENTER to confirm"
     echo ""
     
     if $HAS_GUM; then
@@ -57,7 +235,7 @@ interactive_category_selection() {
 
 # Function to get all categories from the packages.txt file
 get_all_categories() {
-  local package_file="$(pwd)/packages.txt"
+  local package_file="$HOME/Dotfiles/install_scripts/packages.txt"
   grep '^#' "$package_file" | sed 's/^#\s*//'
 }
 
@@ -100,7 +278,10 @@ start_package_installation() {
 select_packages_for_category() {
   local category=$1
   
-  print_styled_message "Selecting packages from: $category"
+  print_styled_message "Selecting packages from: $category
+Navigate with arrows, SPACE to select
+ENTER to confirm
+ESC or ENTER without selection to cancel"
   echo ""
   
   local app_list
@@ -159,7 +340,7 @@ select_packages_for_category() {
 # Function to get packages from a specific category in the packages.txt file
 get_packages_from_category() {
   local category_to_find="$1"
-  local package_file="$(pwd)/packages.txt"
+  local package_file="$HOME/Dotfiles/install_scripts/packages.txt"
 
   awk -v category="$category_to_find" '
     BEGIN { p=0 }
@@ -185,11 +366,19 @@ execute_script() {
 execute_command() {
   local message=$1
   local script=$2
-  
+
   print_styled_message "$message"
   if confirm_action "$message"; then
-    bash -c ". $(pwd)/gum_functions.sh && . $(pwd)/functions.sh && $script"
+    bash -c ". $HOME/Dotfiles/install_scripts/gum_functions.sh && . $HOME/Dotfiles/install_scripts/functions.sh && $script"
+    local cmd_exit=$?
+    if [ $cmd_exit -eq 1 ]; then
+      print_error_message "Failed to $message"
+      return 1
+    fi
     check_success "$message"
+    return $?
+  else
+    return 1
   fi
 }
 
@@ -227,14 +416,14 @@ install_yay() {
     print_styled_message "Installing yay"
     if confirm_action "install yay"; then
       origin_dir="$(pwd)"
-      git clone https://aur.archlinux.org/yay.git ~/yay
+      git clone https://aur.archlinux.org/yay.git $HOME/yay
       check_success "Cloning yay repository"
 
-      cd ~/yay
+      cd $HOME/yay
       makepkg -si --noconfirm
       check_success "Installing yay"
-      rm -rf yay
       cd $origin_dir
+      rm -rf $HOME/yay
     fi
   else
     print_styled_message "yay is already installed, skipping..."
@@ -242,6 +431,7 @@ install_yay() {
 }
 
 
+# Function to set the font for cyrillic support
 set_ru_font() {
   local script="grep -q "^FONT=" /etc/vconsole.conf && \
     sudo sed -i "s/^FONT=.*/FONT=cyr-sun16/" /etc/vconsole.conf || \
@@ -251,6 +441,7 @@ set_ru_font() {
 }
 
 
+# Function to convert Russian XDG user directories to English
 convert_xdg_dirs_to_english() {
   russian_dirs=("$HOME/Рабочий стол" "$HOME/Загрузки" "$HOME/Шаблоны" "$HOME/Общедоступные" "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео")
   russian_exists=false
@@ -266,7 +457,7 @@ convert_xdg_dirs_to_english() {
     print_styled_message "Converting Russian XDG user directories to English"
     if confirm_action "Do you want to convert XDG user directories to English?"; then
 
-      cat >~/.config/user-dirs.dirs <<EOL
+      cat >$HOME/.config/user-dirs.dirs <<EOL
 XDG_DESKTOP_DIR="$HOME/Desktop"
 XDG_DOWNLOAD_DIR="$HOME/Downloads"
 XDG_TEMPLATES_DIR="$HOME/Templates"
@@ -277,7 +468,7 @@ XDG_PICTURES_DIR="$HOME/Pictures"
 XDG_VIDEOS_DIR="$HOME/Videos"
 EOL
 
-      mkdir -p ~/Desktop ~/Downloads ~/Templates ~/Public ~/Documents ~/Music ~/Pictures ~/Videos
+      mkdir -p $HOME/Desktop $HOME/Downloads $HOME/Templates $HOME/Public $HOME/Documents $HOME/Music $HOME/Pictures $HOME/Videos
       mv -n "$HOME/Рабочий стол"/* "$HOME/Desktop" 2>/dev/null || true
       mv -n "$HOME/Загрузки"/* "$HOME/Downloads" 2>/dev/null || true
       mv -n "$HOME/Шаблоны"/* "$HOME/Templates" 2>/dev/null || true
@@ -291,6 +482,11 @@ EOL
         "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео" 2>/dev/null || true
 
       check_success "XDG user directories converted to English successfully!"
+    else
+      return 1
     fi
+  else
+    print_error_message "There are no Russian XDG user directories to convert"
+    return 1
   fi
 }

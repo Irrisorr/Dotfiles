@@ -1,7 +1,7 @@
 #!/bin/bash
 
-. ../install_scripts/functions.sh
-. ../install_scripts/gum_functions.sh
+. $HOME/Dotfiles/install_scripts/functions.sh
+. $HOME/Dotfiles/install_scripts/gum_functions.sh
 
 
 set_java_env() {
@@ -21,26 +21,26 @@ set_java_env() {
         selected_java="${java_dirs[$((java_choice-1))]}"
         
         # Configure bashrc
-        if grep -q "export JAVA_HOME" ~/.bashrc; then
-          sed -i "s|export JAVA_HOME=.*|export JAVA_HOME=$selected_java|g" ~/.bashrc
+        if grep -q "export JAVA_HOME" $HOME/.bashrc; then
+          sed -i "s|export JAVA_HOME=.*|export JAVA_HOME=$selected_java|g" $HOME/.bashrc
         else
-          echo "export JAVA_HOME=$selected_java" >>~/.bashrc
+          echo "export JAVA_HOME=$selected_java" >>$HOME/.bashrc
         fi
         
         # Configure zshrc
-        if grep -q "export JAVA_HOME" ~/.zshrc; then
-          sed -i "s|export JAVA_HOME=.*|export JAVA_HOME=$selected_java|g" ~/.zshrc
+        if grep -q "export JAVA_HOME" $HOME/.zshrc; then
+          sed -i "s|export JAVA_HOME=.*|export JAVA_HOME=$selected_java|g" $HOME/.zshrc
         else
-          echo "export JAVA_HOME=$selected_java" >>~/.zshrc
+          echo "export JAVA_HOME=$selected_java" >>$HOME/.zshrc
         fi
         
         # Configure fish
-        if [ -d ~/.config/fish ]; then
-          mkdir -p ~/.config/fish
-          if grep -q "set -x JAVA_HOME" ~/.config/fish/config.fish; then
-            sed -i "s|set -x JAVA_HOME .*|set -x JAVA_HOME $selected_java|g" ~/.config/fish/config.fish
+        if [ -d $HOME/.config/fish ]; then
+          mkdir -p $HOME/.config/fish
+          if grep -q "set -x JAVA_HOME" $HOME/.config/fish/config.fish; then
+            sed -i "s|set -x JAVA_HOME .*|set -x JAVA_HOME $selected_java|g" $HOME/.config/fish/config.fish
           else
-            echo "set -x JAVA_HOME $selected_java" >>~/.config/fish/config.fish
+            echo "set -x JAVA_HOME $selected_java" >>$HOME/.config/fish/config.fish
           fi
         fi
         
