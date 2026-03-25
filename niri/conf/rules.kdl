@@ -75,6 +75,7 @@ window-rule {
 window-rule {
     match app-id=r#"code$"#
     match app-id=r#"jetbrains-idea$"#
+    match app-id=r#"antigravity$"#
 
     open-on-workspace "ide"
 }

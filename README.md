@@ -167,6 +167,8 @@ You should change this configuration by urself using command `niri msg outputs` 
 | `Mod+TouchpadScrollUp`   | Volume +0.02                |
 | `XF86AudioRaiseVolume`   | Volume +0.1                 |
 | `XF86AudioLowerVolume`   | Volume -0.1                 |
+| `XF86MonBrightnessUp`    | Brightness +5%              |
+| `XF86MonBrightnessDown`  | Brightness -5%              |
 | `XF86AudioMute`          | Toggle Mute                 |
 | `XF86AudioMicMute`       | Toggle Mic Mute             |
 | `Mod+Shift+P`            | Power Off Monitors          |
