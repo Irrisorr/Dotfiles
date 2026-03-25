@@ -114,6 +114,7 @@ xdg-user-dirs-gtk (for home gtk directories)
 gnome-keyring (implements the Secret portal, required for certain apps to work)
 xwayland-satellite (to run X11 apps like Steam or Discord)
 dms-shell-bin (panel bar)
+hyprlock (lock manager)
 
 # Additional Packages
 gowall (tool to operate/convert the image (many features))
@@ -134,3 +135,4 @@ qt5-graphicaleffects (needs for sddm)
 qt5-quickcontrols2 (needs for sddm)
 qt5-svg (needs for sddm)
 usbutils (tool for check model name of all bus devices like usb or fingerprint)
+arronax (for creating .desktop files)
