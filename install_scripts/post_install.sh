@@ -2,12 +2,12 @@
 
 . $HOME/Dotfiles/install_scripts/functions.sh
 
+
+#== System Update
 system_update
 
-# Post-installation tasks
-print_styled_message "Post-Installation Tasks"
 
-# iMe Desktop installation
+#== iMe Desktop installation
 print_styled_message "Installing iMe Desktop"
 if confirm_action "install iMe Desktop"; then
   mkdir -p $HOME/Downloads/apps
@@ -46,11 +46,11 @@ if confirm_action "install iMe Desktop"; then
     fi
   fi
 
-  cd - >/dev/null # Return to original directory
+  cd - >/dev/null
 fi
 
 
-# Installing RustDesk
+#== RustDesk installation
 print_styled_message "Installing RustDesk"
 if confirm_action "install RustDesk version 1.3.7"; then
   mkdir -p $HOME/Downloads/apps
@@ -64,35 +64,33 @@ if confirm_action "install RustDesk version 1.3.7"; then
   print_styled_message "Installing RustDesk package"
   execute_script sudo pacman -U --noconfirm "$RUSTDESK_PKG"
   print_success_message "RustDesk 1.3.7 installed successfully"
-  cd - >/dev/null # Return to original directory
+  cd - >/dev/null
 fi
 
 
-# Installing Hyprland plugins
-print_styled_message "Installing Hyprland plugins"
+#== Hyprland plugins installation
+if command -v hyprpm &>/dev/null; then
+  print_styled_message "Installing Hyprland plugins"
 
-# hypr-dynamic-cursors plugin
-print_styled_message "Installing hypr-dynamic-cursors plugin"
-if confirm_action "install hypr-dynamic-cursors plugin"; then
-  print_styled_message "Adding hypr-dynamic-cursors plugin"
-  execute_command hyprpm add https://github.com/virtcode/hypr-dynamic-cursors
+  # hypr-dynamic-cursors plugin
+  print_styled_message "Installing hypr-dynamic-cursors plugin"
+  if confirm_action "install hypr-dynamic-cursors plugin"; then
+    print_styled_message "Adding hypr-dynamic-cursors plugin"
+    execute_command hyprpm add https://github.com/virtcode/hypr-dynamic-cursors
 
-  print_styled_message "Enabling hypr-dynamic-cursors plugin"
-  execute_command hyprpm enable dynamic-cursors
+    print_styled_message "Enabling hypr-dynamic-cursors plugin"
+    execute_command hyprpm enable dynamic-cursors
 
-  print_success_message "hypr-dynamic-cursors plugin installed and enabled"
+    print_success_message "hypr-dynamic-cursors plugin installed and enabled"
+  fi
 fi
 
-#Auth github via Github-cli
-print_styled_message "Auth github via Github-cli (Browser required)"
-if confirm_action "auth github via Github-cli"; then
-  execute_command gh auth login
-  print_success_message "Github-cli auth success"
+
+#== Auth github via Github-cli
+if command -v gh &>/dev/null; then
+  execute_command "Auth github via Github-cli (Browser Required)" "gh auth login"
 fi
 
-print_styled_message "Post-installation tasks complete!"
 
-print_styled_message "Installation complete! Restart your computer for changes to take effect."
-if confirm_action "Do u want to reboot"; then
-  reboot
-fi
+#== Reboot
+execute_command "Restart your computer for changes to take effect" "reboot"

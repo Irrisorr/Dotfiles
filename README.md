@@ -2,8 +2,9 @@
 
 # Installation with config/packages choices
 
-- Type in terminal:
+- Type in terminal next commands (**IMPORTANT**: clone repo to home directory):
 ```
+cd ~
 git clone https://github.com/Irrisorr/Dotfiles
 cd Dotfiles/install_scripts
 ./install
@@ -23,7 +24,7 @@ cd Dotfiles/install_scripts
 
 ### Input (`niri/conf/input.kdl`)
 
-- For touchpad using, еhere is no mouse configurations
+- For touchpad using, there is no mouse configurations
 - `Alt` and `Ctrl` are swaped
 - `Esc` and `CapsLock` are swaped
 - `Super` + `Space` for switching keyboard layout (language)
