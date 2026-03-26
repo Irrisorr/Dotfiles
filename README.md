@@ -1,4 +1,4 @@
-# My Dotfiles for niri or Hyprland
+# My Dotfiles for niri
 
 # Installation with config/packages choices
 
