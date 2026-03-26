@@ -9,8 +9,9 @@ declare -A ACTION_STATUS
 
 # Interactive menu for first level actions
 menu_first_level() {
+  local source_file="${1:-$HOME/Dotfiles/install_scripts/main.sh}"
   local actions
-  actions=$(get_first_level_actions)
+  actions=$(get_first_level_actions "$source_file")
   
   while true; do
     local options=()
@@ -42,15 +43,16 @@ menu_first_level() {
     fi
     
     local action=$(echo "$choice" | sed 's/^[✓✗ ]\s*//')
-    execute_action_from_file "$action" "1"
+    execute_action_from_file "$action" "1" "$source_file"
   done
 }
 
 
 # Interactive menu for second level actions
 menu_second_level() {
+  local source_file="${1:-$HOME/Dotfiles/install_scripts/main.sh}"
   local actions
-  actions=$(get_second_level_actions)
+  actions=$(get_second_level_actions "$source_file")
   
   while true; do
     local options=()
@@ -59,7 +61,7 @@ menu_second_level() {
     while IFS= read -r action; do
       [ -z "$action" ] && continue
       
-      local cmd=$(get_command_check "$action")
+      local cmd=$(get_command_check "$action" "$source_file")
       local should_show=true
       
       if [ -n "$cmd" ]; then
@@ -87,7 +89,7 @@ menu_second_level() {
     fi
     
     options+=("⬅️ Back to main menu")
-    options+=("✅ Done (end script)")
+    options+=("✅ Done (end script wout reboot)")
     
     local choice
     if $HAS_GUM; then
@@ -107,29 +109,52 @@ menu_second_level() {
     fi
     
     local action=$(echo "$choice" | sed 's/^[✓✗ ]\s*//')
-    execute_action_from_file "$action" "2"
+    execute_action_from_file "$action" "2" "$source_file"
   done
 }
 
 
 # Get all first-level actions (#=)
 get_first_level_actions() {
-  grep '^#= ' "$HOME/Dotfiles/install_scripts/main.sh" | sed 's/^#= //'
+  local source_file="${1:-$HOME/Dotfiles/install_scripts/main.sh}"
+  grep '^#= ' "$source_file" | sed 's/^#= //'
 }
 
 
 # Get all second-level actions (#==)
 get_second_level_actions() {
-  grep '^#== ' "$HOME/Dotfiles/install_scripts/main.sh" | sed 's/^#== //'
+  local source_file="${1:-$HOME/Dotfiles/install_scripts/main.sh}"
+  grep '^#== ' "$source_file" | sed 's/^#== //'
+}
+
+
+# Get second-level actions that belong to a specific first-level action
+get_second_level_actions_for() {
+  local parent_action=$1
+  local source_file="${2:-$HOME/Dotfiles/install_scripts/main.sh}"
+  
+  awk -v parent="$parent_action" '
+    BEGIN { found=0 }
+    /^#= / {
+      gsub(/^#= /, "");
+      if (found) exit;
+      if ($0 == parent) { found=1 }
+      next
+    }
+    found && /^#== / {
+      gsub(/^#== /, "");
+      print
+    }
+  ' "$source_file"
 }
 
 
 # Get command check for action (looks at the line after #==)
 get_command_check() {
   local action=$1
-  local install_file="$HOME/Dotfiles/install_scripts/main.sh"
+  local source_file="${2:-$HOME/Dotfiles/install_scripts/main.sh}"
   
-  grep -A 1 "^#== $action\$" "$install_file" | grep "if command -v" | sed 's/.*if command -v \([^ ]*\).*/\1/'
+  grep -A 1 "^#== $action\$" "$source_file" | grep "if command -v" | sed 's/.*if command -v \([^ ]*\).*/\1/'
 }
 
 
@@ -137,8 +162,9 @@ get_command_check() {
 execute_action_from_file() {
   local action=$1
   local level=$2
+  local source_file="${3:-$HOME/Dotfiles/install_scripts/main.sh}"
   
-  local code=$(get_action_code_by_level "$action" "$level")
+  local code=$(get_action_code_by_level "$action" "$level" "$source_file")
   
   if [ -z "$code" ]; then
     ACTION_STATUS[$action]="✗"
@@ -158,11 +184,11 @@ execute_action_from_file() {
 }
 
 
-# Get action code from main.sh
+# Get action code from source file
 get_action_code_by_level() {
   local action=$1
   local level=$2
-  local install_file="$HOME/Dotfiles/install_scripts/main.sh"
+  local source_file="${3:-$HOME/Dotfiles/install_scripts/main.sh}"
   local marker=$([ "$level" = "2" ] && echo "^#== " || echo "^#= ")
   
   awk -v marker="$marker" -v action="$action" '
@@ -178,7 +204,7 @@ get_action_code_by_level() {
     p {
       print
     }
-  ' "$install_file"
+  ' "$source_file"
 }
 
 
