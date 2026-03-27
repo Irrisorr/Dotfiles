@@ -57,7 +57,9 @@ set_env() {
     else
       echo "set -x $var_name $var_value" >>$HOME/.config/fish/config.fish
     fi
-    print_success_message "Set env $var_name=$var_value"
+    print_success_message "Set $var_name=$var_value env.
+Run 'source ~/.config/fish/config.fish' to apply changes
+or just open new terminal"
   fi
 }
 
@@ -91,7 +93,9 @@ delete_env() {
   if [ -f "$HOME/.config/fish/config.fish" ]; then
     if grep -q "set -x $var_name " "$HOME/.config/fish/config.fish"; then
       sed -i "/set -x $var_name /d" "$HOME/.config/fish/config.fish"
-      print_success_message "Deleted $var_name"
+      print_success_message "Deleted $var_name env.
+Run 'source ~/.config/fish/config.fish' to apply changes
+or just open new terminal"
     else
       print_error_message "'$var_name' env not found"
     fi
@@ -140,7 +144,9 @@ set_java_env() {
           fi
         fi
         
-        print_success_message "Java environment configured: $selected_java"
+        print_success_message "Java environment configured: $selected_java.
+Run 'source ~/.config/fish/config.fish' to apply changes
+or just open new terminal"
       else
         print_error_message "Invalid selection"
       fi
