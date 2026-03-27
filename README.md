@@ -1,4 +1,4 @@
-# My Dotfiles for niri
+# My Dotfiles for niri WM
 
 # Installation with config/packages choices
 
@@ -83,6 +83,29 @@ You should change this configuration by urself using command `niri msg outputs` 
 - `GDK_BACKEND "wayland"` - Force GTK applications (like Gnome apps) to use the native Wayland display protocol instead of running through the XWayland compatibility layer
 - `OBSIDIAN_USE_WAYLAND "1"` - Force Obsidian to use the native Wayland display protocol instead of running through the XWayland compatibility layer
 - `QT_QPA_PLATFORMTHEME "gtk3"` - Force Qt applications to use the GTK3 platform theme for better integration with the desktop environment
+
+### Aliases (`fish/functions/*`)
+
+> Right now there is only **fish** shell aliases, but u can add shell scripts for other shells too using their functions
+
+- All aliases is shell scripts in `scripts/scripts.sh` file 
+- You can run aliases by it's name in terminal (see below)
+- You can run menu with all aliases by typing `asd` in terminal and choose needed script
+- Comments `#= <alias_name>` above functions for 1st level menu 
+- Comments `##= <alias_name>` above functions for 2nd level menu (like `system update` under `Yay/Pacman commands` choice in 1st level menu)
+
+#### Scripts (just type name of script in terminal or use `asd` menu)
+
+- `asd` - Menu with all useful scripts by choosing from list:
+    - `set-env <var_name> <var_value>` - Set a new environment variable
+    - `delete-env <var_name>` - Delete an environment variable
+    - `set-java` - Set Java environment variable with selection from existing java versions (check `/usr/lib/jvm/`)
+    - `rain` - Rain animation (if installed `terminal-rain` package)
+    - `rain-float` - Rain animation in mini floating window (if installed `terminal-rain` package)
+    - `vim` - open **nvim** on **ide** workspace and maximize window (if installed `neovim` package)
+    - 'Yay/Pacman commands' - menu with useful yay/pacman commands:
+        - `update` - update system (`yay -Sy`)
+        - `upgrade` - upgrade system (`yay -Syu`)
 
 
 # Key Bindings
