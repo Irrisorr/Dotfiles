@@ -117,6 +117,11 @@ if command -v /usr/lib/mate-polkit/polkit-mate-authentication-agent-1 &>/dev/nul
   execute_command "Start MATE polkit agent" "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1 &"
 fi
 
+#== Clipse Configuration
+if command -v clipse &>/dev/null; then
+  execute_command "Configure clipse" "mkdir -p $HOME/.config/clipse && create_symlink $HOME/Dotfiles/clipse/config.json $HOME/.config/clipse/"
+fi
+
 #== Fastfetch Configuration
 if command -v fastfetch &>/dev/null; then
   execute_command "Configure fastfetch" "mkdir -p $HOME/.config/fastfetch && create_symlink $HOME/Dotfiles/fastfetch $HOME/.config/fastfetch"
