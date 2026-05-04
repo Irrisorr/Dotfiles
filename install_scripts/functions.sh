@@ -528,6 +528,14 @@ configure_zen_browser() {
   if [ ! -d "$zen_config" ]; then
     echo ":: Launching zen-browser to initialise config directory..."
     zen-browser &
+    local zen_pid=$!
+    local waited=0
+    while [ ! -d "$zen_config" ] && [ $waited -lt 30 ]; do
+      sleep 1
+      waited=$((waited + 1))
+    done
+    kill "$zen_pid" 2>/dev/null
+    wait "$zen_pid" 2>/dev/null
   fi
 
   if [ ! -d "$zen_config" ]; then
