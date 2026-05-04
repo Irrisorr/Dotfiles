@@ -516,3 +516,40 @@ EOL
     return 1
   fi
 }
+
+
+# Function to configure Zen Browser profile
+# Launches the browser once to generate ~/.config/zen/, then finds the
+# *release* profile directory and symlinks all files from Dotfiles/zen-browser/
+configure_zen_browser() {
+  local zen_config="$HOME/.config/zen"
+  local dotfiles_zen="$HOME/Dotfiles/zen-browser"
+
+  if [ ! -d "$zen_config" ]; then
+    echo ":: Launching zen-browser to initialise config directory..."
+    zen-browser &
+  fi
+
+  if [ ! -d "$zen_config" ]; then
+    echo ":: ERROR: ~/.config/zen was not created by zen-browser"
+    return 1
+  fi
+
+  local profile_dir
+  profile_dir=$(find "$zen_config" -maxdepth 1 -type d -name "*release*" | head -n 1)
+
+  if [ -z "$profile_dir" ]; then
+    echo ":: ERROR: No directory containing 'release' found inside $zen_config"
+    return 1
+  fi
+
+  echo ":: Found profile directory: $profile_dir"
+
+  for item in "$dotfiles_zen"/{*,.*}; do
+    [[ "$(basename "$item")" == "." || "$(basename "$item")" == ".." ]] && continue
+    [ -e "$item" ] || continue
+    create_symlink "$item" "$profile_dir/$(basename "$item")"
+  done
+
+  check_success "Zen-Browser profile configured at $profile_dir"
+}

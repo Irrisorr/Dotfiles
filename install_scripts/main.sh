@@ -172,6 +172,11 @@ if command -v wofi &>/dev/null; then
   execute_command "Configure Wofi" "mkdir -p $HOME/.config/wofi && create_symlink $HOME/Dotfiles/wofi $HOME/.config/wofi"
 fi
 
+#== Zen-Browser Configuration
+if command -v zen-browser &>/dev/null; then
+  execute_command "Configure Zen-Browser" "configure_zen_browser"
+fi
+
 #== Update user directories
 if command -v xdg-user-dirs-update &>/dev/null; then
   execute_command "Update user directories" "xdg-user-dirs-update"
