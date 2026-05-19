@@ -1,5 +1,5 @@
 user_pref("zen.view.show-newtab-button-top", false);
-user_pref("browser.tabs.insertAfterCurrent", true);
+user_pref("browser.tabs.insertAfterCurrent", false);
 user_pref("browser.download.useDownloadDir", false);
 user_pref("browser.startup.page", 3);
 user_pref("browser.link.open_newwindow", 3);
@@ -35,3 +35,15 @@ user_pref("general.smoothScroll.msdPhysics.slowdownSpringConstant", 5000);
 user_pref("toolkit.scrollbox.horizontalScrollDistance", 4);
 user_pref("mousewheel.min_line_scroll_amount", 30);
 user_pref("toolkit.scrollbox.verticalScrollDistance", 5);
+
+// Sidebar Expand on Hover Mod settings
+user_pref("mod.autoexpand.animation_duration", "200ms");
+user_pref("mod.autoexpand.animation_delay", "0ms");
+user_pref("mod.autoexpand.collapse_delay", "100ms");
+user_pref("mod.autoexpand.expanded_width", "450px");
+user_pref("mod.autoexpand.collapsed_width", "45px");
+user_pref("mod.autoexpand.essentials_vertical", false);
+user_pref("mod.autoexpand.fade_sleeping_tabs", true);
+user_pref("mod.autoexpand.hide_workspace_indicator", false);
+user_pref("mod.autoexpand.remove_line_separator", false);
+user_pref("mod.autoexpand.performance_mode", "potato");
