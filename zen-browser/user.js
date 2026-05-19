@@ -8,6 +8,7 @@ user_pref("font.name.serif.x-cyrillic", "JetBrainsMono Nerd Font");
 user_pref("font.name.serif.x-western", "JetBrainsMono Nerd Font");
 user_pref("font.size.variable.x-cyrillic", 14);
 user_pref("zen.view.sidebar-expanded", true);
+user_pref("zen.view.use-single-toolbar", false);
 user_pref("zen.tabs.show-newtab-vertical", false);
 user_pref("zen.glance.enabled", true);
 user_pref("zen.tabs.ctrl-tab.ignore-essential-tabs", true);

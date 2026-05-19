@@ -559,14 +559,11 @@ configure_zen_browser() {
     create_symlink "$item" "$profile_dir/$(basename "$item")"
   done
 
-  # Register mods in the browser's mod manager by writing zen-themes.json
-  # This file is what makes mods appear in Settings > Zen Mods UI
   local mods_export="$dotfiles_zen/zen-mods-export.json"
   if [ -f "$mods_export" ]; then
     echo ":: Registering Zen mods from export file..."
     local zen_themes_json="$profile_dir/zen-themes.json"
     if [ -f "$zen_themes_json" ] && [ ! -L "$zen_themes_json" ]; then
-      # Merge existing mods with our exported mods (our mods take priority)
       if command -v jq &>/dev/null; then
         jq -s '.[0] * .[1]' "$zen_themes_json" "$mods_export" > "${zen_themes_json}.tmp" \
           && mv "${zen_themes_json}.tmp" "$zen_themes_json"

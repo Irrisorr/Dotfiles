@@ -7,6 +7,50 @@
 system_update
 
 
+#== Auth github via Github-cli
+if command -v gh &>/dev/null; then
+  execute_command "Auth github via Github-cli (Browser Required)" "gh auth login"
+fi
+
+
+#== Private Dotfiles (Zen Browser)
+print_styled_message "Configuring Private Dotfiles"
+if command -v gh &>/dev/null; then
+  private_repo_dir="$HOME/Dotfiles-private"
+  private_dotfiles_zen="$private_repo_dir/zen-browser"
+  
+  if [ ! -d "$private_repo_dir" ]; then
+    if confirm_action "clone your private Dotfiles repository (Dotfiles-private)"; then
+      echo ":: Cloning via gh cli..."
+      gh repo clone Irrisorr/Dotfiles-private "$private_repo_dir" < /dev/tty
+    fi
+  fi
+  
+  if [ -d "$private_dotfiles_zen" ]; then
+    echo ":: Searching for Zen Browser configure directory..."
+    zen_config="$HOME/.config/zen"
+    profile_dir=""
+    
+    if [ -d "$zen_config" ]; then
+      profile_dir=$(find "$zen_config" -maxdepth 1 -type d -name "*release*" | head -n 1)
+      if [ -n "$profile_dir" ]; then
+        echo ":: Symlinking items from private zen-browser directory..."
+        for item in "$private_dotfiles_zen"/{*,.*}; do
+          [[ "$(basename "$item")" == "." || "$(basename "$item")" == ".." ]] && continue
+          [ -e "$item" ] || continue
+          create_symlink "$item" "$profile_dir/$(basename "$item")"
+        done
+        check_success "Private Dotfiles symlinked"
+      else
+        echo ":: WARNING: Zen Browser release profile not found. Cannot symlink private configs."
+      fi
+    else
+      echo ":: WARNING: ~/.config/zen not found."
+    fi
+  fi
+fi
+
+
 #== iMe Desktop installation
 print_styled_message "Installing iMe Desktop"
 if confirm_action "install iMe Desktop"; then
@@ -83,12 +127,6 @@ if command -v hyprpm &>/dev/null; then
 
     print_success_message "hypr-dynamic-cursors plugin installed and enabled"
   fi
-fi
-
-
-#== Auth github via Github-cli
-if command -v gh &>/dev/null; then
-  execute_command "Auth github via Github-cli (Browser Required)" "gh auth login"
 fi
 
 
