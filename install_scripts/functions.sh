@@ -531,7 +531,7 @@ configure_zen_browser() {
     local zen_pid=$!
     local waited=0
     while [ ! -d "$zen_config" ] && [ $waited -lt 30 ]; do
-      sleep 1
+      sleep 3
       waited=$((waited + 1))
     done
     kill "$zen_pid" 2>/dev/null
