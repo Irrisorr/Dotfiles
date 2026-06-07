@@ -225,5 +225,18 @@ convert_xdg_dirs_to_english
 execute_command "Delete .bak directories from the .config/" "find $HOME/.config/ -type d -name "*.bak" -delete"
 
 
+#== Set up automatic post-install after reboot
+if [ "$SHELL" = "$(command -v fish)" ] || [ -d "$HOME/.config/fish/conf.d" ]; then
+  mkdir -p "$HOME/.config/fish/conf.d"
+  cat > "$HOME/.config/fish/conf.d/post_install_hook.fish" << 'EOF'
+if status is-interactive
+    if test -x ~/Dotfiles/install_scripts/post_install.sh
+        rm -f ~/.config/fish/conf.d/post_install_hook.fish
+        bash ~/Dotfiles/install_scripts/post_install.sh
+    end
+end
+EOF
+fi
+
 #== Reboot device for changes to take effect
 execute_command "Reboot device for changes to take effect" "reboot"
