@@ -17,7 +17,7 @@ window-rule {
 window-rule {
     match app-id=r#"firefox$"# title="^Santander"
     match app-id=r#"zen$"# title="^Santander"
-    match app-id="obsidian"
+    match app-id=r#"obsidian$"# title="Быт"
     match app-id="clipse"
     block-out-from "screencast"
 }

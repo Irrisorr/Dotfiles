@@ -1,6 +1,6 @@
 #!/bin/bash
 
-. $HOME/Dotfiles/install_scripts/functions.sh
+. $HOME/Dotfiles/scripts/lib/common.sh
 
 
 #== System Update
@@ -16,36 +16,38 @@ fi
 #== Private Dotfiles (Zen Browser)
 print_styled_message "Configuring Private Dotfiles"
 if command -v gh &>/dev/null; then
-  private_repo_dir="$HOME/Dotfiles-private"
-  private_dotfiles_zen="$private_repo_dir/zen-browser"
-  
-  if [ ! -d "$private_repo_dir" ]; then
+  private_dotfiles_zen="$PRIVATE_DIR/zen-browser"
+
+  if [ ! -d "$PRIVATE_DIR" ]; then
     if confirm_action "clone your private Dotfiles repository (Dotfiles-private)"; then
       echo ":: Cloning via gh cli..."
-      gh repo clone Irrisorr/Dotfiles-private "$private_repo_dir" < /dev/tty
+      gh repo clone Irrisorr/Dotfiles-private "$PRIVATE_DIR" < /dev/tty
     fi
   fi
-  
+
   if [ -d "$private_dotfiles_zen" ]; then
     echo ":: Searching for Zen Browser configure directory..."
-    zen_config="$HOME/.config/zen"
+    zen_config="$CONFIG_DIR/zen"
     profile_dir=""
-    
+
     if [ -d "$zen_config" ]; then
       profile_dir=$(find "$zen_config" -maxdepth 1 -type d -name "*release*" | head -n 1)
       if [ -n "$profile_dir" ]; then
-        echo ":: Symlinking items from private zen-browser directory..."
+        # Copy (not symlink): these are live session/profile files the browser
+        # rewrites at runtime — a symlink would push changes back into the repo.
+        echo ":: Copying items from private zen-browser directory..."
         for item in "$private_dotfiles_zen"/{*,.*}; do
-          [[ "$(basename "$item")" == "." || "$(basename "$item")" == ".." ]] && continue
+          base="$(basename "$item")"
+          [[ "$base" == "." || "$base" == ".." ]] && continue
           [ -e "$item" ] || continue
-          create_symlink "$item" "$profile_dir/$(basename "$item")"
+          cp -rf "$item" "$profile_dir/"
         done
-        check_success "Private Dotfiles symlinked"
+        check_success "Private Zen-Browser Dotfiles copied"
       else
-        echo ":: WARNING: Zen Browser release profile not found. Cannot symlink private configs."
+        echo ":: WARNING: Zen Browser release profile not found. Cannot copy private configs."
       fi
     else
-      echo ":: WARNING: ~/.config/zen not found."
+      echo ":: WARNING: $zen_config not found."
     fi
   fi
 fi
