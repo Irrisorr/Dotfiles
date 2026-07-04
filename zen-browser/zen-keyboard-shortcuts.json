@@ -2226,6 +2226,41 @@
             "disabled": false,
             "reserved": false,
             "internal": false
+        },
+        {
+            "id": "zen-workspace-create",
+            "key": "",
+            "keycode": "",
+            "group": "zen-workspace",
+            "l10nId": "zen-workspace-shortcut-create",
+            "modifiers": {
+                "control": false,
+                "alt": false,
+                "shift": false,
+                "meta": false,
+                "accel": false
+            },
+            "action": "cmd_zenOpenWorkspaceCreation",
+            "disabled": false,
+            "reserved": false,
+            "internal": false
+        },
+        {
+            "id": "key_duplicateTab",
+            "keycode": null,
+            "group": "other",
+            "l10nId": null,
+            "modifiers": {
+                "control": false,
+                "alt": false,
+                "shift": false,
+                "meta": false,
+                "accel": false
+            },
+            "action": "Browser:DuplicateTab",
+            "disabled": false,
+            "reserved": false,
+            "internal": false
         }
     ]
 }

@@ -1,5 +1,6 @@
 user_pref("zen.view.show-newtab-button-top", false);
 user_pref("browser.tabs.insertAfterCurrent", false);
+user_pref("browser.tabs.insertRelatedAfterCurrent", false)
 user_pref("browser.download.useDownloadDir", false);
 user_pref("browser.startup.page", 3);
 user_pref("browser.link.open_newwindow", 3);
