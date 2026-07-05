@@ -20,9 +20,17 @@ _zen_find_profile() {
 # dumps into the profile's places.sqlite. Shared by configure_zen + post_install.
 restore_private_zen() {
   local profile_dir="$1"
+  [ -n "$profile_dir" ] || return 1
+
+  # Pull first so a repo cloned earlier isn't stale (files updated on GitHub
+  # would otherwise never reach an existing local clone).
+  if [ -d "$PRIVATE_DIR/.git" ] && command -v git &>/dev/null; then
+    echo ":: Updating private repo ($PRIVATE_DIR)..."
+    git -C "$PRIVATE_DIR" pull
+  fi
+
   local private_zen="$PRIVATE_DIR/zen-browser"
   [ -d "$private_zen" ] || return 0
-  [ -n "$profile_dir" ] || return 1
 
   # Copy (not symlink) — the browser rewrites these at runtime. Skip *.sql:
   # those are sqlite table dumps, imported below rather than copied as files.
