@@ -215,20 +215,37 @@ replacing it with a fresh fish is how the change to `config.fish` is applied.
 ## `functions/sync/` (private-files backup)
 
 An alias that lives in its own folder. `sync_map.json` (next to the script) is an
-array of objects, each grouping many sources under a single dest:
+array of objects. Two kinds of entry:
 
 ```json
 [
-  { "comment": "optional, ignored by the parser",
-    "dest": "~/Dotfiles-private/zen-browser",
-    "sources": ["~/.config/zen/*release*/zen-sessions.jsonlz4", "..."] }
+  { "dest": "~/Dotfiles-private/zen-browser",
+    "sources": ["~/.config/zen/*release*/zen-sessions.jsonlz4", "..."] },
+
+  { "dest": "~/Dotfiles-private/zen-browser",
+    "sqlite": "~/.config/zen/*release*/places.sqlite",
+    "table": "zen_bookmarks_workspaces" }
 ]
 ```
 
-Sources may be **files or folders** (copied recursively with `cp -rf`). `~`
-expands to home and `*` globs are supported, so a changing profile-folder name
-still matches. `sync_private` reads the map with `jq`, glob-expands each source,
-and copies matches into the dest folder of the private repo so they can be
-committed. Run it as `sync-private` or from the `asd` menu. An optional
-`"comment"` field is ignored. The reverse (restore) is handled by
-`post_install.sh`.
+* **file group** (`sources`) — copied with `cp -rf`. Sources may be **files or
+  folders**; `~` expands to home and `*` globs are supported, so a changing
+  profile-folder name still matches.
+* **sqlite** (`sqlite` + `table`) — dumps a single table to `<dest>/<table>.sql`
+  (e.g. `zen_bookmarks_workspaces`) instead of the whole database. The dump opens
+  the DB with `file:<db>?immutable=1` (read-only, no locking), so it works even
+  while Zen is running — no "database is locked" error.
+
+Run it as `sync-private` or from the `asd` menu. It checks its dependencies and
+tells you which package to install if one is missing (`jq` is required; `sqlite`
+is required only when the map has table entries — those are skipped otherwise).
+Before overwriting files that already exist in a dest, you get one
+gum selection with **every conflicting file pre-selected** (= will be
+overwritten) — unselect the ones you want to keep. An optional `"comment"` field
+is ignored.
+
+**Restore** is handled by `restore_private_zen` in `install/apps/zen.sh` (reused
+by both `configure_zen` and `post_install.sh`): it copies the live files back
+into the profile and imports each `*.sql` dump into the profile's `places.sqlite`
+(dropping the table first, so sibling tables like history/bookmarks are
+untouched).

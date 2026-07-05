@@ -151,9 +151,12 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
 #### Private/sensitive files backup (`scripts/functions/sync/`)
 
 - Sensitive profile data (Zen sessions, etc.) lives in a separate **private** repo (`~/Dotfiles-private`), not here
-- `scripts/functions/sync/sync_map.json` is an array of objects, each grouping many sources under one dest: `{ "dest": "~/Dotfiles-private/zen-browser", "sources": ["fileA", "folderB", ...] }`. Sources may be **files or folders** (copied recursively), `~` and `*` globs supported. An optional `"comment"` field per object is ignored
-- Run `sync-private` (or pick it from the `asd` menu) to copy all listed live files into the private repo, then commit/push that repo (requires `jq`)
-- On a fresh install `post_install.sh` clones `Dotfiles-private` and **copies** those files back into the Zen profile (copy, not symlink, since the browser rewrites them at runtime)
+- `scripts/functions/sync/sync_map.json` is an array of two kinds of entry:
+    - **file group**: `{ "dest": "~/Dotfiles-private/zen-browser", "sources": ["fileA", "folderB", ...] }` — files or folders (copied recursively), `~` and `*` globs supported
+    - **sqlite table**: `{ "dest": "...", "sqlite": "~/.../places.sqlite", "table": "zen_bookmarks_workspaces" }` — backs up just one table (dumped to `<table>.sql`) instead of the whole DB
+    - an optional `"comment"` field per object is ignored
+- Run `sync-private` (or pick it from the `asd` menu) to sync into the private repo, then commit/push it (needs `jq`; sqlite entries need `sqlite3`). Files that already exist in a dest are shown in one gum selection, all pre-selected — **unselect** the ones you want to keep instead of overwriting
+- On a fresh install `post_install.sh` clones (or `git pull`s) `Dotfiles-private` and — with your confirmation — restores those files back into the Zen profile: live files are **copied** (not symlinked, since the browser rewrites them at runtime) and each `*.sql` table dump is imported into `places.sqlite`. The default `configure_zen` step does the same restore if the private repo is already present
 
 
 # Key Bindings

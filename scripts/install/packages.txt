@@ -117,6 +117,8 @@ dms-shell-bin (panel bar)
 hyprlock (lock manager)
 
 # Additional Packages
+sqlite (need for sync private dotfiles)
+jq (need for sync private dotfiles)
 gowall (tool to operate/convert the image (many features))
 inxi (tui app for get info about ur system)
 terminal-rain-lightning (tui rain in terminal)

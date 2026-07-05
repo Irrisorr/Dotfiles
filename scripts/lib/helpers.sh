@@ -57,7 +57,9 @@ menu() {
       choice=$(choose_action_no_limit "${options[@]}")
     fi
 
-    [ $? -ne 0 ] && continue
+    local rc=$?
+    [ $rc -eq 130 ] && exit 130   # Ctrl+C → quit the whole menu immediately
+    [ $rc -ne 0 ] && exit 130     # Esc / cancel → quit the whole menu
     [ "$choice" = "$back_label" ] && return 0
 
     local i

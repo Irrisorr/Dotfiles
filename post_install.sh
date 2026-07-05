@@ -1,6 +1,7 @@
 #!/bin/bash
 
 . $HOME/Dotfiles/scripts/lib/common.sh
+. "$APPS_DIR/zen.sh"   # for _zen_find_profile + restore_private_zen
 
 
 #== System Update
@@ -23,31 +24,24 @@ if command -v gh &>/dev/null; then
       echo ":: Cloning via gh cli..."
       gh repo clone Irrisorr/Dotfiles-private "$PRIVATE_DIR" < /dev/tty
     fi
+  elif [ -d "$PRIVATE_DIR/.git" ]; then
+    # Already cloned — pull so files updated on GitHub are not stale locally.
+    if confirm_action "pull the latest changes in Dotfiles-private"; then
+      echo ":: Pulling latest private Dotfiles..."
+      git -C "$PRIVATE_DIR" pull < /dev/tty
+    fi
   fi
 
-  if [ -d "$private_dotfiles_zen" ]; then
-    echo ":: Searching for Zen Browser configure directory..."
-    zen_config="$CONFIG_DIR/zen"
-    profile_dir=""
-
-    if [ -d "$zen_config" ]; then
-      profile_dir=$(find "$zen_config" -maxdepth 1 -type d -name "*release*" | head -n 1)
-      if [ -n "$profile_dir" ]; then
-        # Copy (not symlink): these are live session/profile files the browser
-        # rewrites at runtime — a symlink would push changes back into the repo.
-        echo ":: Copying items from private zen-browser directory..."
-        for item in "$private_dotfiles_zen"/{*,.*}; do
-          base="$(basename "$item")"
-          [[ "$base" == "." || "$base" == ".." ]] && continue
-          [ -e "$item" ] || continue
-          cp -rf "$item" "$profile_dir/"
-        done
-        check_success "Private Zen-Browser Dotfiles copied"
-      else
-        echo ":: WARNING: Zen Browser release profile not found. Cannot copy private configs."
-      fi
+  if [ -d "$private_dotfiles_zen" ] \
+     && confirm_action "restore private Zen Browser files into your profile"; then
+    echo ":: Searching for Zen Browser profile directory..."
+    profile_dir=$(_zen_find_profile)
+    if [ -n "$profile_dir" ]; then
+      echo ":: Restoring private Zen files into $profile_dir"
+      restore_private_zen "$profile_dir"
+      check_success "Private Zen-Browser Dotfiles restored"
     else
-      echo ":: WARNING: $zen_config not found."
+      echo ":: WARNING: Zen Browser release profile not found. Cannot restore private configs."
     fi
   fi
 fi
