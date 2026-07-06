@@ -1,55 +1,56 @@
 #!/bin/bash
+#
+# Runs once after the reboot (fish conf.d hook). Like install.sh it is menu-driven:
+# every step is a function, listed in one menu() call at the bottom.
 
-. $HOME/Dotfiles/scripts/lib/common.sh
+. "$HOME/Dotfiles/scripts/lib/common.sh"
 . "$APPS_DIR/zen.sh"   # for _zen_find_profile + restore_private_zen
 
 
-#== System Update
-system_update
+# ─── Step functions ──────────────────────────────────────────────────────────
 
-
-#== Auth github via Github-cli
-if command -v gh &>/dev/null; then
+post_gh_auth() {
   execute_command "Auth github via Github-cli (Browser Required)" "gh auth login"
-fi
+}
 
+# Restore private Zen files (sessions, bookmark↔workspace links, ...).
+# MUST run after the Mozilla account is signed in and bookmarks have synced —
+# otherwise the workspace links reference bookmarks that don't exist yet.
+restore_private_dotfiles() {
+  print_styled_message "IMPORTANT — do this AFTER signing in
+Sign into your Mozilla account in Zen and let your bookmarks finish syncing
+BEFORE restoring. Otherwise bookmarks won't be linked to their workspaces."
 
-#== Private Dotfiles (Zen Browser)
-print_styled_message "Configuring Private Dotfiles"
-if command -v gh &>/dev/null; then
-  private_dotfiles_zen="$PRIVATE_DIR/zen-browser"
+  local private_dotfiles_zen="$PRIVATE_DIR/zen-browser"
 
   if [ ! -d "$PRIVATE_DIR" ]; then
     if confirm_action "clone your private Dotfiles repository (Dotfiles-private)"; then
       echo ":: Cloning via gh cli..."
       gh repo clone Irrisorr/Dotfiles-private "$PRIVATE_DIR" < /dev/tty
     fi
-  elif [ -d "$PRIVATE_DIR/.git" ]; then
-    # Already cloned — pull so files updated on GitHub are not stale locally.
-    if confirm_action "pull the latest changes in Dotfiles-private"; then
-      echo ":: Pulling latest private Dotfiles..."
-      git -C "$PRIVATE_DIR" pull < /dev/tty
-    fi
   fi
 
   if [ -d "$private_dotfiles_zen" ] \
      && confirm_action "restore private Zen Browser files into your profile"; then
     echo ":: Searching for Zen Browser profile directory..."
+    local profile_dir
     profile_dir=$(_zen_find_profile)
     if [ -n "$profile_dir" ]; then
       echo ":: Restoring private Zen files into $profile_dir"
       restore_private_zen "$profile_dir"
       check_success "Private Zen-Browser Dotfiles restored"
     else
-      echo ":: WARNING: Zen Browser release profile not found. Cannot restore private configs."
+      print_error_message "Zen Browser release profile not found. Cannot restore."
     fi
   fi
-fi
+}
 
+install_ime() {
+  print_styled_message "Installing iMe Desktop"
+  if ! confirm_action "install iMe Desktop"; then
+    return 1
+  fi
 
-#== iMe Desktop installation
-print_styled_message "Installing iMe Desktop"
-if confirm_action "install iMe Desktop"; then
   mkdir -p $HOME/Downloads/apps
   cd $HOME/Downloads/apps
 
@@ -87,12 +88,14 @@ if confirm_action "install iMe Desktop"; then
   fi
 
   cd - >/dev/null
-fi
+}
 
+install_rustdesk() {
+  print_styled_message "Installing RustDesk"
+  if ! confirm_action "install RustDesk version 1.3.7"; then
+    return 1
+  fi
 
-#== RustDesk installation
-print_styled_message "Installing RustDesk"
-if confirm_action "install RustDesk version 1.3.7"; then
   mkdir -p $HOME/Downloads/apps
   cd $HOME/Downloads/apps
 
@@ -105,11 +108,10 @@ if confirm_action "install RustDesk version 1.3.7"; then
   execute_script sudo pacman -U --noconfirm "$RUSTDESK_PKG"
   print_success_message "RustDesk 1.3.7 installed successfully"
   cd - >/dev/null
-fi
+}
 
-
-#== Hyprland plugins installation
-if command -v hyprpm &>/dev/null; then
+# Menu guard: hyprpm
+install_hypr_plugins() {
   print_styled_message "Installing Hyprland plugins"
 
   # hypr-dynamic-cursors plugin
@@ -123,8 +125,20 @@ if command -v hyprpm &>/dev/null; then
 
     print_success_message "hypr-dynamic-cursors plugin installed and enabled"
   fi
-fi
+}
 
 
-#== Reboot
-execute_command "Restart your computer for changes to take effect" "reboot"
+# ─── Menu ────────────────────────────────────────────────────────────────────
+
+menu ">>> Finish & reboot <<<" \
+  "Update system|system_update" \
+  "Auth GitHub (gh)|post_gh_auth|gh" \
+  "Restore private Zen dotfiles (AFTER Mozilla login!)|restore_private_dotfiles|gh" \
+  "Install iMe Desktop|install_ime" \
+  "Install RustDesk 1.3.7|install_rustdesk" \
+  "Install Hyprland plugins|install_hypr_plugins|hyprpm"
+
+
+# ─── Final step ──────────────────────────────────────────────────────────────
+
+execute_command "Reboot device for changes to take effect" "reboot"

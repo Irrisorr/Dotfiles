@@ -5,8 +5,8 @@
 #
 # Everything Zen-related lives here. configure_zen (install-time) launches the
 # browser once to generate ~/.config/zen/, symlinks the tracked configs from
-# Dotfiles/zen-browser/, registers the mods, and optionally restores the private
-# files. restore_private_zen is shared with post_install.sh.
+# Dotfiles/zen-browser/, and registers the mods. Restoring the private files is
+# done later by post_install.sh (after Mozilla login) via restore_private_zen.
 
 # Find the *release* profile dir inside ~/.config/zen (prints nothing if none).
 _zen_find_profile() {
@@ -67,12 +67,12 @@ configure_zen() {
   local dotfiles_zen="$DOTFILES_DIR/zen-browser"
 
   if [ ! -d "$zen_config" ]; then
-    echo ":: Launching zen-browser to initialise config directory..."
+    echo ":: Launching zen-browser to initialise config directory... (wait 10 seconds)"
     zen-browser &
     local zen_pid=$!
     local waited=0
     while [ ! -d "$zen_config" ] && [ $waited -lt 30 ]; do
-      sleep 3
+      sleep 10
       waited=$((waited + 1))
     done
     kill "$zen_pid" 2>/dev/null
@@ -113,14 +113,6 @@ configure_zen() {
       cp "$mods_export" "$zen_themes_json"
     fi
     check_success "Zen mods registered in $zen_themes_json"
-  fi
-
-  # Restore private files (sessions, bookmark-workspaces table, ...) if the
-  # private repo is present on this machine.
-  if [ -d "$PRIVATE_DIR/zen-browser" ] \
-     && confirm_action "restore private Zen files (sessions, workspaces) into the profile"; then
-    restore_private_zen "$profile_dir"
-    check_success "Private Zen files restored"
   fi
 
   # create_symlink leaves *.bak backups of anything it replaced — offer cleanup.
