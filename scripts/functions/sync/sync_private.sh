@@ -26,6 +26,39 @@ _sync_expand_home() {
   esac
 }
 
+# Stage, commit (with a message you type) and push the private repo after a sync.
+_sync_commit_push() {
+  local repo="$PRIVATE_DIR"
+
+  command -v git &>/dev/null || return 0
+  [ -d "$repo/.git" ] || { echo ":: $repo is not a git repo — skipping commit"; return 0; }
+
+  if [ -z "$(git -C "$repo" status --porcelain)" ]; then
+    echo ":: Nothing to commit in $repo"
+    return 0
+  fi
+
+  confirm_action "commit & push the synced changes in $repo" || return 0
+
+  local default_msg msg
+  default_msg="sync private files ($(date '+%Y-%m-%d %H:%M'))"
+  if $HAS_GUM; then
+    msg=$(gum input --value "$default_msg" --placeholder "Commit message" </dev/tty)
+  else
+    read -rp "Commit message [$default_msg]: " msg
+  fi
+  [ -z "$msg" ] && msg="$default_msg"
+
+  if git -C "$repo" add . \
+     && git -C "$repo" commit -m "$msg" \
+     && git -C "$repo" push; then
+    print_success_message "Committed & pushed private repo"
+  else
+    print_error_message "git add/commit/push failed in $repo"
+    return 1
+  fi
+}
+
 sync_private() {
   local sync_map="${1:-$FUNCTIONS_DIR/sync/sync_map.json}"
 
@@ -203,6 +236,7 @@ UNSELECT (space) the ones you want to keep as-is, then Enter."
   if [ "$failed" -eq 0 ]; then
     print_success_message "Synced $copied item(s)
 $skipped kept, $missing missing"
+    _sync_commit_push
   else
     print_error_message "Synced $copied item(s)
 $skipped kept, $missing missing, $failed failed"
