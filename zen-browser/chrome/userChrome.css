@@ -1,0 +1,123 @@
+/* toolbar height (url + extension etc.) */
+*|*:root {
+  --zen-toolbar-height: 38px !important;
+}
+
+/* change font size at url bar */
+#nav-bar {
+  font-size: 13px !important;
+}
+
+
+/* ████████╗░█████╗░██████╗░░██████╗
+   ╚══██╔══╝██╔══██╗██╔══██╗██╔════╝
+   ░░░██║░░░███████║██████╦╝╚█████╗░
+   ░░░██║░░░██╔══██║██╔══██╗░╚═══██╗
+   ░░░██║░░░██║░░██║██████╦╝██████╔╝
+   ░░░╚═╝░░░╚═╝░░╚═╝╚═════╝░╚═════╝░ */
+
+
+/* Change essentials size */
+#navigator-toolbox[zen-sidebar-expanded="true"] {
+  & #zen-essentials {
+    --tab-min-height: 30px !important;
+  }
+}
+
+/* Change tab height */
+*|*:root {
+  --tab-min-height: 25px !important;
+}
+
+/* make newtab button invisible */
+#tabs-newtab-button {
+  display: none !important;
+}
+
+/* make tab height smaller in split view */
+tab-group[split-view-group] {
+  & .tab-group-container {
+    &>.tabbrowser-tab {
+      :root[zen-sidebar-expanded="true"] & {
+        --tab-min-height: 15px !important;
+      }
+    }
+  }
+}
+
+
+
+
+
+/*  ██╗░░░░░░░██╗░█████╗░██████╗░██╗░░██╗░██████╗██████╗░░█████╗░░██████╗███████╗░██████╗
+    ██║░░██╗░░██║██╔══██╗██╔══██╗██║░██╔╝██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝
+    ╚██╗████╗██╔╝██║░░██║██████╔╝█████═╝░╚█████╗░██████╔╝███████║██║░░░░░█████╗░░╚█████╗░
+    ░████╔═████║░██║░░██║██╔══██╗██╔═██╗░░╚═══██╗██╔═══╝░██╔══██║██║░░░░░██╔══╝░░░╚═══██╗
+    ░╚██╔╝░╚██╔╝░╚█████╔╝██║░░██║██║░╚██╗██████╔╝██║░░░░░██║░░██║╚██████╗███████╗██████╔╝
+    ░░╚═╝░░░╚═╝░░░╚════╝░╚═╝░░╚═╝╚═╝░░╚═╝╚═════╝░╚═╝░░░░░╚═╝░░╚═╝░╚═════╝╚══════╝╚═════╝░ */
+
+
+/* border around workspace icons */
+#zen-workspaces-button {
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  box-shadow: 0px 1px 10px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  border: 1px solid #ffffff0c !important;
+  container-type: normal !important;
+  width: max-content !important;
+  margin-inline: auto !important;
+  padding: 4px !important;
+  gap: 2px !important;
+}
+
+/* border around active worskpace icon */
+#zen-workspaces-button {
+  .subviewbutton {
+    flex-shrink: 0 !important;
+    min-width: 28px !important;
+
+    /* button's size*/
+    &[active="true"] {
+      background: rgba(255, 255, 255, 0.1) !important;
+      transition: 0.3s !important;
+      border: 1px solid #ffffff0a !important;
+      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.062) !important;
+    }
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.2) !important;
+      transition: 0.3s !important;
+    }
+
+    &:after {
+      display: none !important;
+    }
+  }
+}
+
+/* Main panel at the top of tabs (workspace indicator)*/
+.zen-current-workspace-indicator {
+  position: relative !important;
+  justify-content: center !important;
+}
+
+/* Workspace icon in the panel*/
+.zen-current-workspace-indicator-stack {
+  position: static !important;
+  margin-right: 6px !important;
+  transform: none !important;
+}
+
+/* Workspace name in the panel*/
+.zen-current-workspace-indicator-name {
+  font-size: 16px !important;
+  font-weight: 800 !important;
+  margin: 0 !important;
+  flex: 0 1 auto !important;
+}
+
+/* change workspace actions to keep always at the same place*/
+.zen-workspaces-actions {
+  position: absolute !important;
+  right: 12px !important;
+}

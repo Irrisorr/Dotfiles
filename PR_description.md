@@ -1,0 +1,30 @@
+- Fish
+  - move colors from variables to `config.fish`
+  - aliases:
+    - **`asd` aliases menu** rebuilt on the universal menu; `functions/` is sourced recursively so an alias can have its own folder
+    - set/delete-env aliases offer a shell restart so `config.fish` changes apply immediately
+- Clipse
+  - update keybindings
+  - add configuration to install scripts
+- Zen-browser
+  - Full update userChrome.css + added exported mods
+  - Add search engines config
+  - Add configuration to install scripts
+  
+- Others
+  - Full scripts rework:
+    - `install.sh` and `post_install.sh` moved to root directory
+    - `install.sh` now only contains menus and calls `scripts/install/main.sh`. Check 'README.md' and 'INSTALLATION.md' for more info.
+    - Create 'scripts/lib' directory for:
+      - `helpers.sh` - helper functions (menu, check_success, etc.)
+      - `gum.sh` - gum wrappers (confirm_action, print_styled_message, etc.)
+      - `common.sh` - common functions (constants and include other scripts)
+    - Create 'scripts/install' directory for:
+      - `main.sh` - main installation script
+      - `/system` - system configuration scripts
+      - `/apps` - applications configuration scripts
+    - All application/system scripts now wrapped into functions and called from `install.sh` with guard attribute
+    - Reworked menu function to use `name in menu|function|guard` format, where guard is optional command that presents `command -v <guard> &>/dev/null`
+    - **Universal `menu` function** — one function powers every menu:
+  - Add autorun post_install script after reboot
+  - Installer end: "configuration complete" message + optional reboot, with a clear note about the post-install autorun

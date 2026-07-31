@@ -17,6 +17,9 @@ spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
 // Starts DankShell
 spawn-at-startup "dms" "run"
 
+// Wallpaper swaybg
+spawn-sh-at-startup "swaybg -i /home/irrisorr/Dotfiles/wallpaper/night-sky.png -m fill"
+
 // Apps 
 // spawn-at-startup "waybar"
 spawn-at-startup "syncthing"

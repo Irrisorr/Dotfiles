@@ -115,8 +115,11 @@ gnome-keyring (implements the Secret portal, required for certain apps to work)
 xwayland-satellite (to run X11 apps like Steam or Discord)
 dms-shell-bin (panel bar)
 hyprlock (lock manager)
+swaybg (wallpaper tool)
 
 # Additional Packages
+sqlite (need for sync private dotfiles)
+jq (need for sync private dotfiles)
 gowall (tool to operate/convert the image (many features))
 inxi (tui app for get info about ur system)
 terminal-rain-lightning (tui rain in terminal)
