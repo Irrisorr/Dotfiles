@@ -7,10 +7,24 @@
 // ╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝╚═════╝░
 
 
+// Wallpaper
+layer-rule {
+    match namespace="^wallpaper$"
+    place-within-backdrop true
+}
+
 // Corner radius for all windows
 window-rule {
     geometry-corner-radius 18
     clip-to-geometry true
+}
+
+// Background blur for all windows
+window-rule {
+    background-effect {
+        blur true
+        xray false
+    }
 }
 
 // Blocked apps from screencasting
@@ -51,11 +65,22 @@ window-rule {
     scroll-factor 0.2
 }
 
+// Rofi
+layer-rule {
+    match namespace="^rofi$"
+    background-effect {
+        blur true
+        xray false
+        saturation 1.5
+        noise 0.05
+    }
+}
+
 // Apps that should open on the "_media" workspace
 window-rule {
     match app-id=r#"^org\.telegram\.desktop$"#
     match app-id=r#"^org\.ime\.desktop"#
-    match app-id=r#"spotify$"#
+    match app-id=r#"Spotify$"#
     match app-id=r#"vesktop$"#
     match app-id=r#"discord$"#
     exclude app-id=r#"^org\.telegram\.desktop$"# title="Просмотр медиа"

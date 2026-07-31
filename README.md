@@ -51,7 +51,7 @@ You should change this configuration by urself using command `niri msg outputs` 
 - They r opened on my specific monitor, so u had to change the name of monitor to urs (at `open-on-output "<here ur monitor name>"`)
 - Workspaces are sorted **alphabetically**, so i had to add `_` in **_media** if i wanted this worspace to be the first
 
-### Window rules (`niri/conf/rules.kdl`)
+### Window/Layer rules (`niri/conf/rules.kdl`)
 
 - **Corner radius** for all windows is 18
 - **Indicate screencasted windows** with red colors
@@ -61,16 +61,25 @@ You should change this configuration by urself using command `niri msg outputs` 
 - **Clipse** always opens floating and small size
 - **Kitty** always opens at 50% (0.5) window size proportion
 - **Obsidian** has scroll-factor 0.2
+- **Rofi** has blur effect
+- **Wallpaper** has place-within-backdrop rule (see in [niri wiki](https://niri-wm.github.io/niri/Overview.html#backdrop-customization))
+- **All apps** that use Wayland protocol have blur effect
 
 ### Animations (`niri/conf/animations.kdl`)
 
 - Default niri animations
+
+### Blur (`niri/config.kdl`, `niri/conf/rules.kdl`)
+
+- Blur for all windows
+- Global setting for blur in `niri/config.kdl`
 
 ### Autostart (`niri/conf/autostart.kdl`)
 
 - **wl-clipboard** for clipboard history
 - **polkit-mate** for authenticate apps
 - **dms** - panel bar
+- **swaybg** - wallpaper tool
 - **syncthing** - local server for synchronize folders between laptop and phone or another devices in real time
 - **clipse** - clipboard app
 - kill all **xdg-desktop-portals** for rerun while startup to avoid unexpected problems during the session
