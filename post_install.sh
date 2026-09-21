@@ -91,23 +91,23 @@ install_ime() {
 }
 
 install_rustdesk() {
+  local version="1.3.7" base url
+
   print_styled_message "Installing RustDesk"
-  if ! confirm_action "install RustDesk version 1.3.7"; then
+  confirm_action "install RustDesk version $version" || return 1
+
+  base="https://github.com/rustdesk/rustdesk/releases/download/$version/rustdesk-$version"
+  if is_arch; then
+    url="$base-0-x86_64.pkg.tar.zst"
+  elif is_debian; then
+    url="$base-x86_64.deb"
+  else
+    print_error_message "No RustDesk package for $DISTRO"
     return 1
   fi
 
-  mkdir -p $HOME/Downloads/apps
-  cd $HOME/Downloads/apps
-
-  print_styled_message "Downloading RustDesk 1.3.7"
-  RUSTDESK_URL="https://github.com/rustdesk/rustdesk/releases/download/1.3.7/rustdesk-1.3.7-0-x86_64.pkg.tar.zst"
-  RUSTDESK_PKG="rustdesk-1.3.7-0-x86_64.pkg.tar.zst"
-
-  execute_script wget -O "$RUSTDESK_PKG" "$RUSTDESK_URL"
-  print_styled_message "Installing RustDesk package"
-  execute_script sudo pacman -U --noconfirm "$RUSTDESK_PKG"
-  print_success_message "RustDesk 1.3.7 installed successfully"
-  cd - >/dev/null
+  url_install "$url"
+  check_success "RustDesk $version installed"
 }
 
 # Menu guard: hyprpm

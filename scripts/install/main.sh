@@ -35,12 +35,7 @@ install_yay() {
 set_cyrillic_font() {
   print_styled_message "Cyrillic console font"
   if confirm_action "set the cyrillic console font (cyr-sun16)"; then
-    if grep -q "^FONT=" /etc/vconsole.conf 2>/dev/null; then
-      sudo sed -i "s/^FONT=.*/FONT=cyr-sun16/" /etc/vconsole.conf
-    else
-      echo "FONT=cyr-sun16" | sudo tee -a /etc/vconsole.conf
-    fi
-    sudo systemctl restart systemd-vconsole-setup.service
+    set_console_font cyr-sun16
     check_success "Cyrillic console font set"
   fi
 }
@@ -50,7 +45,7 @@ install_window_manager() {
   if confirm_action "install window manager"; then
     local window_manager
     window_manager=$(choose_action hyprland niri)
-    execute_script sudo pacman -S --noconfirm "$window_manager"
+    execute_script pkg_install "$window_manager"
   fi
 }
 

@@ -5,8 +5,10 @@
 #   . "$HOME/Dotfiles/scripts/lib/common.sh"
 #
 # After sourcing you get the path constants below plus every helper from
-# lib/gum.sh and lib/helpers.sh (print_*, confirm_action, create_symlink,
-# execute_command, the menu parsers, the package engine, etc).
+# lib/distro.sh (DISTRO/DISTRO_FAMILY, is_arch, pkg_install, ...), lib/paths.sh
+# (find_polkit_agent, fish_bin, python_site_dir, ...), lib/gum.sh and
+# lib/helpers.sh (print_*, confirm_action, create_symlink, execute_command,
+# the menu parsers, the package engine, etc).
 
 # Source once — many files source this and the menus source several of them,
 # so guard against redundant re-sourcing within one shell.
@@ -23,5 +25,8 @@ export APPS_DIR="$INSTALL_DIR/apps"
 export FUNCTIONS_DIR="$SCRIPTS_DIR/functions"
 export CONFIG_DIR="$HOME/.config"
 
+# Order matters: distro.sh defines pkg_install, which the gum bootstrap needs.
+. "$LIB_DIR/distro.sh"
+. "$LIB_DIR/paths.sh"
 . "$LIB_DIR/gum.sh"
 . "$LIB_DIR/helpers.sh"

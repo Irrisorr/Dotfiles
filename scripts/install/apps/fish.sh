@@ -3,5 +3,7 @@
 
 # Menu guard: fish
 configure_fish() {
-  execute_command "Configure fish" "mkdir -p $HOME/.config/fish && create_symlink $HOME/Dotfiles/fish $HOME/.config/fish && chsh -s /bin/fish"
+  # ensure_login_shell registers fish in /etc/shells before chsh — Ubuntu ships
+  # fish at /usr/bin/fish and chsh rejects any shell missing from that file.
+  execute_command "Configure fish" "create_symlink $HOME/Dotfiles/fish $HOME/.config/fish && ensure_login_shell \"\$(fish_bin)\""
 }
