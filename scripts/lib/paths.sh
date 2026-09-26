@@ -39,8 +39,12 @@ _first_executable() {
 find_polkit_agent() {
   case "${1:-gnome}" in
     gnome)
+      # Ubuntu's policykit-1-gnome ships it under /usr/lib/policykit-1-gnome/
+      # (verified against the resolute package file list), Arch under
+      # /usr/lib/polkit-gnome/.
       _first_executable \
         /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 \
+        /usr/lib/policykit-1-gnome/polkit-gnome-authentication-agent-1 \
         /usr/libexec/polkit-gnome-authentication-agent-1 \
         /usr/libexec/policykit-1-gnome/polkit-gnome-authentication-agent-1 \
         /usr/lib/x86_64-linux-gnu/polkit-gnome/polkit-gnome-authentication-agent-1
