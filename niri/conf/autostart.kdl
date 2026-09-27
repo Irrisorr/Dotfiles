@@ -10,9 +10,9 @@
 // Required for clipboard history integration
 spawn-at-startup "bash" "-c" "wl-paste --watch cliphist store &"
 
-// Recommended (must install polkit-mate before hand) for elevation prompts
-spawn-at-startup "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1"
-// This may be a different path on different distributions, the above is for the arch linux mate-polkit package
+// Elevation prompts. The agent binary lives at a different path on every
+// distro, so the wrapper resolves it instead of hardcoding one here.
+spawn-sh-at-startup "~/Dotfiles/scripts/wrappers/polkit-agent.sh mate"
 
 // Starts DankShell
 spawn-at-startup "dms" "run"

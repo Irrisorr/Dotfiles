@@ -35,30 +35,39 @@ install_yay() {
 set_cyrillic_font() {
   print_styled_message "Cyrillic console font"
   if confirm_action "set the cyrillic console font (cyr-sun16)"; then
-    if grep -q "^FONT=" /etc/vconsole.conf 2>/dev/null; then
-      sudo sed -i "s/^FONT=.*/FONT=cyr-sun16/" /etc/vconsole.conf
-    else
-      echo "FONT=cyr-sun16" | sudo tee -a /etc/vconsole.conf
-    fi
-    sudo systemctl restart systemd-vconsole-setup.service
+    set_console_font cyr-sun16
     check_success "Cyrillic console font set"
   fi
 }
 
+# Through install_packages, not pkg_install: on Ubuntu niri needs its PPA.
+# No separate confirm — install_packages shows the plan and asks.
 install_window_manager() {
   print_styled_message "Installing Window Manager"
-  if confirm_action "install window manager"; then
-    local window_manager
-    window_manager=$(choose_action hyprland niri)
-    execute_script sudo pacman -S --noconfirm "$window_manager"
-  fi
+  local window_manager
+  window_manager=$(choose_action hyprland niri) || return 1
+  install_packages "$window_manager"
 }
 
 
 # ─── Final steps (run by install.sh after the menus) ─────────────────────────
 
+# Backups create_symlink left behind: dirs and files, including timestamped
+# .bak.<date> ones. find does not follow symlinks, so it never reaches into
+# ~/Dotfiles through a linked config dir.
+_find_config_backups() {
+  find "$HOME/.config" \( -name '*.bak' -o -name '*.bak.[0-9]*' \) -prune "$@"
+}
+
 run_final_steps() {
-  execute_command "Delete .bak directories from ~/.config" "find $HOME/.config/ -type d -name '*.bak' -delete"
+  if [ -n "$(_find_config_backups -print -quit)" ]; then
+    echo ":: Backups in ~/.config:"
+    _find_config_backups -print | sed 's/^/   /'
+    if confirm_action "delete all these backups"; then
+      _find_config_backups -exec rm -rf {} +
+      check_success "Backups deleted"
+    fi
+  fi
 
   if command -v fish &>/dev/null; then
     mkdir -p "$HOME/.config/fish/conf.d"

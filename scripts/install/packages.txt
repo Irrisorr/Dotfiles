@@ -1,8 +1,8 @@
 # Browsers
-zen-browser-bin (based on firefox)
+zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
 firefox
-vivaldi (based on chromium)
-google-chrome
+vivaldi                ubuntu:flatpak=com.vivaldi.Vivaldi (based on chromium)
+google-chrome          ubuntu:flatpak=com.google.Chrome
 
 # Terminals and shells
 kitty
@@ -12,37 +12,37 @@ fish
 # Runners
 wofi
 rofi
-anyrun
-walker
+anyrun                 ubuntu:skip (Ubuntu: no .deb, tarball only)
+walker                 ubuntu:skip (Ubuntu: no .deb, tarball only)
 
 # Sync
 syncthing (sync service (f.e. for obsidian sync between devices))
 
 # IDE's
 neovim
-visual-studio-code-bin
-intellij-idea-ultimate-edition
-postman-bin
-podman-desktop-bin
+visual-studio-code-bin ubuntu:flatpak=com.visualstudio.code
+intellij-idea-ultimate-edition ubuntu:flatpak=com.jetbrains.IntelliJ-IDEA-Ultimate
+postman-bin            ubuntu:flatpak=com.getpostman.Postman
+podman-desktop-bin     ubuntu:flatpak=io.podman_desktop.PodmanDesktop
 podman
 
 # Media
-telegram-desktop
+telegram-desktop       ubuntu:flatpak=org.telegram.desktop (Ubuntu: dropped from the archive)
 slack
 iMe (fork of telegram with some features | DONT INSTALL HERE WILL BE LATER IF U WANT)
-vesktop-bin
-discord
-spotify
-spicetify-cli (extension for customize and add extensions for spotify client)
-zoom
+vesktop-bin            ubuntu:flatpak=dev.vencord.Vesktop
+discord                ubuntu:flatpak=com.discordapp.Discord
+spotify                ubuntu:flatpak=com.spotify.Client
+spicetify-cli          ubuntu:skip (spotify extensions manager | Ubuntu: install script only)
+zoom                   ubuntu:flatpak=us.zoom.Zoom
 
 # Notes and Offices
-obsidian
-freeoffice
-rnote
+obsidian               ubuntu:flatpak=md.obsidian.Obsidian
+freeoffice             ubuntu:source=freeoffice (Ubuntu: adds the SoftMaker apt repo)
+rnote                  ubuntu:flatpak=com.github.flxzt.rnote
 
 # Themes
-vimix-gtk-themes
+vimix-gtk-themes       ubuntu:skip (Ubuntu: not packaged)
 adwaita-qt6
 
 # Cursors
@@ -52,7 +52,7 @@ bibata-cursor-theme
 papirus-icon-theme
 
 # Fonts
-ttf-jetbrains-mono-nerd
+ttf-jetbrains-mono-nerd ubuntu:apt=fonts-jetbrains-mono (Ubuntu: plain font, apt has no nerd-patched ones — icons will be missing)
 
 # File managers
 thunar                (xfce/gtk fm)
@@ -68,9 +68,9 @@ nautilus              (gnome/gtk fm)
 # Virtual Machines
 gnome-boxes
 scrcpy (display and control ur Android device | duplicating screen on laptop through cabel)
-waydroid (android vm for wayland)
+waydroid               ubuntu:skip (android vm for wayland | Ubuntu: own repo at repo.waydro.id)
 
-# Packages For System 
+# Packages For System
 gnome-calculator
 gnome-system-monitor
 baobab (disk viewer | on GTK)
@@ -78,25 +78,25 @@ obs-studio
 swayimg (view images)
 vlc (view videos)
 wlogout (logout app for wayland)
-clipse (clipboard tui manager)
+clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: built from source, no auto-update)
 
 # Settings packages
 pavucontrol (audio control)
 nwg-look (themes/icons/cursors etc. control)
-polkit-gnome (for apps that required gui roots)
+polkit-gnome           ubuntu:apt=policykit-1-gnome (for apps that required gui roots)
 mate-polkit (for apps that required gui roots)
-libfprint-2-tod1-goodix-v2 (driver for my fingerprint device (27c6:550a: Shenzhen Goodix Technology))
+libfprint-2-tod1-goodix-v2 ubuntu:skip (driver for my fingerprint device (27c6:550a: Shenzhen Goodix Technology) | Ubuntu: AUR-only)
 fprintd (for setting ur fingerprint for lock-managers)
-logmein-hamachi (VPN service)
+logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
 
 # Games and Launchers
-steam
+steam                  ubuntu:apt=steam-installer
 lutris
 
 # Hypr Ecosystem
-hyprshot
-hyprswitch
-ags-hyprpanel-git
+hyprshot               ubuntu:skip (Ubuntu: shell script, no .deb)
+hyprswitch             ubuntu:skip (Ubuntu: no releases, source only)
+ags-hyprpanel-git      ubuntu:skip (Ubuntu: not packaged)
 hyprpaper
 hyprlock
 xdg-desktop-portal
@@ -106,36 +106,37 @@ hyprpicker
 nwg-displays (monitor control)
 
 # niri Ecosystem
+niri                   ubuntu:ppa=avengemedia/danklinux (the compositor itself)
 xdg-desktop-portal (default portal)
 xdg-desktop-portal-gtk (implements most of the basic functionality)
 xdg-desktop-portal-gnome (required for screencasting support)
 xdg-user-dirs (for home directories)
 xdg-user-dirs-gtk (for home gtk directories)
 gnome-keyring (implements the Secret portal, required for certain apps to work)
-xwayland-satellite (to run X11 apps like Steam or Discord)
-dms-shell-bin (panel bar)
+xwayland-satellite     ubuntu:ppa=avengemedia/danklinux (to run X11 apps like Steam or Discord)
+dms-shell-bin          ubuntu:ppa=avengemedia/dms ubuntu:apt=dms (panel bar)
 hyprlock (lock manager)
 swaybg (wallpaper tool)
 
 # Additional Packages
-sqlite (need for sync private dotfiles)
+sqlite                 ubuntu:apt=sqlite3 (need for sync private dotfiles)
 jq (need for sync private dotfiles)
-gowall (tool to operate/convert the image (many features))
+gowall                 ubuntu:skip (image converter | Ubuntu: no .deb, tarball only)
 inxi (tui app for get info about ur system)
-terminal-rain-lightning (tui rain in terminal)
+terminal-rain-lightning ubuntu:skip (tui rain in terminal | Ubuntu: pip only)
 thefuck (tui app that fixes errors in previous console commands)
-python-pip
-github-cli (github client for terminal)
-jdk21-openjdk
-jdk23-openjdk
+python-pip             ubuntu:apt=python3-pip
+github-cli             ubuntu:apt=gh (github client for terminal)
+jdk21-openjdk          ubuntu:apt=openjdk-21-jdk
+jdk23-openjdk          ubuntu:apt=openjdk-25-jdk (Ubuntu: no 23 in apt, 25 is the current LTS)
 maven (java project management)
 fastfetch (fast neofetch)
 figlet (for making large letters in terminal)
 playerctl (for control media player)
 brightnessctl (control brightness)
-sddm (welcome service on startup ur device) 
-qt5-graphicaleffects (needs for sddm)
-qt5-quickcontrols2 (needs for sddm)
-qt5-svg (needs for sddm)
+sddm (welcome service on startup ur device)
+qt5-graphicaleffects   ubuntu:apt=qml-module-qtgraphicaleffects (needs for sddm)
+qt5-quickcontrols2     ubuntu:apt=qml-module-qtquick-controls2 (needs for sddm)
+qt5-svg                ubuntu:apt=libqt5svg5 (needs for sddm)
 usbutils (tool for check model name of all bus devices like usb or fingerprint)
-arronax (for creating .desktop files)
+arronax                ubuntu:skip (for creating .desktop files | Ubuntu: not packaged)
