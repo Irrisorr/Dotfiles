@@ -37,11 +37,14 @@ _gum_install_deb() {
   url="https://github.com/charmbracelet/gum/releases/download/${tag}/gum_${tag#v}_${arch}.deb"
   tmp=$(mktemp -d)
 
+  local rc=0
   echo ":: Downloading $url"
   if curl -fsSL -o "$tmp/gum.deb" "$url"; then
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$tmp/gum.deb"
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$tmp/gum.deb" || rc=1
+  else
+    echo ":: Download failed: $url" >&2
+    rc=1
   fi
-  local rc=$?
 
   rm -rf "$tmp"
   return $rc

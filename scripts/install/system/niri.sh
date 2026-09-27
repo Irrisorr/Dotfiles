@@ -7,7 +7,7 @@ configure_niri() {
 
   execute_command "Configure niri directory" "create_symlink $HOME/Dotfiles/niri $HOME/.config/niri"
 
-  execute_command "Configure dms-shell (panel-bar)" "mkdir -p $HOME/.config/DankMaterialShell && create_symlink $HOME/Dotfiles/DankMaterialShell $HOME/.config/DankMaterialShell"
+  execute_command "Configure dms-shell (panel-bar)" "create_symlink $HOME/Dotfiles/DankMaterialShell $HOME/.config/DankMaterialShell"
 
   if command -v hyprlock &>/dev/null; then
     execute_command "Configure hyprlock" "mkdir -p $HOME/.config/hypr && create_symlink $HOME/Dotfiles/hypr/hyprlock.conf $HOME/.config/hypr/hyprlock.conf"

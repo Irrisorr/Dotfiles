@@ -103,12 +103,24 @@ menu() {
 }
 
 
-# Offer to restart fish so env changes written to config.fish take effect.
-# A subshell can't mutate the parent shell, so exec replaces it with a fresh one.
-reload_shell_prompt() {
-  if confirm_action "restart shell session to apply changes"; then
-    exec fish
+# fish_apply <fish command> — run a command in the calling fish shell.
+# A bash child can't change its parent's env (and `exec fish` from here only
+# nests a new fish inside the old one), so the fish wrapper passes a file in
+# DOTFILES_FISH_OUT and sources it after this script exits. Without a wrapper
+# (e.g. the asd menu) the change still lands in config.fish for new terminals.
+fish_apply() {
+  if [ -n "$DOTFILES_FISH_OUT" ]; then
+    printf '%s\n' "$1" >> "$DOTFILES_FISH_OUT"
+  else
+    echo ":: Open a new terminal to apply the change"
   fi
+}
+
+
+# Quote a value for fish: inside '...' only \ and ' need escaping.
+fish_quote() {
+  local s="${1//\\/\\\\}"
+  printf "'%s'" "${s//\'/\\\'}"
 }
 
 
@@ -281,12 +293,9 @@ get_all_categories() {
 }
 
 
-# Plan first, then execute. resolve_package sorts every selection into a bucket
-# per backend, so one run can mix repo packages, flatpaks and source builds.
 start_package_installation() {
-  local -a native=() flat=() snaps=() urls=() src=() skipped=()
-  local -A repos=()
-  local category line name repo backend value
+  local -a names=()
+  local category line
 
   print_styled_message "Preparing to install selected packages..."
   echo ""
@@ -295,21 +304,37 @@ start_package_installation() {
     while IFS= read -r line; do
       [ -n "$line" ] || continue
       _split_package_line "$line"   # trims the description and any padding
-      name="$_PKG_NAME"
-      [ -n "$name" ] || continue
-
-      IFS=$'\t' read -r backend value repo < <(resolve_package "$name")
-      [ -n "$repo" ] && repos["$repo"]=1
-
-      case "$backend" in
-        native)  native+=("$value") ;;
-        flatpak) flat+=("$value")   ;;
-        snap)    snaps+=("$value")  ;;
-        url)     urls+=("$value")   ;;
-        source)  src+=("$value")    ;;
-        skip)    skipped+=("$name") ;;
-      esac
+      [ -n "$_PKG_NAME" ] && names+=("$_PKG_NAME")
     done <<< "${SELECTED_PACKAGES[$category]}"
+  done
+
+  install_packages "${names[@]}"
+}
+
+
+# install_packages <canonical>... — the single entry point for installing
+# anything listed in packages.txt, so every caller gets the per-distro mapping
+# (PPAs, flatpak, source builds) instead of a raw pkg_install.
+#
+# Plan first, then execute. resolve_package sorts every name into a bucket per
+# backend, so one run can mix repo packages, flatpaks and source builds.
+install_packages() {
+  local -a native=() flat=() snaps=() urls=() src=() skipped=()
+  local -A repos=()
+  local name repo backend value
+
+  for name in "$@"; do
+    IFS=$'\t' read -r backend value repo < <(resolve_package "$name")
+    [ -n "$repo" ] && repos["$repo"]=1
+
+    case "$backend" in
+      native)  native+=("$value") ;;
+      flatpak) flat+=("$value")   ;;
+      snap)    snaps+=("$value")  ;;
+      url)     urls+=("$value")   ;;
+      source)  src+=("$value")    ;;
+      skip)    skipped+=("$name") ;;
+    esac
   done
 
   local total=$(( ${#native[@]} + ${#flat[@]} + ${#snaps[@]} + ${#urls[@]} + ${#src[@]} ))
@@ -345,6 +370,22 @@ start_package_installation() {
     print_styled_message "Adding repository $repo"
     add_repo "$repo" || failed+=("repo:$repo")
   done
+
+  # apt and pacman abort the whole transaction on one unknown name, so filter
+  # first. Checked only now, after the repos: PPA packages are invisible before.
+  if [ ${#native[@]} -gt 0 ]; then
+    local -a available=()
+    echo ":: Checking availability of ${#native[@]} packages..."
+    for value in "${native[@]}"; do
+      if pkg_available "$value"; then
+        available+=("$value")
+      else
+        print_error_message "Not found in $PKG_MGR repos: $value"
+        failed+=("missing:$value")
+      fi
+    done
+    native=("${available[@]}")
+  fi
 
   if [ ${#native[@]} -gt 0 ]; then
     print_styled_message "Installing ${#native[@]} packages with $PKG_MGR"
@@ -382,7 +423,7 @@ start_package_installation() {
 
   if [ ${#failed[@]} -gt 0 ]; then
     print_error_message "Failed: ${failed[*]}"
-    return 1
+    return 2
   fi
 
   print_success_message "All packages installed successfully!"
@@ -479,49 +520,57 @@ execute_script() {
 }
 
 
-# Funtcion to execute a command with confirmation and check its success
+# Run a command after confirmation. Return codes follow menu(): 1 = declined
+# (no mark), 2 = failed (✗), so a real failure is never shown as skipped.
 execute_command() {
   local message=$1
   local script=$2
 
   print_styled_message "$message"
-  if confirm_action "$message"; then
-    bash -c ". $HOME/Dotfiles/scripts/lib/common.sh && $script"
-    local cmd_exit=$?
-    if [ $cmd_exit -eq 1 ]; then
-      print_error_message "Failed to $message"
-      return 1
-    fi
-    check_success "$message"
-    return $?
+  confirm_action "$message" || return 1
+
+  if bash -c ". $HOME/Dotfiles/scripts/lib/common.sh && $script"; then
+    print_success_message "$message"
   else
-    return 1
+    print_error_message "Failed to $message"
+    return 2
   fi
 }
 
 
-# Function to create a symbolic link
+# Replace <target> with a symlink to <source>. Whatever was there before (a
+# real config from another install) is kept as <target>.bak; a stale symlink is
+# just replaced.
 create_symlink() {
   local source=$1
   local target=$2
 
-  if [ -e "$target" ]; then
-    if [ -L "$target" ]; then
-      echo ":: Symlink already exists, removing..."
-      rm "$target"
-    else
-      echo ":: File/directory already exists, backing up..."
-      mv "$target" "${target}.bak"
-    fi
+  # Target already resolves to source — either our link, or a path inside a
+  # symlinked dir (~/.config/hypr/x when ~/.config/hypr -> Dotfiles/hypr).
+  # Touching it would move the repo's own file to .bak and self-link it.
+  if [ -e "$target" ] && [ "$(realpath "$target")" = "$(realpath "$source")" ]; then
+    echo ":: Already linked: $target"
+    return 0
+  fi
+
+  if [ -L "$target" ]; then
+    echo ":: Replacing old symlink $target"
+    rm "$target"
+  elif [ -e "$target" ]; then
+    local backup="${target}.bak"
+    # mv into an existing .bak dir would nest instead of rename.
+    [ -e "$backup" ] && backup="${target}.bak.$(date +%Y%m%d-%H%M%S)"
+    echo ":: Backing up existing $target -> $backup"
+    mv "$target" "$backup" || return 2
   fi
 
   mkdir -p "$(dirname "$target")"
-  ln -sf "$source" "$target"
+  ln -s "$source" "$target"
   check_success "Created symlink from $source to $target"
 }
 
 
-# Function to update the system using pacman (reused by install.sh and post_install.sh)
+# Reused by install.sh and post_install.sh
 system_update() {
-  execute_command "Update the system" 'sudo pacman -Syu --noconfirm'
+  execute_command "Update the system" 'pkg_upgrade'
 }

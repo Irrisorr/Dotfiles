@@ -94,19 +94,31 @@ pkg_sync() {
 }
 
 
+# Also updates flatpaks: on Ubuntu a good part of the GUI apps come from Flathub
+# and the native manager never touches them.
 pkg_upgrade() {
+  local rc=0
+
   if is_arch; then
     if [ "$PKG_MGR" = "yay" ]; then
-      yay -Syu --noconfirm
+      yay -Syu --noconfirm || rc=1
     else
-      sudo pacman -Syu --noconfirm
+      sudo pacman -Syu --noconfirm || rc=1
     fi
   elif is_debian; then
     sudo DEBIAN_FRONTEND=noninteractive apt-get update \
-      && sudo DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y
+      && sudo DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y \
+      || rc=1
   else
     _unsupported_distro
+    return 1
   fi
+
+  if command -v flatpak &>/dev/null; then
+    flatpak update --noninteractive --assumeyes || rc=1
+  fi
+
+  return $rc
 }
 
 

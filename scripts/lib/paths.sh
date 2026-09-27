@@ -171,9 +171,12 @@ set_console_font() {
       fi
     }
 
-    _console_setup_key CODESET  "CyrKoi"
+    # CyrSlav = Russian/Ukrainian/Belarusian glyphs for a UTF-8 console
+    # (CyrKoi would be the legacy KOI8 set); 8x16 is cyr-sun16's cell size.
+    _console_setup_key CHARMAP  "UTF-8"
+    _console_setup_key CODESET  "CyrSlav"
     _console_setup_key FONTFACE "Terminus"
-    _console_setup_key FONTSIZE "16x32"
+    _console_setup_key FONTSIZE "8x16"
 
     sudo setupcon --save 2>/dev/null || sudo systemctl restart console-setup.service
 
