@@ -26,10 +26,10 @@ cd Dotfiles
     - `clipse` is built from source (`go install`), FreeOffice comes from SoftMaker's apt repo
 - Known differences:
     - `fonts-jetbrains-mono` is **not nerd-patched** — icons in fastfetch / DMS / kitty will be missing
-    - 13 packages have no Ubuntu source and are skipped (the installer names them before installing): `anyrun`, `walker`, `gowall`, `hyprswitch`, `hyprshot`, `arronax`, `vimix-gtk-themes`, `waydroid`, `spicetify-cli`, `terminal-rain-lightning`, `logmein-hamachi`, `libfprint-2-tod1-goodix-v2`, `ags-hyprpanel-git`
+    - 12 packages have no Ubuntu source and are skipped (the installer names them before installing): `anyrun`, `walker`, `gowall`, `hyprswitch`, `hyprshot`, `arronax`, `vimix-gtk-themes`, `waydroid`, `spicetify-cli`, `terminal-rain-lightning`, `logmein-hamachi`, `ags-hyprpanel-git`
+    - fingerprint driver (`libfprint-2-tod1-goodix-v2`, 27c6:550a) is installed from the same `.deb` the AUR package repackages — it doesn't update by itself
     - `iMe`, `claude-code` and `claude-desktop` have no Ubuntu source yet — the installer reports them as `missing:` and installs everything else
     - Zen and Zoom config steps don't work with their flatpak versions yet
-    - `update` / `upgrade` aliases are Arch only (they call `yay`) — use `Update system` in the installer menu
 
 ### Adding a package
 
@@ -145,8 +145,8 @@ sddm-greeter-qt6 --test-mode --theme ~/Dotfiles/sddm/corners
 - Each alias is its own file in `scripts/functions/<func_name>.sh` (one function per file)
 - You can run aliases by it's name in terminal (see below)
 - You can run menu with all aliases by typing `asd` in terminal and choose needed script
-- Every menu in the repo is one universal `menu` function (`scripts/lib/helpers.sh`). You pass it `"Label|function"` entries (optionally `"Label|function|guard"` to hide an entry unless the guard passes: a command name, `distro:arch` / `distro:debian`, or `test:<function>`; join several with `+`). The **label** is decoupled from the function name, so `yay_commands` can show as `Yay/Pacman commands`
-- A menu entry whose function calls `menu` again becomes a **submenu** with its own back button — that's how `Yay/Pacman commands` (`scripts/functions/yay_pacman.sh`) opens `System update` / `System upgrade`
+- Every menu in the repo is one universal `menu` function (`scripts/lib/helpers.sh`). You pass it `"Label|function"` entries (optionally `"Label|function|guard"` to hide an entry unless the guard passes: a command name, `distro:arch` / `distro:debian`, or `test:<function>`; join several with `+`). The **label** is decoupled from the function name, so `package_commands` can show as `System packages`
+- A menu entry whose function calls `menu` again becomes a **submenu** with its own back button — that's how `System packages` (`scripts/functions/system_packages.sh`) opens `System update` / `System upgrade`
 - Adding an alias = drop a `scripts/functions/<name>.sh` file defining its function, then add one `"Label|<func>"` line to the `menu` call in `scripts/functions/alias_menu.sh`
 - Shared path constants and includes (`DOTFILES_DIR`, `PRIVATE_DIR`, `CONFIG_DIR`, the gum/print helpers, ...) live in `scripts/lib/common.sh` — source it instead of repeating paths
 
@@ -200,9 +200,9 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
     - `rain-float` - Rain animation in mini floating window (if installed `terminal-rain` package)
     - `vim` - open **nvim** on **ide** workspace and maximize window (if installed `neovim` package)
     - `sync-private` - back up private/sensitive files into `~/Dotfiles-private` (requires `jq`; see below)
-    - 'Yay/Pacman commands' - menu with useful yay/pacman commands (Arch only):
-        - `update` - update system (`yay -Sy`)
-        - `upgrade` - upgrade system (`yay -Syu`)
+    - 'System packages' - update / upgrade on both distros:
+        - `update` - sync package lists (`yay -Sy` / `apt update`)
+        - `upgrade` - install all updates: `yay -Syu` / `apt full-upgrade`, plus `flatpak update` (asks before installing, like running them by hand)
 
 #### Private/sensitive files backup (`scripts/functions/sync/`)
 

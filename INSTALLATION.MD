@@ -58,7 +58,8 @@ the same shell is a no-op.
 
   Package functions, one per operation, so no caller ever writes `pacman` or
   `apt` itself: `pkg_install` (`--needed` on Arch), `pkg_sync`, `pkg_upgrade`
-  (also runs `flatpak update` when flatpak is present), `pkg_installed`,
+  (also runs `flatpak update` when flatpak is present; `-i` keeps every
+  manager's prompts — the `upgrade` alias uses it, the installer doesn't), `pkg_installed`,
   `pkg_available`, `pkg_install_hint`. Other backends: `ensure_flatpak` /
   `flatpak_install` (Flathub, `--user`), `snap_install`, `url_install` (download
   a `.deb` / `.pkg.tar.zst` and install it with the native manager, so
@@ -74,7 +75,8 @@ the same shell is a no-op.
 * **`gum.sh`** — UI wrappers around `gum` (`gum_choose_wrapper`, `confirm_action`,
   `print_success_message`, `print_error_message`, `print_styled_message`,
   `check_success`). Installs gum on first use: from the repos on Arch, from
-  Charm's official `.deb` release on Ubuntu (apt has no gum; it asks first).
+  Charm's official apt repository on Ubuntu (apt has no gum; it asks first) —
+  `add_charm_repo`, so gum then upgrades with `apt upgrade`.
   `menu` and the package picker **require** gum (`require_gum`); the small
   helpers fall back to plain bash (`read`/`echo`) without it.
   `DOTFILES_NO_GUM_BOOTSTRAP=1` sources it without installing anything.
@@ -115,7 +117,7 @@ menu <back_label> <entry>...
 ```
 
 * **Custom labels** — the label shown in the terminal is decoupled from the
-  function name (`"Yay/Pacman commands|yay_commands"` shows `Yay/Pacman commands`).
+  function name (`"System packages|package_commands"` shows `System packages`).
 * **Guards** — an optional third field hides the entry unless it passes. Several
   tokens can be joined with `+`, and all of them must pass:
   * `<command>` — that command exists (`"Zen Browser|configure_zen|zen-browser"`);
@@ -129,7 +131,7 @@ menu <back_label> <entry>...
 * **Nested menus** — a function passed to `menu` may itself call `menu` again;
   that becomes a submenu with its own back button. When the submenu returns, you
   land back in the parent. No exit-code plumbing — `return` from the loop is all
-  it takes. `config_menu` and `yay_commands` are exactly this.
+  it takes. `config_menu` and `package_commands` are exactly this.
 * **Back / status** — the `<back_label>` entry (`"⬅️ Back"`, `"🚀 Finish"`) is
   always appended last; picking it returns. Each function's ✓/✗ is tracked and
   shown next to its label on the next pass.
@@ -221,8 +223,16 @@ Runs once after the reboot, triggered by the fish hook in
 
 ## `packages.txt`
 
-Categories delimited by `# Name` headers, each followed by **one line per
-package — the same line serves both distros**:
+Categories delimited by `# Name` headers. A header can carry a guard, in the
+same syntax as `menu` — the category only shows in the picker when it passes:
+
+```
+# niri Ecosystem | niri
+# Hypr Ecosystem | hyprland
+```
+
+Each header is followed by **one line per package — the same line serves both
+distros**:
 
 ```
 <canonical> [<distro>:<backend>[=<value>]]... [(description)]
@@ -330,13 +340,13 @@ folder — assets, a JSON config, etc. — just gets a subfolder (e.g.
 menu "🚪 Exit" \
   "Set env var|set_env|fish" \
   "Rain animation|terminal_rain|terminal-rain" \
-  "Yay/Pacman commands|yay_commands"
+  "System packages|package_commands"
 ```
 
 Fish wrappers in `fish/functions/` just run the file and pass arguments:
 `bash $HOME/Dotfiles/scripts/functions/terminal_rain.sh $argv`.
 
-`yay_pacman.sh` (Arch only — it calls `yay` directly) defines `update_system`, `upgrade_system`, and a `yay_commands`
+`system_packages.sh` defines `update_system` / `upgrade_system` (via `pkg_sync` / `pkg_upgrade`, so the same on both distros), and a `package_commands`
 function that opens a submenu (it calls `menu` again). Having more than one entry
 point, its dispatcher is generic (`… && "$@"`) so the caller — a fish wrapper or
 the asd menu — names which function to run.
