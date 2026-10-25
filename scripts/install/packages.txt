@@ -118,6 +118,14 @@ dms-shell-bin          ubuntu:ppa=avengemedia/dms ubuntu:apt=dms (panel bar)
 hyprlock (lock manager)
 swaybg (wallpaper tool)
 
+# work
+nodejs
+npm
+git
+rsync
+claude-code
+claude-desktop
+
 # Additional Packages
 sqlite                 ubuntu:apt=sqlite3 (need for sync private dotfiles)
 jq (need for sync private dotfiles)
