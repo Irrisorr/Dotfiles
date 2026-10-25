@@ -59,3 +59,12 @@ install_source_freeoffice() {
   pkg_sync || return 1
   pkg_install softmaker-freeoffice-2024
 }
+
+
+# Goodix 27c6:550a fingerprint driver. The AUR package (libfprint-2-tod1-goodix-v2)
+# repackages exactly this .deb from the libfprint-tod1-group PPA. The PPA has no
+# build for 26.04, so the noble .deb is installed directly — apt pulls in the
+# libfprint-2-tod1 it needs from the Ubuntu archive. Does not update by itself.
+install_source_goodix() {
+  url_install "https://launchpad.net/~libfprint-tod1-group/+archive/ubuntu/ppa/+files/libfprint-2-tod1-goodix-550a_0.0.11+2404-0ubuntu1_amd64.deb"
+}
