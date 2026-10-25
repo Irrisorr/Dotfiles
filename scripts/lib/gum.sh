@@ -16,38 +16,32 @@ HAS_GUM=false
 command -v gum &>/dev/null && HAS_GUM=true
 
 
-# Ubuntu has no gum package; Charm ships .deb files on GitHub. Asks first —
-# this downloads and installs a binary from the network.
-_gum_install_deb() {
-  local arch tag url tmp
-  arch=$(dpkg --print-architecture 2>/dev/null) || return 1
-
-  echo ":: 'gum' is not available in apt."
-  echo ":: It can be installed from the official Charm .deb release on GitHub"
-  echo ":: (https://github.com/charmbracelet/gum/releases)."
-  read -rp ":: Download and install it? (y/N): " reply </dev/tty
-  case "$reply" in y | Y) ;; *) return 1 ;; esac
+# Ubuntu has no gum package. Charm's own apt repository has it, and once the
+# repo is added gum upgrades with `apt upgrade` like everything else (a .deb
+# from GitHub releases never would). Asks first — this adds a third-party repo.
+add_charm_repo() {
+  local keyring="/etc/apt/keyrings/charm.gpg"
+  local list="/etc/apt/sources.list.d/charm.list"
 
   command -v curl &>/dev/null || pkg_install curl || return 1
+  command -v gpg &>/dev/null || pkg_install gnupg || return 1
 
-  tag=$(curl -fsSL https://api.github.com/repos/charmbracelet/gum/releases/latest \
-        | grep -m1 '"tag_name"' | cut -d'"' -f4)
-  [ -n "$tag" ] || { echo ":: Could not determine the latest gum release." >&2; return 1; }
+  sudo mkdir -p /etc/apt/keyrings || return 1
+  curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor --yes -o "$keyring" || return 1
+  sudo chmod 0644 "$keyring"
+  echo "deb [signed-by=$keyring] https://repo.charm.sh/apt/ * *" | sudo tee "$list" >/dev/null || return 1
+  pkg_sync
+}
 
-  url="https://github.com/charmbracelet/gum/releases/download/${tag}/gum_${tag#v}_${arch}.deb"
-  tmp=$(mktemp -d)
 
-  local rc=0
-  echo ":: Downloading $url"
-  if curl -fsSL -o "$tmp/gum.deb" "$url"; then
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$tmp/gum.deb" || rc=1
-  else
-    echo ":: Download failed: $url" >&2
-    rc=1
-  fi
+_gum_install_apt_repo() {
+  echo ":: 'gum' is not in the Ubuntu repos. It can be installed from Charm's"
+  echo ":: official apt repository (https://repo.charm.sh/apt) and then updates"
+  echo ":: with apt upgrade."
+  read -rp ":: Add the repository and install gum? (y/N): " reply </dev/tty
+  case "$reply" in y | Y) ;; *) return 1 ;; esac
 
-  rm -rf "$tmp"
-  return $rc
+  add_charm_repo && pkg_install gum
 }
 
 
@@ -60,9 +54,9 @@ bootstrap_gum() {
   echo ":: Installing gum for beautiful output..."
   pkg_install gum &>/dev/null
 
-  # apt has no 'gum', so on Debian/Ubuntu fall through to the .deb release.
+  # apt has no 'gum', so on Debian/Ubuntu fall through to Charm's apt repo.
   if ! command -v gum &>/dev/null && is_debian; then
-    _gum_install_deb
+    _gum_install_apt_repo
   fi
 
   if command -v gum &>/dev/null; then
