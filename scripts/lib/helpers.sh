@@ -278,7 +278,9 @@ Navigate with arrows, ENTER to confirm"
       print_styled_message "Skipping package installation"
       break
     else
-      local clean_choice=$(echo "$choice" | sed 's/^[✓ ]\s*//')
+      # Strip the "✓ " / "  " status prefix added above.
+      local clean_choice="${choice#✓ }"
+      clean_choice="${clean_choice#  }"
       select_packages_for_category "$clean_choice"
     fi
     echo ""
@@ -289,7 +291,7 @@ Navigate with arrows, ENTER to confirm"
 # Function to get all categories from the packages.txt file
 get_all_categories() {
   local package_file="$INSTALL_DIR/packages.txt"
-  grep '^#' "$package_file" | sed 's/^#\s*//'
+  grep '^#' "$package_file" | sed 's/^#[[:blank:]]*//'
 }
 
 
@@ -500,7 +502,7 @@ get_packages_from_category() {
     BEGIN { p=0 }
     /^#/ {
         if (p) { exit }
-        gsub(/^#\s*/, "");
+        gsub(/^#[ \t]*/, "");   # not \s: Ubuntu ships mawk, which lacks it
         if ($0 == category) { p=1 }
         next
     }
