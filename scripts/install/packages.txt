@@ -93,7 +93,7 @@ logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unver
 steam                  ubuntu:apt=steam-installer
 lutris
 
-# Hypr Ecosystem
+# Hypr Ecosystem | hyprland
 hyprshot               ubuntu:skip (Ubuntu: shell script, no .deb)
 hyprswitch             ubuntu:skip (Ubuntu: no releases, source only)
 ags-hyprpanel-git      ubuntu:skip (Ubuntu: not packaged)
@@ -105,7 +105,7 @@ xdg-desktop-portal-hyprland
 hyprpicker
 nwg-displays (monitor control)
 
-# niri Ecosystem
+# niri Ecosystem | niri
 niri                   ubuntu:ppa=avengemedia/danklinux (the compositor itself)
 xdg-desktop-portal (default portal)
 xdg-desktop-portal-gtk (implements most of the basic functionality)

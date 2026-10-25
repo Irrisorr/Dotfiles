@@ -136,7 +136,7 @@ fish_quote() {
 #   neovim                                    same name everywhere
 #   sqlite                 ubuntu:apt=sqlite3
 #   zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen
-#   dms-shell-bin          ubuntu:source=dms
+#   clipse                 ubuntu:source=clipse
 #   logmein-hamachi        ubuntu:skip        no equivalent, don't try
 #
 # backend ∈ apt | aur | pacman | flatpak | snap | url | ppa | source | skip
@@ -253,7 +253,7 @@ package_category_selection() {
       else
         category_status+=("  $category")
       fi
-    done < <(echo "$(get_all_categories)")
+    done < <(get_all_categories)
 
     category_status+=("⏭️ Skip Package Installation")
     category_status+=("🚀 Start Installation")
@@ -288,10 +288,17 @@ Navigate with arrows, ENTER to confirm"
 }
 
 
-# Function to get all categories from the packages.txt file
+# Category names from packages.txt, minus those whose header guard fails.
+# Header: "# <name>" or "# <name> | <guard>" — same guard syntax as menu().
 get_all_categories() {
-  local package_file="$INSTALL_DIR/packages.txt"
-  grep '^#' "$package_file" | sed 's/^#[[:blank:]]*//'
+  local header name guard
+  while IFS= read -r header; do
+    IFS='|' read -r name guard <<< "${header#\#}"
+    read -r name <<< "$name"     # read trims surrounding whitespace
+    read -r guard <<< "$guard"
+    [ -n "$guard" ] && ! guard_passes "$guard" && continue
+    printf '%s\n' "$name"
+  done < <(grep '^#' "$INSTALL_DIR/packages.txt")
 }
 
 
@@ -503,6 +510,7 @@ get_packages_from_category() {
     /^#/ {
         if (p) { exit }
         gsub(/^#[ \t]*/, "");   # not \s: Ubuntu ships mawk, which lacks it
+        sub(/[ \t]*\|.*$/, "");  # drop the " | guard" part of the header
         if ($0 == category) { p=1 }
         next
     }
