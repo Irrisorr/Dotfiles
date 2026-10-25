@@ -1,8 +1,10 @@
 # My Dotfiles for niri WM
 
+Works on **Arch** (and Arch-based: CachyOS, EndeavourOS) and **Ubuntu 26.04** (and Debian-based). One repo for both — the installer detects the distro by itself and installs every package with the right package manager.
+
 # Installation with config/packages choices
 
-- Type in terminal next commands (**IMPORTANT**: clone repo to home directory):
+- Type in terminal next commands (**IMPORTANT**: clone repo to home directory — `~/Dotfiles` on every machine, all configs and scripts rely on this path):
 ```
 cd ~
 git clone https://github.com/Irrisorr/Dotfiles
@@ -15,6 +17,38 @@ cd Dotfiles
 cd Dotfiles
 ./post_install.sh
 ```
+
+### On Ubuntu
+
+- Same steps, same menus — nothing to choose by hand. Differences the installer handles by itself:
+    - **niri**, `xwayland-satellite` and **dms** come from the DankMaterialShell author's PPAs (`ppa:avengemedia/danklinux`, `ppa:avengemedia/dms`) — they are not in the Ubuntu repos
+    - apps that are only in the AUR (Zen, VS Code, Obsidian, Discord, Spotify, ...) are installed from **Flathub**
+    - `clipse` is built from source (`go install`), FreeOffice comes from SoftMaker's apt repo
+- Known differences:
+    - `fonts-jetbrains-mono` is **not nerd-patched** — icons in fastfetch / DMS / kitty will be missing
+    - 13 packages have no Ubuntu source and are skipped (the installer names them before installing): `anyrun`, `walker`, `gowall`, `hyprswitch`, `hyprshot`, `arronax`, `vimix-gtk-themes`, `waydroid`, `spicetify-cli`, `terminal-rain-lightning`, `logmein-hamachi`, `libfprint-2-tod1-goodix-v2`, `ags-hyprpanel-git`
+    - `iMe`, `claude-code` and `claude-desktop` have no Ubuntu source yet — the installer reports them as `missing:` and installs everything else
+    - Zen and Zoom config steps don't work with their flatpak versions yet
+    - `update` / `upgrade` aliases are Arch only (they call `yay`) — use `Update system` in the installer menu
+
+### Adding a package
+
+- One line in `scripts/install/packages.txt` under its category — it's installed on both distros. If on Ubuntu the package has another name or comes from somewhere else, add a tail (full format in [INSTALLATION.MD](INSTALLATION.MD#packagestxt)):
+```
+neovim
+sqlite                 ubuntu:apt=sqlite3 (need for sync private dotfiles)
+zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
+logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
+```
+
+# Syncing between machines
+
+- Configs are symlinks into `~/Dotfiles`, so the repo **is** the config: change something on one machine, commit & push, then `git pull` on the other one — done
+- WM configs never hold distro-specific paths (polkit agent, portals go through `scripts/wrappers/`), so the same niri/hyprland config works on both
+- Things that are per machine and need care:
+    - monitors (`niri/conf/output.kdl`, `open-on-output` in `workspaces.kdl`) — u can list the monitors of both machines in the same file, niri ignores outputs that aren't connected
+    - `fish/fish_variables` is rewritten by fish itself (and depends on its version) — expect it to show up in `git status`
+    - `set-env` / `set-java` write into `fish/config.fish`, which is in the repo — f.e. `JAVA_HOME` is `/usr/lib/jvm/java-23-openjdk` on Arch but `/usr/lib/jvm/java-25-openjdk-amd64` on Ubuntu, so don't commit machine-specific values
 
 # Configure 
 
@@ -77,7 +111,7 @@ You should change this configuration by urself using command `niri msg outputs` 
 ### Autostart (`niri/conf/autostart.kdl`)
 
 - **wl-clipboard** for clipboard history
-- **polkit-mate** for authenticate apps
+- **polkit-mate** for authenticate apps (started through `scripts/wrappers/polkit-agent.sh`, because the agent's path differs per distro)
 - **dms** - panel bar
 - **swaybg** - wallpaper tool
 - **syncthing** - local server for synchronize folders between laptop and phone or another devices in real time
@@ -94,6 +128,16 @@ You should change this configuration by urself using command `niri msg outputs` 
 - `OBSIDIAN_USE_WAYLAND "1"` - Force Obsidian to use the native Wayland display protocol instead of running through the XWayland compatibility layer
 - `QT_QPA_PLATFORMTHEME "gtk3"` - Force Qt applications to use the GTK3 platform theme for better integration with the desktop environment
 
+### SDDM (`sddm/`)
+
+- Theme **corners** — based on [aczw/sddm-theme-corners](https://github.com/aczw/sddm-theme-corners), ported to **Qt6** (upstream is Qt5-only), so the same theme works on Arch and Ubuntu (Ubuntu's sddm has only the Qt6 greeter)
+- Greeter runs on **Wayland** (`DisplayServer=wayland`, `weston --shell=kiosk` as its compositor) — no X server needed
+- Preview the theme in a window without logging out:
+```
+sddm-greeter-qt6 --test-mode --theme ~/Dotfiles/sddm/corners
+```
+- `configure_sddm` copies the theme and `default.conf` into the system dirs, so after editing them re-run the **SDDM** step in `./install.sh`
+
 ### Aliases (`fish/functions/*`)
 
 > Right now there is only **fish** shell aliases, but u can add shell scripts for other shells too using their functions
@@ -101,7 +145,7 @@ You should change this configuration by urself using command `niri msg outputs` 
 - Each alias is its own file in `scripts/functions/<func_name>.sh` (one function per file)
 - You can run aliases by it's name in terminal (see below)
 - You can run menu with all aliases by typing `asd` in terminal and choose needed script
-- Every menu in the repo is one universal `menu` function (`scripts/lib/helpers.sh`). You pass it `"Label|function"` entries (optionally `"Label|function|guard_command"` to hide an entry unless that command exists). The **label** is decoupled from the function name, so `yay_commands` can show as `Yay/Pacman commands`
+- Every menu in the repo is one universal `menu` function (`scripts/lib/helpers.sh`). You pass it `"Label|function"` entries (optionally `"Label|function|guard"` to hide an entry unless the guard passes: a command name, `distro:arch` / `distro:debian`, or `test:<function>`; join several with `+`). The **label** is decoupled from the function name, so `yay_commands` can show as `Yay/Pacman commands`
 - A menu entry whose function calls `menu` again becomes a **submenu** with its own back button — that's how `Yay/Pacman commands` (`scripts/functions/yay_pacman.sh`) opens `System update` / `System upgrade`
 - Adding an alias = drop a `scripts/functions/<name>.sh` file defining its function, then add one `"Label|<func>"` line to the `menu` call in `scripts/functions/alias_menu.sh`
 - Shared path constants and includes (`DOTFILES_DIR`, `PRIVATE_DIR`, `CONFIG_DIR`, the gum/print helpers, ...) live in `scripts/lib/common.sh` — source it instead of repeating paths
@@ -117,12 +161,15 @@ Dotfiles/
   scripts/
     lib/             # reusable helpers (no app-specific logic)
       common.sh      # path constants + sources lib/  (source this everywhere)
-      gum.sh         # gum/fallback UI wrappers
+      distro.sh      # distro detection + package managers (pacman/yay/apt, flatpak, snap, PPAs)
+      paths.sh       # paths that differ between distros (polkit, portals, sddm, fish, ...)
+      gum.sh         # gum bootstrap + UI wrappers
       helpers.sh     # universal menu(), execute_*, create_symlink, package engine, system_update
+    wrappers/        # launchers called from WM configs, resolve distro-specific paths (polkit, portals)
     install/
       main.sh        # installer ENGINE: sourcing + core-step functions + run_final_steps (no menus)
-      packages.txt
-      system/        # system-level config functions: niri, hyprland, sddm, fingerprint, gtk/bluetooth/polkit, xdg
+      packages.txt   # one line per package, works for both distros
+      system/        # system-level config functions: niri, hyprland, sddm, fingerprint, gtk/bluetooth/polkit, xdg, flatpak, sources.sh (custom installers)
       apps/          # per-app config functions: zen, kitty, fish, thunar, rofi, ...  (ONE file per app)
     functions/       # everyday shell aliases + alias_menu.sh (the `asd` menu)
       sync/          # private-files backup tool: sync_private.sh + sync_map.json (see below)
@@ -146,14 +193,14 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
 #### Scripts (just type name of script in terminal or use `asd` menu)
 
 - `asd` - Menu with all useful scripts by choosing from list:
-    - `set-env <var_name> <var_value>` - Set a new environment variable (writes to `config.fish`; with no args it asks via `gum`). On success the script offers to restart the shell so the change applies
-    - `delete-env <var_name>` - Delete an environment variable (with no args it lets you pick via `gum`). On success the script offers to restart the shell
+    - `set-env <var_name> <var_value>` - Set a new environment variable (writes to `config.fish`; with no args it asks via `gum`). Applied in the current shell right away, no restart needed
+    - `delete-env <var_name>` - Delete an environment variable (with no args it lets you pick via `gum`). Removed from the current shell right away
     - `set-java` - Set Java environment variable with selection from existing java versions (check `/usr/lib/jvm/`)
     - `rain` - Rain animation (if installed `terminal-rain` package)
     - `rain-float` - Rain animation in mini floating window (if installed `terminal-rain` package)
     - `vim` - open **nvim** on **ide** workspace and maximize window (if installed `neovim` package)
     - `sync-private` - back up private/sensitive files into `~/Dotfiles-private` (requires `jq`; see below)
-    - 'Yay/Pacman commands' - menu with useful yay/pacman commands:
+    - 'Yay/Pacman commands' - menu with useful yay/pacman commands (Arch only):
         - `update` - update system (`yay -Sy`)
         - `upgrade` - upgrade system (`yay -Syu`)
 
