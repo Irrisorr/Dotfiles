@@ -94,20 +94,26 @@ pkg_sync() {
 }
 
 
-# Also updates flatpaks: on Ubuntu a good part of the GUI apps come from Flathub
-# and the native manager never touches them.
+# pkg_upgrade [-i] — also updates flatpaks: on Ubuntu a good part of the GUI
+# apps come from Flathub and the native manager never touches them.
+# Without -i nothing asks (the installer); with -i every manager shows its own
+# prompts (the `upgrade` alias).
 pkg_upgrade() {
-  local rc=0
+  local rc=0 pm_yes=(--noconfirm) apt_yes=(-y) fp_yes=(--noninteractive --assumeyes)
+  local -a apt_env=(DEBIAN_FRONTEND=noninteractive)
+  if [ "$1" = "-i" ]; then
+    pm_yes=() apt_yes=() fp_yes=() apt_env=()
+  fi
 
   if is_arch; then
     if [ "$PKG_MGR" = "yay" ]; then
-      yay -Syu --noconfirm || rc=1
+      yay -Syu "${pm_yes[@]}" || rc=1
     else
-      sudo pacman -Syu --noconfirm || rc=1
+      sudo pacman -Syu "${pm_yes[@]}" || rc=1
     fi
   elif is_debian; then
-    sudo DEBIAN_FRONTEND=noninteractive apt-get update \
-      && sudo DEBIAN_FRONTEND=noninteractive apt-get full-upgrade -y \
+    sudo "${apt_env[@]}" apt-get update \
+      && sudo "${apt_env[@]}" apt-get full-upgrade "${apt_yes[@]}" \
       || rc=1
   else
     _unsupported_distro
@@ -115,7 +121,7 @@ pkg_upgrade() {
   fi
 
   if command -v flatpak &>/dev/null; then
-    flatpak update --noninteractive --assumeyes || rc=1
+    flatpak update "${fp_yes[@]}" || rc=1
   fi
 
   return $rc
