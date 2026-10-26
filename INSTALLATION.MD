@@ -247,7 +247,7 @@ neovim
 sqlite                 ubuntu:apt=sqlite3 (need for sync private dotfiles)
 zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
 niri                   ubuntu:ppa=avengemedia/danklinux (the compositor itself)
-dms-shell-bin          ubuntu:ppa=avengemedia/dms ubuntu:apt=dms (panel bar)
+dms-shell              ubuntu:ppa=avengemedia/dms ubuntu:apt=dms (panel bar)
 clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)
 logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
 ```
