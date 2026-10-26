@@ -52,7 +52,7 @@ bibata-cursor-theme
 papirus-icon-theme
 
 # Fonts
-ttf-jetbrains-mono-nerd ubuntu:apt=fonts-jetbrains-mono (Ubuntu: plain font, apt has no nerd-patched ones — icons will be missing)
+ttf-jetbrains-mono-nerd ubuntu:source=jetbrains_nerd (Ubuntu: official nerd-fonts release, re-run to update)
 
 # File managers
 thunar                (xfce/gtk fm)
@@ -78,7 +78,8 @@ obs-studio
 swayimg (view images)
 vlc (view videos)
 wlogout (logout app for wayland)
-clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: built from source, no auto-update)
+clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)
+wl-clipboard (wayland clipboard, needs for clipse and dms)
 
 # Settings packages
 pavucontrol (audio control)
@@ -117,6 +118,7 @@ xwayland-satellite     ubuntu:ppa=avengemedia/danklinux (to run X11 apps like St
 dms-shell-bin          ubuntu:ppa=avengemedia/dms ubuntu:apt=dms (panel bar)
 hyprlock (lock manager)
 swaybg (wallpaper tool)
+cliphist               ubuntu:ppa=avengemedia/danklinux (clipboard history for dms)
 
 # work
 nodejs

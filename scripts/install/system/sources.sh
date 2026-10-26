@@ -17,21 +17,32 @@
 . "$HOME/Dotfiles/scripts/lib/common.sh"
 
 
-# clipse has no Debian package, no PPA, no snap and no release binaries, so it
-# is built from source. The upstream Makefile's wayland target is
-# `CGO_ENABLED=0 go build -tags wayland`; go install takes the same tag and
-# skips the clone, so that is what runs here.
-#
-# NOTE: this does not update with the system. Re-run the step to upgrade.
+# clipse has no Debian package or PPA, but upstream publishes prebuilt Wayland
+# binaries. Installed into /usr/local/bin so it is on every PATH — including
+# niri's, which runs `clipse -listen` at startup (~/go/bin would not be).
+# Re-running the step upgrades it to the latest release.
 install_source_clipse() {
-  command -v go &>/dev/null || pkg_install golang-go || return 1
+  local arch tag tmp rc=0
+  case "$(uname -m)" in
+    x86_64)  arch=amd64 ;;
+    aarch64) arch=arm64 ;;
+    *) print_error_message "clipse: no release binary for $(uname -m)"; return 1 ;;
+  esac
 
-  CGO_ENABLED=0 go install -tags wayland github.com/savedra1/clipse@latest || return 1
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tag=$(curl -fsSL https://api.github.com/repos/savedra1/clipse/releases/latest)
+  tag=$(grep -m1 '"tag_name"' <<< "$tag" | cut -d'"' -f4)
+  [ -n "$tag" ] || { print_error_message "clipse: could not find the latest release"; return 1; }
 
-  local gobin="${GOBIN:-$(go env GOPATH)/bin}"
-  [ -x "$gobin/clipse" ] || { print_error_message "clipse not found in $gobin"; return 1; }
+  tmp=$(mktemp -d)
+  curl -fsSL "https://github.com/savedra1/clipse/releases/download/$tag/clipse_${tag}_linux_wayland_${arch}.tar.gz" \
+    | tar -xz -C "$tmp" \
+    && sudo install -m 755 "$tmp/clipse-linux-wayland-$arch" /usr/local/bin/clipse \
+    || rc=1
+  rm -rf "$tmp"
 
-  echo ":: clipse installed to $gobin — make sure that directory is on your PATH"
+  [ $rc -eq 0 ] && echo ":: clipse $tag installed to /usr/local/bin/clipse"
+  return $rc
 }
 
 
@@ -67,4 +78,23 @@ install_source_freeoffice() {
 # libfprint-2-tod1 it needs from the Ubuntu archive. Does not update by itself.
 install_source_goodix() {
   url_install "https://launchpad.net/~libfprint-tod1-group/+archive/ubuntu/ppa/+files/libfprint-2-tod1-goodix-550a_0.0.11+2404-0ubuntu1_amd64.deb"
+}
+
+
+# JetBrains Mono Nerd Font — kitty, fastfetch and DMS use its icons. apt ships
+# only the plain font, so the official nerd-fonts release is installed system
+# wide instead (the same font Arch's ttf-jetbrains-mono-nerd packages).
+# Re-running the step upgrades it to the latest release.
+install_source_jetbrains_nerd() {
+  local dir="/usr/local/share/fonts/JetBrainsMonoNerd"
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  command -v fc-cache &>/dev/null || pkg_install fontconfig || return 1
+
+  sudo mkdir -p "$dir" \
+    && curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz \
+       | sudo tar -xJ -C "$dir" \
+    && sudo fc-cache -f "$dir" >/dev/null \
+    || return 1
+
+  echo ":: JetBrainsMono Nerd Font installed to $dir"
 }
