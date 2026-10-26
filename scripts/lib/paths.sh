@@ -185,3 +185,21 @@ set_console_font() {
     return 1
   fi
 }
+
+
+# ─── Zen Browser ──────────────────────────────────────────────────────────────
+
+ZEN_FLATPAK_ID="app.zen_browser.zen"
+
+# Where Zen keeps its profiles: ~/.config/zen (newer native builds), ~/.zen
+# (older native builds — the Arch laptop), or the flatpak's persisted ~/.zen.
+zen_profile_root() {
+  _first_existing \
+    "$HOME/.config/zen" \
+    "$HOME/.zen" \
+    "$HOME/.var/app/$ZEN_FLATPAK_ID/.zen"
+}
+
+is_zen_flatpak() {
+  command -v flatpak &>/dev/null && flatpak info "$ZEN_FLATPAK_ID" &>/dev/null
+}
