@@ -248,7 +248,7 @@ sqlite                 ubuntu:apt=sqlite3 (need for sync private dotfiles)
 zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
 niri                   ubuntu:ppa=avengemedia/danklinux (the compositor itself)
 dms-shell-bin          ubuntu:ppa=avengemedia/dms ubuntu:apt=dms (panel bar)
-clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: built from source, no auto-update)
+clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)
 logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
 ```
 
@@ -261,7 +261,12 @@ notes always go inside the parentheses.
 * `<distro>` matches `$DISTRO` or `$DISTRO_FAMILY` (`ubuntu:`, `debian:`, `arch:`)
 * backends:
   * `apt` / `aur` / `pacman` — native manager, under this name
-  * `flatpak=<app id>` — from Flathub
+  * `flatpak=<app id>` — from Flathub. Also gets a shim in `/usr/local/bin`
+    (`exec flatpak run <app id>`) named like the native command — the canonical
+    name minus `-bin` (`zen-browser-bin` → `zen-browser`), so WM keybinds, menu
+    guards and scripts call it the same way on both distros
+  * `bin=<command>` — the shim's name when that default is wrong
+    (`visual-studio-code-bin ubuntu:flatpak=com.visualstudio.code ubuntu:bin=code`)
   * `snap=<name>`
   * `url=<link>` — a `.deb` / `.pkg.tar.zst` installed with the native manager
   * `ppa=<owner/repo>` — a **modifier**, not a method: adds the repo, then the
@@ -382,8 +387,11 @@ array of objects. Two kinds of entry:
 ```
 
 * **file group** (`sources`) — copied with `cp -rf`. Sources may be **files or
-  folders**; `~` expands to home and `*` globs are supported, so a changing
-  profile-folder name still matches.
+  folders**; `~` expands to home and `*` globs are supported (expanded with
+  `compgen -G`, so profile dirs with spaces match), so a changing profile-folder
+  name still matches. The map lists every Zen profile root — `~/.config/zen`,
+  `~/.zen` and the flatpak's `~/.var/app/app.zen_browser.zen/.zen` — and only
+  the ones that exist match.
 * **sqlite** (`sqlite` + `table`) — dumps a single table to `<dest>/<table>.sql`
   (e.g. `zen_bookmarks_workspaces`) instead of the whole database. The dump opens
   the DB with `file:<db>?immutable=1` (read-only, no locking), so it works even

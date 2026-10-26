@@ -22,14 +22,13 @@ cd Dotfiles
 
 - Same steps, same menus — nothing to choose by hand. Differences the installer handles by itself:
     - **niri**, `xwayland-satellite` and **dms** come from the DankMaterialShell author's PPAs (`ppa:avengemedia/danklinux`, `ppa:avengemedia/dms`) — they are not in the Ubuntu repos
-    - apps that are only in the AUR (Zen, VS Code, Obsidian, Discord, Spotify, ...) are installed from **Flathub**
-    - `clipse` is built from source (`go install`), FreeOffice comes from SoftMaker's apt repo
+    - apps that are only in the AUR (Zen, VS Code, Obsidian, Discord, Spotify, ...) are installed from **Flathub** — and get a command with the usual name in `/usr/local/bin` (`zen-browser`, `code`, `spotify`, ...), so niri keybinds and the config menu work the same as on Arch
+    - `clipse` (release binary), JetBrains Mono Nerd Font (official nerd-fonts release) and FreeOffice (SoftMaker's apt repo) have their own installers in `scripts/install/system/sources.sh`; re-run the package step to update clipse and the font
+    - SDDM replaces GDM as the login screen (the **SDDM** config step switches it; it prints the command to switch back)
 - Known differences:
-    - `fonts-jetbrains-mono` is **not nerd-patched** — icons in fastfetch / DMS / kitty will be missing
     - 12 packages have no Ubuntu source and are skipped (the installer names them before installing): `anyrun`, `walker`, `gowall`, `hyprswitch`, `hyprshot`, `arronax`, `vimix-gtk-themes`, `waydroid`, `spicetify-cli`, `terminal-rain-lightning`, `logmein-hamachi`, `ags-hyprpanel-git`
     - fingerprint driver (`libfprint-2-tod1-goodix-v2`, 27c6:550a) is installed from the same `.deb` the AUR package repackages — it doesn't update by itself
     - `iMe`, `claude-code` and `claude-desktop` have no Ubuntu source yet — the installer reports them as `missing:` and installs everything else
-    - Zen and Zoom config steps don't work with their flatpak versions yet
 
 ### Adding a package
 
