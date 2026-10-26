@@ -389,9 +389,9 @@ array of objects. Two kinds of entry:
 * **file group** (`sources`) — copied with `cp -rf`. Sources may be **files or
   folders**; `~` expands to home and `*` globs are supported (expanded with
   `compgen -G`, so profile dirs with spaces match), so a changing profile-folder
-  name still matches. The map lists every Zen profile root — `~/.config/zen`,
-  `~/.zen` and the flatpak's `~/.var/app/app.zen_browser.zen/.zen` — and only
-  the ones that exist match.
+  name still matches. The map lists both Zen profile roots — `~/.config/zen`
+  (native) and the flatpak's `~/.var/app/app.zen_browser.zen/.zen` — and only
+  the one that exists matches.
 * **sqlite** (`sqlite` + `table`) — dumps a single table to `<dest>/<table>.sql`
   (e.g. `zen_bookmarks_workspaces`) instead of the whole database. The dump opens
   the DB with `file:<db>?immutable=1` (read-only, no locking), so it works even
