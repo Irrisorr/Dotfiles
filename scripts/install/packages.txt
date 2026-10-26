@@ -20,7 +20,7 @@ syncthing (sync service (f.e. for obsidian sync between devices))
 
 # IDE's
 neovim
-visual-studio-code-bin ubuntu:flatpak=com.visualstudio.code
+visual-studio-code-bin ubuntu:flatpak=com.visualstudio.code ubuntu:bin=code
 intellij-idea-ultimate-edition ubuntu:flatpak=com.jetbrains.IntelliJ-IDEA-Ultimate
 postman-bin            ubuntu:flatpak=com.getpostman.Postman
 podman-desktop-bin     ubuntu:flatpak=io.podman_desktop.PodmanDesktop

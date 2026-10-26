@@ -193,6 +193,24 @@ flatpak_install() {
 }
 
 
+# flatpak_shim <command> <app id> — make a flatpak callable by the command name
+# the native package has (zen-browser, code, ...), so WM keybinds, menu guards
+# and scripts work the same on both distros. /usr/local/bin is on every PATH,
+# including the compositor's.
+flatpak_shim() {
+  local cmd="$1" id="$2" path="/usr/local/bin/$1"
+  [ -n "$cmd" ] && [ -n "$id" ] || return 1
+
+  # Never shadow a real binary of that name — only our own shim gets rewritten.
+  if command -v "$cmd" &>/dev/null && ! grep -qs "flatpak run" "$(command -v "$cmd")"; then
+    return 0
+  fi
+
+  printf '#!/bin/sh\nexec flatpak run %s "$@"\n' "$id" | sudo tee "$path" >/dev/null \
+    && sudo chmod 755 "$path"
+}
+
+
 # ─── Other install backends ───────────────────────────────────────────────────
 
 snap_install() {

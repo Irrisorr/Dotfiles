@@ -179,16 +179,18 @@ load_package_index() {
 }
 
 
-# resolve_package <canonical> → "<backend>\t<value>\t<repo>"
+# resolve_package <canonical> → "<backend>␟<value>␟<repo>␟<bin>"  (␟ = \x1f)
 #   backend ∈ native | flatpak | snap | url | source | skip
-#   repo is empty unless a ppa= token asked for one — and it is LAST because
-#   `read` with IFS=tab strips a leading empty field (tab counts as whitespace),
-#   which would shift every column when there is no repo.
+#   repo is empty unless a ppa= token asked for one; bin is empty unless a bin=
+#   token named the command a flatpak should be callable as (default: the
+#   canonical name minus "-bin", see install_packages).
+#   Fields are split on \x1f, not tab: tab is IFS whitespace, so `read` would
+#   collapse empty fields and shift every column after them.
 resolve_package() {
   load_package_index || return 1
 
   local name="$1" tok backend value
-  local repo="" out_backend="" out_value=""
+  local repo="" bin="" out_backend="" out_value=""
 
   for tok in ${_PKG_SPEC["$name"]}; do
     case "$tok" in
@@ -203,6 +205,7 @@ resolve_package() {
 
     case "$backend" in
       ppa | repo) repo="$value"; continue ;;
+      bin) bin="$value"; continue ;;
       apt | aur | pacman) backend="native" ;;
     esac
 
@@ -210,7 +213,7 @@ resolve_package() {
     out_value="$value"
   done
 
-  printf '%s\t%s\t%s\n' "${out_backend:-native}" "${out_value:-$name}" "$repo"
+  printf '%s\x1f%s\x1f%s\x1f%s\n' "${out_backend:-native}" "${out_value:-$name}" "$repo" "$bin"
 }
 
 
@@ -329,12 +332,15 @@ start_package_installation() {
 # backend, so one run can mix repo packages, flatpaks and source builds.
 install_packages() {
   local -a native=() flat=() snaps=() urls=() src=() skipped=()
-  local -A repos=()
-  local name repo backend value
+  local -A repos=() flat_bin=()
+  local name repo backend value bin
 
   for name in "$@"; do
-    IFS=$'\t' read -r backend value repo < <(resolve_package "$name")
+    IFS=$'\x1f' read -r backend value repo bin < <(resolve_package "$name")
     [ -n "$repo" ] && repos["$repo"]=1
+    # A flatpak gets a shim named like the native command; the canonical name
+    # minus "-bin" is right for all but a few (bin=code for VS Code).
+    [ "$backend" = flatpak ] && flat_bin["$value"]="${bin:-${name%-bin}}"
 
     case "$backend" in
       native)  native+=("$value") ;;
@@ -405,6 +411,10 @@ install_packages() {
     print_styled_message "Installing ${#flat[@]} flatpaks"
     for value in "${flat[@]}"; do
       flatpak_install "$value" || failed+=("flatpak:$value")
+      # Also for apps installed by an earlier run, so a re-run adds the shim.
+      if [ -n "${flat_bin[$value]}" ] && flatpak info "$value" &>/dev/null; then
+        flatpak_shim "${flat_bin[$value]}" "$value" || failed+=("shim:${flat_bin[$value]}")
+      fi
     done
   fi
 
