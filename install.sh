@@ -33,7 +33,7 @@ config_menu() {
     "Hyprland ecosystem|configure_hyprland|hyprland" \
     "SDDM|configure_sddm|sddm" \
     "Enable Flatpak + Flathub|enable_flatpak|distro:debian" \
-    "Enable Bluetooth service|enable_bluetooth" \
+    "Enable Bluetooth service|enable_bluetooth|bluetoothctl" \
     "Start GNOME polkit agent|start_polkit_gnome|test:has_polkit_gnome" \
     "Start MATE polkit agent|start_polkit_mate|test:has_polkit_mate" \
     "GTK (window control buttons)|configure_gtk" \
@@ -45,7 +45,7 @@ config_menu() {
     "Kitty|configure_kitty|kitty" \
     "Fish|configure_fish|fish" \
     "Rofi|configure_rofi|rofi" \
-    "Spicetify|configure_spicetify|spicetify-cli" \
+    "Spicetify|configure_spicetify|spicetify" \
     "Thunar|configure_thunar|thunar" \
     "Wlogout|configure_wlogout|wlogout" \
     "Wofi|configure_wofi|wofi" \
