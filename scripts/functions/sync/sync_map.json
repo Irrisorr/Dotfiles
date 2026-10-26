@@ -1,25 +1,28 @@
 [
   {
+    "comment": "Zen profile roots: ~/.config/zen (newer native), ~/.zen (older native, the Arch laptop), the flatpak's ~/.zen (Ubuntu)",
     "dest": "~/Dotfiles-private/zen-browser",
     "sources": [
       "~/.config/zen/*release*/zen-sessions.jsonlz4",
       "~/.config/zen/*release*/zen-live-folders.jsonlz4",
       "~/.config/zen/*release*/search.json.mozlz4",
-      "~/.zen/2oa3mlp3.Default (release)/zen-sessions.jsonlz4",
-      "~/.zen/2oa3mlp3.Default (release)/zen-live-folders.jsonlz4",
-      "~/.zen/2oa3mlp3.Default (release)/search.json.mozlz4"
+      "~/.zen/*release*/zen-sessions.jsonlz4",
+      "~/.zen/*release*/zen-live-folders.jsonlz4",
+      "~/.zen/*release*/search.json.mozlz4",
+      "~/.var/app/app.zen_browser.zen/.zen/*release*/zen-sessions.jsonlz4",
+      "~/.var/app/app.zen_browser.zen/.zen/*release*/zen-live-folders.jsonlz4",
+      "~/.var/app/app.zen_browser.zen/.zen/*release*/search.json.mozlz4"
     ]
   },
-  {
-    "dest": "~/Dotfiles-private/zen-browser",
-    "sqlite": "~/.zen/2oa3mlp3.Default (release)/places.sqlite",
-    "table": "zen_bookmarks_workspaces"
-  },
+  { "dest": "~/Dotfiles-private/zen-browser", "sqlite": "~/.config/zen/*release*/places.sqlite", "table": "zen_bookmarks_workspaces" },
+  { "dest": "~/Dotfiles-private/zen-browser", "sqlite": "~/.zen/*release*/places.sqlite", "table": "zen_bookmarks_workspaces" },
+  { "dest": "~/Dotfiles-private/zen-browser", "sqlite": "~/.var/app/app.zen_browser.zen/.zen/*release*/places.sqlite", "table": "zen_bookmarks_workspaces" },
   {
     "dest": "~/Dotfiles/zen-browser",
     "sources": [
       "~/.config/zen/*release*/zen-keyboard-shortcuts.json",
-      "~/.zen/2oa3mlp3.Default (release)/zen-keyboard-shortcuts.json"
+      "~/.zen/*release*/zen-keyboard-shortcuts.json",
+      "~/.var/app/app.zen_browser.zen/.zen/*release*/zen-keyboard-shortcuts.json"
     ]
   }
 ]
