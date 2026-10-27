@@ -138,7 +138,7 @@ thefuck (tui app that fixes errors in previous console commands)
 python-pip             ubuntu:apt=python3-pip
 github-cli             ubuntu:apt=gh (github client for terminal)
 jdk21-openjdk          ubuntu:apt=openjdk-21-jdk
-jdk23-openjdk          ubuntu:apt=openjdk-25-jdk (Ubuntu: no 23 in apt, 25 is the current LTS)
+jdk25-openjdk          ubuntu:apt=openjdk-25-jdk (current LTS)
 maven (java project management)
 fastfetch (fast neofetch)
 figlet (for making large letters in terminal)
