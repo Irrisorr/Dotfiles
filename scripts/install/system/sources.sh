@@ -13,6 +13,9 @@
 #
 # Return 0 on success, non-zero on failure — the installer collects failures
 # and reports them at the end instead of aborting the whole run.
+#
+# Optional:  installed_source_<name>  — returns 0 when it is already installed,
+# so the package picker can mark it ✓. Without one the entry shows no mark.
 
 . "$HOME/Dotfiles/scripts/lib/common.sh"
 
@@ -119,4 +122,18 @@ install_source_jetbrains_nerd() {
     || return 1
 
   echo ":: JetBrainsMono Nerd Font installed to $dir"
+}
+
+
+# ─── Installed checks for the package picker (see the contract above) ─────────
+
+installed_source_clipse()         { command -v clipse &>/dev/null; }
+installed_source_jetbrains_nerd() { fc-list 2>/dev/null | grep -q "JetBrainsMono Nerd"; }
+installed_source_freeoffice()     { pkg_installed softmaker-freeoffice-2024; }
+installed_source_goodix() {
+  if is_debian; then
+    pkg_installed libfprint-2-tod1-goodix-550a
+  else
+    pkg_installed libfprint-2-tod1-goodix-v2
+  fi
 }

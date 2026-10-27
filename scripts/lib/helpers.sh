@@ -8,6 +8,7 @@
 declare -A SELECTED_PACKAGES
 declare -A ACTION_STATUS
 declare -A _PKG_SPEC
+declare -A _PKG_INSTALLED _PKG_UPGRADABLE _PKG_REAL
 
 
 # ─── Universal menu ───────────────────────────────────────────────────────────
@@ -236,6 +237,112 @@ _package_display_line() {
 }
 
 
+# ─── Installed / upgradable status for the picker ─────────────────────────────
+#
+# Collected once per picker session, in a few bulk queries instead of one per
+# package. Keys are the names this distro installs (resolve_package's value):
+# package names for native, app ids for flatpak.
+
+load_package_status() {
+  _PKG_INSTALLED=() _PKG_UPGRADABLE=() _PKG_REAL=()
+  local name backend value repo bin
+  local -a native=()
+
+  load_package_index || return 1
+  for name in "${!_PKG_SPEC[@]}"; do
+    IFS=$'\x1f' read -r backend value repo bin < <(resolve_package "$name")
+    [ "$backend" = native ] && native+=("$value")
+  done
+
+  echo ":: Checking installed packages and available updates..."
+
+  if is_arch; then
+    # pacman -T prints the deps NOT satisfied by what is installed — and it
+    # resolves provides, so dux-shell counts as installed via dms-shell-bin.
+    local -A missing=()
+    while IFS= read -r value; do missing["$value"]=1; done < <(pacman -T "${native[@]}" 2>/dev/null)
+    local -a present=() real=()
+    for value in "${native[@]}"; do
+      [ -n "${missing[$value]}" ] || { _PKG_INSTALLED["$value"]=1; present+=("$value"); }
+    done
+    # Updates are listed under the package that is really installed
+    # (obs-studio-git for obs-studio), so map each name to it. -Qq resolves
+    # provides and answers in argument order; every name here is installed.
+    mapfile -t real < <(pacman -Qq "${present[@]}" 2>/dev/null)
+    if [ ${#real[@]} -eq ${#present[@]} ]; then
+      local i
+      for i in "${!present[@]}"; do _PKG_REAL["${present[$i]}"]="${real[$i]}"; done
+    fi
+    # -Qu reads the local sync db (current after the pre-install update);
+    # yay -Qua asks the AUR.
+    while read -r value _; do _PKG_UPGRADABLE["$value"]=1; done < <(
+      pacman -Qu 2>/dev/null
+      command -v yay &>/dev/null && yay -Qua 2>/dev/null
+    )
+  elif is_debian; then
+    while read -r value; do _PKG_INSTALLED["$value"]=1; done < <(
+      dpkg-query -W -f='${db:Status-Status} ${Package}\n' 2>/dev/null | awk '$1 == "installed" { print $2 }')
+    while IFS=/ read -r value _; do _PKG_UPGRADABLE["$value"]=1; done < <(
+      apt list --upgradable 2>/dev/null | tail -n +2)
+  fi
+
+  if command -v flatpak &>/dev/null; then
+    while read -r value; do _PKG_INSTALLED["$value"]=1; done < <(flatpak list --app --columns=application 2>/dev/null)
+    while read -r value; do _PKG_UPGRADABLE["$value"]=1; done < <(flatpak remote-ls --updates --columns=application 2>/dev/null)
+  fi
+}
+
+
+# package_mark <canonical> → "✓ ↑" (installed, update available), "✓"
+# (installed), or nothing. Skipped-on-this-distro packages get nothing.
+package_mark() {
+  local backend value repo bin
+  IFS=$'\x1f' read -r backend value repo bin < <(resolve_package "$1")
+
+  case "$backend" in
+    native | flatpak)
+      [ -n "${_PKG_INSTALLED[$value]}" ] || return 0
+      [ -n "${_PKG_UPGRADABLE[${_PKG_REAL[$value]:-$value}]}" ] && echo "✓ ↑" || echo "✓"
+      ;;
+    source)
+      declare -F "installed_source_$value" >/dev/null \
+        && "installed_source_$value" && echo "✓"
+      ;;
+  esac
+  return 0
+}
+
+
+# Raw packages.txt lines of one category (override tails included).
+_category_lines() {
+  awk -v category="$1" '
+    BEGIN { p=0 }
+    /^#/ {
+        if (p) { exit }
+        gsub(/^#[ \t]*/, "");   # not \s: Ubuntu ships mawk, which lacks it
+        sub(/[ \t]*\|.*$/, "");  # drop the " | guard" part of the header
+        if ($0 == category) { p=1 }
+        next
+    }
+    p && NF { print }
+  ' "$INSTALL_DIR/packages.txt"
+}
+
+
+# "(installed/total)" for a category; skipped-on-this-distro packages don't count.
+category_counter() {
+  local line backend value repo bin total=0 done=0
+  while IFS= read -r line; do
+    _split_package_line "$line"
+    IFS=$'\x1f' read -r backend value repo bin < <(resolve_package "$_PKG_NAME")
+    [ "$backend" = skip ] && continue
+    total=$((total + 1))
+    [ -n "$(package_mark "$_PKG_NAME")" ] && done=$((done + 1))
+  done < <(_category_lines "$1")
+  echo "($done/$total)"
+}
+
+
 # ─── Package selection engine ─────────────────────────────────────────────────
 
 # Function to handle interactive category selection and package selection
@@ -243,18 +350,20 @@ package_category_selection() {
   local package_file="$INSTALL_DIR/packages.txt"
 
   require_gum "package installation" || return 1
+  load_package_status
 
   while true; do
     local categories_array=()
     local category_status=()
 
+    # "✓ " prefix = packages picked in this category; "(2/4)" = installed.
     while IFS= read -r category; do
       categories_array+=("$category")
 
       if [ -n "${SELECTED_PACKAGES[$category]}" ]; then
-        category_status+=("✓ $category")
+        category_status+=("✓ $category $(category_counter "$category")")
       else
-        category_status+=("  $category")
+        category_status+=("  $category $(category_counter "$category")")
       fi
     done < <(get_all_categories)
 
@@ -263,6 +372,7 @@ package_category_selection() {
 
     print_styled_message "Package Installation
 Select Package Categories
+(installed/total) per category
 Navigate with arrows, ENTER to confirm"
     echo ""
 
@@ -281,9 +391,10 @@ Navigate with arrows, ENTER to confirm"
       print_styled_message "Skipping package installation"
       break
     else
-      # Strip the "✓ " / "  " status prefix added above.
+      # Strip the "✓ " / "  " prefix and the " (n/m)" counter added above.
       local clean_choice="${choice#✓ }"
       clean_choice="${clean_choice#  }"
+      clean_choice="${clean_choice% (*/*)}"
       select_packages_for_category "$clean_choice"
     fi
     echo ""
@@ -455,6 +566,7 @@ select_packages_for_category() {
   local category=$1
 
   print_styled_message "Selecting packages from: $category
+✓ installed   ↑ update available
 Navigate with arrows, SPACE to select
 ENTER to confirm
 ESC or ENTER without selection to cancel"
@@ -510,25 +622,15 @@ ESC or ENTER without selection to cancel"
 }
 
 
-# Function to get packages from a specific category in the packages.txt file
+# Picker lines of one category: "<name> (description)" plus the ✓ / ✓ ↑ mark
+# at the end, so the package name stays the first word for parsing.
 get_packages_from_category() {
-  local category_to_find="$1"
-  local package_file="$INSTALL_DIR/packages.txt"
-
-  local line
-  awk -v category="$category_to_find" '
-    BEGIN { p=0 }
-    /^#/ {
-        if (p) { exit }
-        gsub(/^#[ \t]*/, "");   # not \s: Ubuntu ships mawk, which lacks it
-        sub(/[ \t]*\|.*$/, "");  # drop the " | guard" part of the header
-        if ($0 == category) { p=1 }
-        next
-    }
-    p { print }
-  ' "$package_file" | while IFS= read -r line; do
-    _package_display_line "$line"
-  done
+  local line mark
+  while IFS= read -r line; do
+    _split_package_line "$line"
+    mark=$(package_mark "$_PKG_NAME")
+    printf '%s%s\n' "$(_package_display_line "$line")" "${mark:+  $mark}"
+  done < <(_category_lines "$1")
 }
 
 
