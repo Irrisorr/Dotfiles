@@ -79,6 +79,25 @@ pkg_install() {
 }
 
 
+# Bring a fresh or long-idle system up to date before installing anything —
+# stale package lists make the very first install (gum) fail.
+# Arch: never -Sy alone (a partial upgrade is how fish once broke against an
+# older glibc), so it is a full upgrade. Keyrings go first: one older than the
+# current packager keys can't verify anything, including the -Su itself.
+pkg_refresh() {
+  if is_arch; then
+    local rings=(archlinux-keyring)
+    pacman -Q cachyos-keyring &>/dev/null && rings+=(cachyos-keyring)
+    sudo pacman -Sy --needed --noconfirm "${rings[@]}" \
+      && sudo pacman -Su --noconfirm
+  elif is_debian; then
+    sudo DEBIAN_FRONTEND=noninteractive apt-get update
+  else
+    _unsupported_distro
+  fi
+}
+
+
 pkg_sync() {
   if is_arch; then
     if [ "$PKG_MGR" = "yay" ]; then

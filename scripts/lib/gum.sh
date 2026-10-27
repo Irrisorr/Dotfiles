@@ -52,11 +52,13 @@ bootstrap_gum() {
   fi
 
   echo ":: Installing gum for beautiful output..."
-  pkg_install gum &>/dev/null
-
-  # apt has no 'gum', so on Debian/Ubuntu fall through to Charm's apt repo.
-  if ! command -v gum &>/dev/null && is_debian; then
+  # Output stays visible: a failure here (stale mirrors, old keyring) is the
+  # first thing a fresh install hits, and its reason is only in pacman's output.
+  # apt has no 'gum', so Debian/Ubuntu go straight to Charm's apt repo.
+  if is_debian; then
     _gum_install_apt_repo
+  else
+    pkg_install gum
   fi
 
   if command -v gum &>/dev/null; then

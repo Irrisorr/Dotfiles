@@ -4,6 +4,7 @@
 # every step is a function, listed in one menu() call at the bottom.
 
 . "$HOME/Dotfiles/scripts/lib/common.sh"
+require_gum "post-install" || exit 1
 . "$APPS_DIR/zen.sh"   # for _zen_find_profile + restore_private_zen
 
 

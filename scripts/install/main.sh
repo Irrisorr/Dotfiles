@@ -56,6 +56,7 @@ install_window_manager() {
 # .bak.<date> ones. find does not follow symlinks, so it never reaches into
 # ~/Dotfiles through a linked config dir.
 _find_config_backups() {
+  [ -d "$HOME/.config" ] || return 0   # a brand-new user may not have one yet
   find "$HOME/.config" \( -name '*.bak' -o -name '*.bak.[0-9]*' \) -prune "$@"
 }
 
