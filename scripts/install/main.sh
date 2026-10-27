@@ -10,7 +10,11 @@
 # Before common.sh: sourcing it installs gum, and on a fresh or long-idle
 # system that already fails on stale package lists / an old keyring.
 . "$HOME/Dotfiles/scripts/lib/distro.sh"
-read -rp ":: Update the system before installing (package lists + all updates)? Recommended [Y/n]: " reply </dev/tty
+# No terminal to ask on → skip, never a silent "yes" to a full upgrade.
+reply=n
+if { : </dev/tty; } 2>/dev/null; then
+  read -rp ":: Update the system before installing (package lists + all updates)? Recommended [Y/n]: " reply </dev/tty
+fi
 case "$reply" in
   n | N) ;;
   *) pkg_refresh || echo ":: System update failed — installs may fail too" >&2 ;;
