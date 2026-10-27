@@ -7,7 +7,19 @@
 # The menus (config_menu + the first menu) live in install.sh so adding a new
 # configuration only means editing that one file.
 
+# Before common.sh: sourcing it installs gum, and on a fresh or long-idle
+# system that already fails on stale package lists / an old keyring.
+. "$HOME/Dotfiles/scripts/lib/distro.sh"
+read -rp ":: Update the system before installing (package lists + all updates)? Recommended [Y/n]: " reply </dev/tty
+case "$reply" in
+  n | N) ;;
+  *) pkg_refresh || echo ":: System update failed — installs may fail too" >&2 ;;
+esac
+
 . "$HOME/Dotfiles/scripts/lib/common.sh"
+
+# Menus can't run without gum; stop instead of jumping to the final steps.
+require_gum "the installer" || exit 1
 
 # Load every config function (system first, then apps).
 for f in "$SYSTEM_DIR"/*.sh "$APPS_DIR"/*.sh; do

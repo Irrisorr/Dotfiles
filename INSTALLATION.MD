@@ -58,8 +58,9 @@ the same shell is a no-op.
 
   Package functions, one per operation, so no caller ever writes `pacman` or
   `apt` itself: `pkg_install` (`--needed` on Arch), `pkg_refresh` (first thing
-  `install.sh` offers: keyrings + full `pacman -Syu` on Arch — never a bare
-  `-Sy`, that's a partial upgrade — or `apt update`), `pkg_sync`, `pkg_upgrade`
+  the installer engine offers, before gum: keyrings + full `pacman -Syu` on
+  Arch — never a bare `-Sy`, that's a partial upgrade — or `apt update` +
+  `apt full-upgrade`), `pkg_sync`, `pkg_upgrade`
   (also runs `flatpak update` when flatpak is present; `-i` keeps every
   manager's prompts — the `upgrade` alias uses it, the installer doesn't), `pkg_installed`,
   `pkg_available`, `pkg_install_hint`. Other backends: `ensure_flatpak` /

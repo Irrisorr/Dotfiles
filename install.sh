@@ -22,23 +22,7 @@
 #
 # Adding a core step:   write its function in main.sh, add a line to the first menu.
 
-# Runs before main.sh: sourcing it installs gum, which already needs current
-# package lists.
-. "$HOME/Dotfiles/scripts/lib/distro.sh"
-if is_arch; then
-  read -rp ":: Update the system first (keyrings + pacman -Syu)? Recommended on a fresh install [Y/n]: " reply </dev/tty
-else
-  read -rp ":: Refresh the package lists first (apt update)? [Y/n]: " reply </dev/tty
-fi
-case "$reply" in
-  n | N) ;;
-  *) pkg_refresh || echo ":: System update failed — installs may fail too" >&2 ;;
-esac
-
 . "$HOME/Dotfiles/scripts/install/main.sh"
-
-# Menus can't run without gum; stop here instead of jumping to the final steps.
-require_gum "the installer" || exit 1
 
 
 # ─── Configuration submenu ───────────────────────────────────────────────────
