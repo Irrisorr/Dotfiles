@@ -12,7 +12,7 @@ cd Dotfiles
 ./install.sh
 ```
 
-- The package picker marks what's already installed (`✓`, `↑` = an update is available) and shows `(installed/total)` next to every category, so you can pick only what's missing
+- The package picker marks what's already installed (`✓`, `↑` = an update is available) and shows `(installed/total)` and how many packages you picked next to every category (plus the total in the header), so you can pick only what's missing
 
 - After it reboot your device and open new terminal, there will be a hook that will run `post_install.sh` automatically. If something went wrong, you can run it manually:
 ```

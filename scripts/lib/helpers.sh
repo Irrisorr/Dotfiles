@@ -355,13 +355,17 @@ package_category_selection() {
   while true; do
     local categories_array=()
     local category_status=()
+    local picked total_picked=0
 
-    # "✓ " prefix = packages picked in this category; "(2/4)" = installed.
+    # "✓ " prefix and "· N selected" = packages picked in this category;
+    # "(2/4)" = installed.
     while IFS= read -r category; do
       categories_array+=("$category")
 
       if [ -n "${SELECTED_PACKAGES[$category]}" ]; then
-        category_status+=("✓ $category $(category_counter "$category")")
+        picked=$(grep -c . <<< "${SELECTED_PACKAGES[$category]}")
+        total_picked=$((total_picked + picked))
+        category_status+=("✓ $category $(category_counter "$category") · $picked selected")
       else
         category_status+=("  $category $(category_counter "$category")")
       fi
@@ -373,6 +377,7 @@ package_category_selection() {
     print_styled_message "Package Installation
 Select Package Categories
 (installed/total) per category
+Selected: $total_picked package(s)
 Navigate with arrows, ENTER to confirm"
     echo ""
 
@@ -391,9 +396,10 @@ Navigate with arrows, ENTER to confirm"
       print_styled_message "Skipping package installation"
       break
     else
-      # Strip the "✓ " / "  " prefix and the " (n/m)" counter added above.
+      # Strip the "✓ " / "  " prefix, " · N selected" and " (n/m)" added above.
       local clean_choice="${choice#✓ }"
       clean_choice="${clean_choice#  }"
+      clean_choice="${clean_choice% · * selected}"
       clean_choice="${clean_choice% (*/*)}"
       select_packages_for_category "$clean_choice"
     fi

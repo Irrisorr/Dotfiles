@@ -292,7 +292,8 @@ notes always go inside the parentheses.
 missing:
 
 ```
-  Browsers (3/4)                          ← installed / available on this distro
+Selected: 2 package(s)                    ← header: everything picked so far
+✓ Browsers (3/4) · 2 selected             ← installed / available · picked here
 zen-browser-bin (based on firefox)  ✓     ← installed
 firefox  ✓ ↑                              ← installed, an update is available
 vivaldi (based on chromium)               ← not installed
