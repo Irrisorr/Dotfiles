@@ -86,7 +86,7 @@ pavucontrol (audio control)
 nwg-look (themes/icons/cursors etc. control)
 polkit-gnome           ubuntu:apt=policykit-1-gnome (for apps that required gui roots)
 mate-polkit (for apps that required gui roots)
-libfprint-2-tod1-goodix-v2 ubuntu:source=goodix (driver for my fingerprint device (27c6:550a: Shenzhen Goodix Technology))
+libfprint-2-tod1-goodix-v2 arch:source=goodix ubuntu:source=goodix (driver for my fingerprint device (27c6:550a: Shenzhen Goodix Technology))
 fprintd (for setting ur fingerprint for lock-managers)
 logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
 

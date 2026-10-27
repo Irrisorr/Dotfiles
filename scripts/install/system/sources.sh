@@ -72,12 +72,34 @@ install_source_freeoffice() {
 }
 
 
-# Goodix 27c6:550a fingerprint driver. The AUR package (libfprint-2-tod1-goodix-v2)
-# repackages exactly this .deb from the libfprint-tod1-group PPA. The PPA has no
-# build for 26.04, so the noble .deb is installed directly — apt pulls in the
-# libfprint-2-tod1 it needs from the Ubuntu archive. Does not update by itself.
+# Goodix 27c6:550a fingerprint driver.
+#
+# Arch: the AUR driver needs libfprint-tod, which conflicts with the plain
+# libfprint that fprintd pulls from the repos. pacman asks before swapping them
+# and --noconfirm answers "no", so the whole AUR transaction fails. Swap them
+# here instead: drop libfprint without its dependants (libfprint-tod provides
+# it, so fprintd stays satisfied), then install, and put libfprint back if that
+# fails so fprintd is never left without it.
+#
+# Ubuntu: the PPA has no 26.04 build, so the noble .deb the AUR package
+# repackages is installed directly; apt pulls libfprint-2-tod1 from the archive.
+# Does not update by itself.
 install_source_goodix() {
-  url_install "https://launchpad.net/~libfprint-tod1-group/+archive/ubuntu/ppa/+files/libfprint-2-tod1-goodix-550a_0.0.11+2404-0ubuntu1_amd64.deb"
+  if is_debian; then
+    url_install "https://launchpad.net/~libfprint-tod1-group/+archive/ubuntu/ppa/+files/libfprint-2-tod1-goodix-550a_0.0.11+2404-0ubuntu1_amd64.deb"
+    return
+  fi
+
+  # `pacman -Qq libfprint` resolves provides: it prints libfprint-tod once that
+  # is installed, so only the plain package is swapped out.
+  if [ "$(pacman -Qq libfprint 2>/dev/null)" = "libfprint" ]; then
+    sudo pacman -Rdd --noconfirm libfprint || return 1
+  fi
+
+  if ! pkg_install libfprint-tod libfprint-2-tod1-goodix-v2; then
+    pacman -Qq libfprint &>/dev/null || pkg_install libfprint
+    return 1
+  fi
 }
 
 
