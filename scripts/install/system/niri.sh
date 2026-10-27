@@ -7,7 +7,7 @@ configure_niri() {
 
   execute_command "Configure niri directory" "create_symlink $HOME/Dotfiles/niri $HOME/.config/niri"
 
-  execute_command "Configure dms-shell (panel-bar)" "create_symlink $HOME/Dotfiles/DankMaterialShell $HOME/.config/DankMaterialShell"
+  execute_command "Configure Dux shell (panel-bar)" "create_symlink $HOME/Dotfiles/DankMaterialShell $HOME/.config/DankMaterialShell"
 
   _disable_global_dms_units
 

@@ -144,7 +144,7 @@ fish_quote() {
 #   url             → download a .deb/.pkg.tar.zst and install it natively
 #   ppa             → a modifier, not a method: adds the repo, then installs
 #                     normally. Pair it with apt= when the name also differs:
-#                       dms-shell  ubuntu:ppa=duxlabs/dms ubuntu:apt=dms
+#                       dux-shell  ubuntu:ppa=duxlabs/dms ubuntu:apt=dms
 #   source          → escape hatch for the rare package that needs real logic;
 #                     runs install_source_<value> from install/sources.sh
 #
