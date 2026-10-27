@@ -12,6 +12,8 @@ cd Dotfiles
 ./install.sh
 ```
 
+- The package picker marks what's already installed (`✓`, `↑` = an update is available) and shows `(installed/total)` next to every category, so you can pick only what's missing
+
 - After it reboot your device and open new terminal, there will be a hook that will run `post_install.sh` automatically. If something went wrong, you can run it manually:
 ```
 cd Dotfiles
@@ -30,6 +32,7 @@ cd Dotfiles
     - fingerprint driver (`libfprint-2-tod1-goodix-v2`, 27c6:550a) is installed from the same `.deb` the AUR package repackages — it doesn't update by itself
     - `iMe`, `claude-code` and `claude-desktop` have no Ubuntu source yet — the installer reports them as `missing:` and installs everything else
 
+
 ### Adding a package
 
 - One line in `scripts/install/packages.txt` under its category — it's installed on both distros. If on Ubuntu the package has another name or comes from somewhere else, add a tail (full format in [INSTALLATION.MD](INSTALLATION.MD#packagestxt)):
@@ -47,7 +50,7 @@ logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unver
 - Things that are per machine and need care:
     - monitors (`niri/conf/output.kdl`, `open-on-output` in `workspaces.kdl`) — u can list the monitors of both machines in the same file, niri ignores outputs that aren't connected
     - `fish/fish_variables` is rewritten by fish itself (and depends on its version) — expect it to show up in `git status`
-    - `set-env` / `set-java` write into `fish/config.fish`, which is in the repo — f.e. `JAVA_HOME` is `/usr/lib/jvm/java-23-openjdk` on Arch but `/usr/lib/jvm/java-25-openjdk-amd64` on Ubuntu, so don't commit machine-specific values
+    - `set-env` / `set-java` write into `fish/config.fish`, which is in the repo — f.e. `JAVA_HOME` is `/usr/lib/jvm/java-25-openjdk` on Arch but `/usr/lib/jvm/java-25-openjdk-amd64` on Ubuntu, so don't commit machine-specific values
 
 # Configure 
 

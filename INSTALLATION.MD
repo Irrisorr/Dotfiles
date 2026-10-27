@@ -100,7 +100,9 @@ the same shell is a no-op.
   * Package engine: `package_category_selection`, `get_all_categories`,
     `get_packages_from_category`, `select_packages_for_category`,
     `start_package_installation`, `install_packages` (the one entry point for
-    installing anything from `packages.txt`).
+    installing anything from `packages.txt`); `load_package_status`,
+    `package_mark`, `category_counter` (the ✓ / ↑ marks and counters, see
+    `packages.txt` below).
   * `system_update` — reused by both the installer and `post_install.sh`.
   * `fish_apply` / `fish_quote` — hand a fish command back to the calling fish
     shell (used by `set_env` / `delete_env`).
@@ -276,13 +278,33 @@ notes always go inside the parentheses.
     package installs natively. Pair it with `apt=` when the name differs too
   * `source=<name>` — the escape hatch for anything needing a clone, a build or
     a vendor repo: runs `install_source_<name>` from `install/system/sources.sh`
-    (return 0/non-zero). Reach for it last — every other backend needs no code
+    (return 0/non-zero). Reach for it last — every other backend needs no code.
+    An optional `installed_source_<name>` (returns 0 when installed) lets the
+    picker mark it ✓
   * `skip` — nothing to install on this distro
 * The picker never shows the tail, so both machines see an identical list.
 * Descriptions are optional; package names never contain `(`.
 * The parser sticks to POSIX `awk` / `sed` regexes (`[ \t]`, `[[:blank:]]`, never
   `\s` / `\w`): Arch's `awk` is gawk, but Ubuntu's is **mawk**, which silently
   doesn't match GNU escapes — that once made every category look empty.
+
+**The picker** shows what is already there, so it's easy to pick only what's
+missing:
+
+```
+  Browsers (3/4)                          ← installed / available on this distro
+zen-browser-bin (based on firefox)  ✓     ← installed
+firefox  ✓ ↑                              ← installed, an update is available
+vivaldi (based on chromium)               ← not installed
+```
+
+`load_package_status` collects it once per picker session in a few bulk
+queries: `pacman -T` (resolves provides, so `obs-studio` counts via
+`obs-studio-git`) + `pacman -Qu` + `yay -Qua` on Arch, `dpkg-query` + `apt list
+--upgradable` on Ubuntu, `flatpak list` + `flatpak remote-ls --updates` for
+flatpaks, and `installed_source_<name>` for custom installers. Packages skipped
+on this distro get no mark and don't count. The marks sit at the end of the
+line, so the package name is still the first word when the selection is parsed.
 
 **Adding a package:** add one line under its category. Check the Ubuntu name
 (`apt-cache policy <name>`, or Flathub for GUI apps) and add a `ubuntu:` tail
