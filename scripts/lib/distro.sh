@@ -35,13 +35,22 @@ _detect_distro() {
 
 _detect_distro
 
-case "$DISTRO_FAMILY" in
-  arch)   command -v yay &>/dev/null && PKG_MGR="yay" || PKG_MGR="pacman" ;;
-  debian) PKG_MGR="apt" ;;
-  *)      PKG_MGR="" ;;
-esac
+# Re-checked before every package operation, not just once at load: yay is
+# usually installed by the installer itself, and every later step in the same
+# run must use it — pacman alone can't see the AUR.
+_detect_pkg_mgr() {
+  case "$DISTRO_FAMILY" in
+    arch)   command -v yay &>/dev/null && PKG_MGR="yay" || PKG_MGR="pacman" ;;
+    debian) PKG_MGR="apt" ;;
+    *)      PKG_MGR="" ;;
+  esac
+  export PKG_MGR
+}
 
-export DISTRO DISTRO_FAMILY PKG_MGR
+_arch_uses_yay() { _detect_pkg_mgr; [ "$PKG_MGR" = "yay" ]; }
+
+_detect_pkg_mgr
+export DISTRO DISTRO_FAMILY
 
 is_arch()   { [ "$DISTRO_FAMILY" = "arch" ]; }
 is_debian() { [ "$DISTRO_FAMILY" = "debian" ]; }
@@ -66,7 +75,7 @@ pkg_install() {
   [ $# -eq 0 ] && return 0
 
   if is_arch; then
-    if [ "$PKG_MGR" = "yay" ]; then
+    if _arch_uses_yay; then
       yay -S --noconfirm --needed "$@"
     else
       sudo pacman -S --noconfirm --needed "$@"
@@ -101,7 +110,7 @@ pkg_refresh() {
 
 pkg_sync() {
   if is_arch; then
-    if [ "$PKG_MGR" = "yay" ]; then
+    if _arch_uses_yay; then
       yay -Sy
     else
       sudo pacman -Sy
@@ -126,7 +135,7 @@ pkg_upgrade() {
   fi
 
   if is_arch; then
-    if [ "$PKG_MGR" = "yay" ]; then
+    if _arch_uses_yay; then
       yay -Syu "${pm_yes[@]}" || rc=1
     else
       sudo pacman -Syu "${pm_yes[@]}" || rc=1
@@ -162,7 +171,7 @@ pkg_installed() {
 # Does the name exist in the repos? Decides if a package needs the source fallback.
 pkg_available() {
   if is_arch; then
-    if [ "$PKG_MGR" = "yay" ]; then
+    if _arch_uses_yay; then
       yay -Si "$1" &>/dev/null
     else
       pacman -Si "$1" &>/dev/null

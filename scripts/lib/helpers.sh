@@ -334,6 +334,7 @@ install_packages() {
   local -a native=() flat=() snaps=() urls=() src=() skipped=()
   local -A repos=() flat_bin=()
   local name repo backend value bin
+  _detect_pkg_mgr   # yay may have been installed earlier in this run
 
   for name in "$@"; do
     IFS=$'\x1f' read -r backend value repo bin < <(resolve_package "$name")
