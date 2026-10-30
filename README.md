@@ -23,7 +23,7 @@ cd Dotfiles
 ### On Ubuntu
 
 - Same steps, same menus — nothing to choose by hand. Differences the installer handles by itself:
-    - **niri**, `xwayland-satellite`, `cliphist` and the **Dux shell** (formerly DankMaterialShell; the Ubuntu package is still called `dms`) come from the author's PPAs (`ppa:duxlabs/dux`, `ppa:duxlabs/dms`) — they are not in the Ubuntu repos
+    - **niri**, `xwayland-satellite` and the **Dux shell** (formerly DankMaterialShell; the Ubuntu package is still called `dms`) come from the author's PPAs (`ppa:duxlabs/dux-repo`, `ppa:duxlabs/dms`) — they are not in the Ubuntu repos
     - apps that are only in the AUR (Zen, VS Code, Obsidian, Discord, Spotify, ...) are installed from **Flathub** — and get a command with the usual name in `/usr/local/bin` (`zen-browser`, `code`, `spotify`, ...), so niri keybinds and the config menu work the same as on Arch
     - `clipse` (release binary), JetBrains Mono Nerd Font (official nerd-fonts release) and FreeOffice (SoftMaker's apt repo) have their own installers in `scripts/install/system/sources.sh`; re-run the package step to update clipse and the font
     - SDDM replaces GDM as the login screen (the **SDDM** config step switches it; it prints the command to switch back)

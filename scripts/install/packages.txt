@@ -107,18 +107,18 @@ hyprpicker
 nwg-displays (monitor control)
 
 # niri Ecosystem | niri
-niri                   ubuntu:ppa=duxlabs/dux (the compositor itself)
+niri                   ubuntu:ppa=duxlabs/dux-repo (the compositor itself)
 xdg-desktop-portal (default portal)
 xdg-desktop-portal-gtk (implements most of the basic functionality)
 xdg-desktop-portal-gnome (required for screencasting support)
 xdg-user-dirs (for home directories)
 xdg-user-dirs-gtk (for home gtk directories)
 gnome-keyring (implements the Secret portal, required for certain apps to work)
-xwayland-satellite     ubuntu:ppa=duxlabs/dux (to run X11 apps like Steam or Discord)
+xwayland-satellite     ubuntu:ppa=duxlabs/dux-repo (to run X11 apps like Steam or Discord)
 dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
 hyprlock (lock manager)
 swaybg (wallpaper tool)
-cliphist               ubuntu:ppa=duxlabs/dux (clipboard history for dms)
+cliphist (clipboard history for dms)
 
 # work
 nodejs

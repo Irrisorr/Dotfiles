@@ -251,7 +251,7 @@ distro actually differs:
 neovim
 sqlite                 ubuntu:apt=sqlite3 (need for sync private dotfiles)
 zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
-niri                   ubuntu:ppa=duxlabs/dux (the compositor itself)
+niri                   ubuntu:ppa=duxlabs/dux-repo (the compositor itself)
 dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
 clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)
 logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
