@@ -23,4 +23,4 @@ menu "🚪 Exit" \
   "Rain animation (floating)|terminal_rain_float|terminal-rain" \
   "Nvim launch|nvim_launch|nvim" \
   "Sync private files|sync_private" \
-  "Yay/Pacman commands|yay_commands"
+  "System packages|package_commands"

@@ -16,8 +16,7 @@ configure_hyprland() {
   if command -v nwg-displays &>/dev/null; then
     print_styled_message "Configuring nwg-displays"
     if confirm_action "configure nwg-displays"; then
-      PYTHON_VERSION=$(python3 -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')
-      NWG_DISPLAYS_PATH="/usr/lib/python${PYTHON_VERSION}/site-packages/nwg_displays/main.py"
+      NWG_DISPLAYS_PATH="$(python_site_dir)/nwg_displays/main.py"
 
       if [ -f "$NWG_DISPLAYS_PATH" ]; then
         print_styled_message "Modifying nwg-displays configuration"

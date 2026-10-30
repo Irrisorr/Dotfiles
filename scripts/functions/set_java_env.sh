@@ -25,11 +25,13 @@ set_java_env() {
           echo "export JAVA_HOME=$selected_java" >>$HOME/.bashrc
         fi
 
-        # Configure zshrc
-        if grep -q "export JAVA_HOME" $HOME/.zshrc; then
-          sed -i "s|export JAVA_HOME=.*|export JAVA_HOME=$selected_java|g" $HOME/.zshrc
-        else
-          echo "export JAVA_HOME=$selected_java" >>$HOME/.zshrc
+        # Configure zshrc — only if zsh is actually used, don't create one
+        if [ -f $HOME/.zshrc ]; then
+          if grep -q "export JAVA_HOME" $HOME/.zshrc; then
+            sed -i "s|export JAVA_HOME=.*|export JAVA_HOME=$selected_java|g" $HOME/.zshrc
+          else
+            echo "export JAVA_HOME=$selected_java" >>$HOME/.zshrc
+          fi
         fi
 
         # Configure fish

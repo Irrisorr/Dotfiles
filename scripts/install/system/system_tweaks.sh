@@ -9,12 +9,12 @@ enable_bluetooth() {
   execute_command "Enable Bluetooth service" "sudo systemctl enable bluetooth.service"
 }
 
-# Menu guard: /usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1
+# Menu guard: test:has_polkit_gnome
 start_polkit_gnome() {
-  execute_command "Start GNOME polkit agent" "/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1 &"
+  execute_command "Start GNOME polkit agent" "\"\$(find_polkit_agent gnome)\" &"
 }
 
-# Menu guard: /usr/lib/mate-polkit/polkit-mate-authentication-agent-1
+# Menu guard: test:has_polkit_mate
 start_polkit_mate() {
-  execute_command "Start MATE polkit agent" "/usr/lib/mate-polkit/polkit-mate-authentication-agent-1 &"
+  execute_command "Start MATE polkit agent" "\"\$(find_polkit_agent mate)\" &"
 }

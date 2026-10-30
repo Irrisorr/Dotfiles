@@ -64,7 +64,7 @@ sync_private() {
 
   if ! command -v jq &>/dev/null; then
     print_error_message "'jq' is not installed — required to read the sync map.
-Install it: sudo pacman -S jq"
+Install it: $(pkg_install_hint jq)"
     return 1
   fi
   if [ ! -f "$sync_map" ]; then
@@ -81,7 +81,7 @@ Install it: sudo pacman -S jq"
   command -v sqlite3 &>/dev/null || have_sqlite3=false
   if [ "$(jq -r 'any(.[]; has("sqlite"))' "$sync_map")" = "true" ] && ! $have_sqlite3; then
     print_error_message "'sqlite3' is not installed — required to sync database tables.
-Install it: sudo pacman -S sqlite
+Install it: $(pkg_install_hint "$(is_arch && echo sqlite || echo sqlite3)")
 Table entries will be skipped."
   fi
 
@@ -106,9 +106,11 @@ $sync_map"
     src_pattern="$(_sync_expand_home "$src_raw")"
     dst_dir="$(_sync_expand_home "$dst_raw")"
 
-    shopt -s nullglob
-    local matches=("$src_pattern")
-    shopt -u nullglob
+    # compgen -G expands the glob without word-splitting, so profile dirs with
+    # spaces ("xxxx.Default (release)") still match. A quoted array would not
+    # expand the pattern at all.
+    local -a matches=()
+    mapfile -t matches < <(compgen -G "$src_pattern")
 
     if [ ${#matches[@]} -eq 0 ]; then
       echo ":: No match for: $src_pattern"
@@ -135,9 +137,8 @@ $sync_map"
       db_pattern="$(_sync_expand_home "$db_raw")"
       dst_dir2="$(_sync_expand_home "$dst_raw2")"
 
-      shopt -s nullglob
-      local dbmatches=("$db_pattern")
-      shopt -u nullglob
+      local -a dbmatches=()
+      mapfile -t dbmatches < <(compgen -G "$db_pattern")
 
       if [ ${#dbmatches[@]} -eq 0 ]; then
         echo ":: No match for db: $db_pattern"

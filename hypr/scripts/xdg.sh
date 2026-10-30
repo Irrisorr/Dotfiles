@@ -1,20 +1,9 @@
 #!/bin/bash
-sleep 1
+#
+# Restart the xdg-desktop-portal stack for a Hyprland session.
+# Thin shim over scripts/wrappers/xdg-portals.sh, which resolves the portal
+# binaries per distro (Arch: /usr/lib, Debian: /usr/libexec).
 
-# kill all possible running xdg-desktop-portals
-killall xdg-desktop-portal-hyprland
-killall xdg-desktop-portal-gnome
-killall xdg-desktop-portal-kde
-killall xdg-desktop-portal-lxqt
-killall xdg-desktop-portal-wlr
-killall xdg-desktop-portal-gtk
-killall xdg-desktop-portal
-sleep 1
-
-# start xdg-desktop-portal-hyprland
-/usr/lib/xdg-desktop-portal-hyprland &
-sleep 2
-
-# start xdg-desktop-portal
-/usr/lib/xdg-desktop-portal &
-sleep 1
+exec "$HOME/Dotfiles/scripts/wrappers/xdg-portals.sh" \
+  xdg-desktop-portal-hyprland \
+  xdg-desktop-portal

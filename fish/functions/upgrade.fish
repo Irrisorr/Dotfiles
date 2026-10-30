@@ -1,3 +1,3 @@
-function upgrade --wraps='yay -Syu' --description 'Upgrade system packages (install updates)'
-  bash $HOME/Dotfiles/scripts/functions/yay_pacman.sh upgrade_system $argv
+function upgrade --description 'Upgrade system packages (apt/yay + flatpak)'
+  bash $HOME/Dotfiles/scripts/functions/system_packages.sh upgrade_system
 end

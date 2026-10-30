@@ -32,7 +32,7 @@ set_env() {
       echo "set -x $var_name $var_value" >>"$CONFIG_DIR/fish/config.fish"
     fi
     print_success_message "Set $var_name=$var_value env"
-    reload_shell_prompt
+    fish_apply "set -gx $var_name $(fish_quote "$var_value")"
   fi
 }
 

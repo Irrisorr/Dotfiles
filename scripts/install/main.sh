@@ -7,7 +7,23 @@
 # The menus (config_menu + the first menu) live in install.sh so adding a new
 # configuration only means editing that one file.
 
+# Before common.sh: sourcing it installs gum, and on a fresh or long-idle
+# system that already fails on stale package lists / an old keyring.
+. "$HOME/Dotfiles/scripts/lib/distro.sh"
+# No terminal to ask on → skip, never a silent "yes" to a full upgrade.
+reply=n
+if { : </dev/tty; } 2>/dev/null; then
+  read -rp ":: Update the system before installing (package lists + all updates)? Recommended [Y/n]: " reply </dev/tty
+fi
+case "$reply" in
+  n | N) ;;
+  *) pkg_refresh || echo ":: System update failed — installs may fail too" >&2 ;;
+esac
+
 . "$HOME/Dotfiles/scripts/lib/common.sh"
+
+# Menus can't run without gum; stop instead of jumping to the final steps.
+require_gum "the installer" || exit 1
 
 # Load every config function (system first, then apps).
 for f in "$SYSTEM_DIR"/*.sh "$APPS_DIR"/*.sh; do
@@ -35,30 +51,40 @@ install_yay() {
 set_cyrillic_font() {
   print_styled_message "Cyrillic console font"
   if confirm_action "set the cyrillic console font (cyr-sun16)"; then
-    if grep -q "^FONT=" /etc/vconsole.conf 2>/dev/null; then
-      sudo sed -i "s/^FONT=.*/FONT=cyr-sun16/" /etc/vconsole.conf
-    else
-      echo "FONT=cyr-sun16" | sudo tee -a /etc/vconsole.conf
-    fi
-    sudo systemctl restart systemd-vconsole-setup.service
+    set_console_font cyr-sun16
     check_success "Cyrillic console font set"
   fi
 }
 
+# Through install_packages, not pkg_install: on Ubuntu niri needs its PPA.
+# No separate confirm — install_packages shows the plan and asks.
 install_window_manager() {
   print_styled_message "Installing Window Manager"
-  if confirm_action "install window manager"; then
-    local window_manager
-    window_manager=$(choose_action hyprland niri)
-    execute_script sudo pacman -S --noconfirm "$window_manager"
-  fi
+  local window_manager
+  window_manager=$(choose_action hyprland niri) || return 1
+  install_packages "$window_manager"
 }
 
 
 # ─── Final steps (run by install.sh after the menus) ─────────────────────────
 
+# Backups create_symlink left behind: dirs and files, including timestamped
+# .bak.<date> ones. find does not follow symlinks, so it never reaches into
+# ~/Dotfiles through a linked config dir.
+_find_config_backups() {
+  [ -d "$HOME/.config" ] || return 0   # a brand-new user may not have one yet
+  find "$HOME/.config" \( -name '*.bak' -o -name '*.bak.[0-9]*' \) -prune "$@"
+}
+
 run_final_steps() {
-  execute_command "Delete .bak directories from ~/.config" "find $HOME/.config/ -type d -name '*.bak' -delete"
+  if [ -n "$(_find_config_backups -print -quit)" ]; then
+    echo ":: Backups in ~/.config:"
+    _find_config_backups -print | sed 's/^/   /'
+    if confirm_action "delete all these backups"; then
+      _find_config_backups -exec rm -rf {} +
+      check_success "Backups deleted"
+    fi
+  fi
 
   if command -v fish &>/dev/null; then
     mkdir -p "$HOME/.config/fish/conf.d"

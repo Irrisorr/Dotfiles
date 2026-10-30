@@ -4,15 +4,19 @@
 # Menu guard: zen-browser
 #
 # Everything Zen-related lives here. configure_zen (install-time) launches the
-# browser once to generate ~/.config/zen/, symlinks the tracked configs from
+# browser once to create its profile, symlinks the tracked configs from
 # Dotfiles/zen-browser/, and registers the mods. Restoring the private files is
 # done later by post_install.sh (after Mozilla login) via restore_private_zen.
+#
+# Works for the native package (Arch) and the flatpak (Ubuntu, where
+# `zen-browser` is a shim around `flatpak run`). The profile root differs per
+# install — zen_profile_root in lib/paths.sh knows all of them.
 
-# Find the *release* profile dir inside ~/.config/zen (prints nothing if none).
+# Find the *release* profile dir (prints nothing if none).
 _zen_find_profile() {
-  local zen_config="$CONFIG_DIR/zen"
-  [ -d "$zen_config" ] || return 0
-  find "$zen_config" -maxdepth 1 -type d -name "*release*" | head -n 1
+  local root
+  root=$(zen_profile_root) || return 0
+  find "$root" -maxdepth 1 -type d -name "*release*" | head -n 1
 }
 
 # Restore private/sensitive Zen files from ~/Dotfiles-private/zen-browser into a
@@ -63,32 +67,37 @@ configure_zen() {
     return 1
   fi
 
-  local zen_config="$CONFIG_DIR/zen"
   local dotfiles_zen="$DOTFILES_DIR/zen-browser"
+  local profile_dir
+  profile_dir=$(_zen_find_profile)
 
-  if [ ! -d "$zen_config" ]; then
-    echo ":: Launching zen-browser to initialise config directory... (wait 10 seconds)"
-    zen-browser &
-    local zen_pid=$!
-    local waited=0
-    while [ ! -d "$zen_config" ] && [ $waited -lt 30 ]; do
-      sleep 10
+  if [ -z "$profile_dir" ]; then
+    # Headless: creates the profile without opening a window (works over ssh
+    # or a serial console too).
+    echo ":: Launching zen-browser once to create its profile (up to 60 seconds)..."
+    zen-browser --headless &>/dev/null &
+    local zen_pid=$! waited=0
+    while [ -z "$profile_dir" ] && [ $waited -lt 60 ]; do
+      sleep 1
       waited=$((waited + 1))
+      profile_dir=$(_zen_find_profile)
     done
+    sleep 2   # let it finish writing the new profile
     kill "$zen_pid" 2>/dev/null
+    is_zen_flatpak && flatpak kill "$ZEN_FLATPAK_ID" 2>/dev/null
     wait "$zen_pid" 2>/dev/null
   fi
 
-  if [ ! -d "$zen_config" ]; then
-    print_error_message "$zen_config was not created by zen-browser"
+  if [ -z "$profile_dir" ]; then
+    print_error_message "No 'release' profile found — zen-browser did not create one"
     return 2
   fi
 
-  local profile_dir
-  profile_dir=$(_zen_find_profile)
-  if [ -z "$profile_dir" ]; then
-    print_error_message "No 'release' profile directory found inside $zen_config"
-    return 2
+  # The flatpak sandbox can't see ~/Dotfiles, so the symlinks below would point
+  # at nothing from inside it. Let it read just the tracked Zen configs.
+  if is_zen_flatpak; then
+    echo ":: Allowing the Zen flatpak to read $dotfiles_zen"
+    flatpak override --user --filesystem="$dotfiles_zen:ro" "$ZEN_FLATPAK_ID" || return 2
   fi
 
   echo ":: Found profile directory: $profile_dir"

@@ -31,7 +31,7 @@ delete_env() {
     if grep -q "set -x $var_name " "$CONFIG_DIR/fish/config.fish"; then
       sed -i "/set -x $var_name /d" "$CONFIG_DIR/fish/config.fish"
       print_success_message "Deleted $var_name env"
-      reload_shell_prompt
+      fish_apply "set -e -g $var_name"
     else
       print_error_message "'$var_name' env not found"
     fi
