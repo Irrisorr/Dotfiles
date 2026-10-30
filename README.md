@@ -38,7 +38,7 @@ cd Dotfiles
 - One line in `scripts/install/packages.txt` under its category — it's installed on both distros. If on Ubuntu the package has another name or comes from somewhere else, add a tail (full format in [INSTALLATION.MD](INSTALLATION.MD#packagestxt)):
 ```
 neovim
-sqlite                 ubuntu:apt=sqlite3 (need for sync private dotfiles)
+sqlite                 ubuntu:apt=sqlite3 (needs for sync private dotfiles)
 zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
 logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
 ```

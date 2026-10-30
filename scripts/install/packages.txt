@@ -62,7 +62,7 @@ thunar-volman         (needs for thunar - adds removable drives operations)
 unzip                 (needs for thunar | for archive operations in tui)
 gvfs                  (needs for thunar | for removable drivers)
 dolphin               (kde/qt fm)
-ark                   (needd for dolphin - adds archive operations)
+ark                   (needs for dolphin - adds archive operations)
 nautilus              (gnome/gtk fm)
 
 # Virtual Machines
@@ -79,7 +79,7 @@ swayimg (view images)
 vlc (view videos)
 wlogout (logout app for wayland)
 clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)
-wl-clipboard (wayland clipboard, needs for clipse and dms)
+wl-clipboard (needs for clipse and dms - wayland clipboard)
 
 # Settings packages
 pavucontrol (audio control)
@@ -118,7 +118,7 @@ xwayland-satellite     ubuntu:ppa=duxlabs/dux-repo (to run X11 apps like Steam o
 dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
 hyprlock (lock manager)
 swaybg (wallpaper tool)
-cliphist (clipboard history for dms)
+cliphist (needs for dms - clipboard history)
 
 # work
 nodejs
@@ -129,8 +129,8 @@ claude-code
 claude-desktop
 
 # Additional Packages
-sqlite                 ubuntu:apt=sqlite3 (need for sync private dotfiles)
-jq (need for sync private dotfiles)
+sqlite                 ubuntu:apt=sqlite3 (needs for sync private dotfiles)
+jq (needs for sync private dotfiles)
 gowall                 ubuntu:skip (image converter | Ubuntu: no .deb, tarball only)
 inxi (tui app for get info about ur system)
 terminal-rain-lightning ubuntu:skip (tui rain in terminal | Ubuntu: pip only)
