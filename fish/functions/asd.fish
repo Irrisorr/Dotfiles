@@ -1,3 +1,3 @@
 function asd --description 'Menu with all usefull scripts'
-    bash -c ". $HOME/Dotfiles/scripts/main.sh"       
+    bash $HOME/Dotfiles/scripts/functions/alias_menu.sh
 end

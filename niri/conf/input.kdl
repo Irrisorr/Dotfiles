@@ -33,8 +33,8 @@ input {
         //drag-lock                             // Lifting the finger off for a short time while dragging will not drop the dragged item
     }
 
-    /-tablet {
-        map-to-input "eDP-1"
+    tablet {
+        map-to-output "eDP-1"
     }
 }
 

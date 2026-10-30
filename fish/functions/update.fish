@@ -1,3 +1,3 @@
-function update --wraps='yay -Sy' --description 'Update system packages (sync repositories)'
-  bash -c ". $HOME/Dotfiles/scripts/scripts.sh && update_system $argv"
+function update --description 'Update system packages (sync repositories)'
+  bash $HOME/Dotfiles/scripts/functions/system_packages.sh update_system
 end

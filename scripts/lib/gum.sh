@@ -1,13 +1,86 @@
-# Install gum for better output styling
-if ! command -v gum &>/dev/null; then
+#!/bin/bash
+#
+# gum bootstrap + every user-facing print/prompt helper.
+# Sourced by lib/common.sh AFTER lib/distro.sh (bootstrap_gum needs pkg_install).
+#
+# gum is required: menu() and the package picker refuse to run without it. The
+# smaller helpers here and in functions/{set_env,delete_env,sync_private}.sh do
+# keep a plain-bash `read` fallback behind $HAS_GUM.
+#
+# DOTFILES_NO_GUM_BOOTSTRAP=1 sources this file without triggering an install.
+
+# HAS_GUM must always hold a literal true/false: `if $HAS_GUM` with an empty
+# value expands to a null command, whose status is 0 — an unset HAS_GUM would
+# silently read as "gum is here" and every helper would call a missing binary.
+HAS_GUM=false
+command -v gum &>/dev/null && HAS_GUM=true
+
+
+# Ubuntu has no gum package. Charm's own apt repository has it, and once the
+# repo is added gum upgrades with `apt upgrade` like everything else (a .deb
+# from GitHub releases never would). Asks first — this adds a third-party repo.
+add_charm_repo() {
+  local keyring="/etc/apt/keyrings/charm.gpg"
+  local list="/etc/apt/sources.list.d/charm.list"
+
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  command -v gpg &>/dev/null || pkg_install gnupg || return 1
+
+  sudo mkdir -p /etc/apt/keyrings || return 1
+  curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor --yes -o "$keyring" || return 1
+  sudo chmod 0644 "$keyring"
+  echo "deb [signed-by=$keyring] https://repo.charm.sh/apt/ * *" | sudo tee "$list" >/dev/null || return 1
+  pkg_sync
+}
+
+
+_gum_install_apt_repo() {
+  echo ":: 'gum' is not in the Ubuntu repos. It can be installed from Charm's"
+  echo ":: official apt repository (https://repo.charm.sh/apt) and then updates"
+  echo ":: with apt upgrade."
+  read -rp ":: Add the repository and install gum? (y/N): " reply </dev/tty
+  case "$reply" in y | Y) ;; *) return 1 ;; esac
+
+  add_charm_repo && pkg_install gum
+}
+
+
+bootstrap_gum() {
+  if command -v gum &>/dev/null; then
+    HAS_GUM=true
+    return 0
+  fi
+
   echo ":: Installing gum for beautiful output..."
-  sudo pacman -S --noconfirm gum || {
-    echo ":: Failed to install gum, continuing without it..."
+  # Output stays visible: a failure here (stale mirrors, old keyring) is the
+  # first thing a fresh install hits, and its reason is only in pacman's output.
+  # apt has no 'gum', so Debian/Ubuntu go straight to Charm's apt repo.
+  if is_debian; then
+    _gum_install_apt_repo
+  else
+    pkg_install gum
+  fi
+
+  if command -v gum &>/dev/null; then
+    HAS_GUM=true
+  else
     HAS_GUM=false
-  }
-else
-  HAS_GUM=true
-fi
+    echo ":: Failed to install gum. Menus will not work — install it manually:" >&2
+    echo "::   $(pkg_install_hint gum)" >&2
+  fi
+}
+
+
+# Hard gate for the paths that cannot run without gum (menu, package picker).
+require_gum() {
+  $HAS_GUM && return 0
+  echo ":: '$1' requires gum, which is not installed." >&2
+  echo "::   $(pkg_install_hint gum)" >&2
+  return 1
+}
+
+
+[ -n "$DOTFILES_NO_GUM_BOOTSTRAP" ] || bootstrap_gum
 
 
 # Universal gum choose wrapper function
