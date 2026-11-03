@@ -5,7 +5,8 @@ vivaldi                ubuntu:flatpak=com.vivaldi.Vivaldi (based on chromium)
 google-chrome          ubuntu:flatpak=com.google.Chrome
 
 # Terminals and shells
-kitty
+kitty                  ubuntu:source=kitty
+shader-slang           ubuntu:skip (needs for kitty - custom shaders | Ubuntu: bundled with the upstream kitty build)
 alacritty
 fish
 
@@ -22,6 +23,7 @@ syncthing (sync service (f.e. for obsidian sync between devices))
 neovim
 visual-studio-code-bin ubuntu:flatpak=com.visualstudio.code ubuntu:bin=code
 intellij-idea-ultimate-edition ubuntu:flatpak=com.jetbrains.IntelliJ-IDEA-Ultimate
+antigravity            ubuntu:source=antigravity (Google's agentic IDE)
 postman-bin            ubuntu:flatpak=com.getpostman.Postman
 podman-desktop-bin     ubuntu:flatpak=io.podman_desktop.PodmanDesktop
 podman

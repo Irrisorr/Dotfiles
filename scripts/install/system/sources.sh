@@ -125,6 +125,97 @@ install_source_jetbrains_nerd() {
 }
 
 
+# Google Antigravity — no .deb, apt repo or flatpak for the 2.x app; Google only
+# publishes a tarball whose URL carries a build id. The download page embeds the
+# current one, so it is read from there (the same tarball the AUR package uses).
+# Installed like the AUR package: /opt/Antigravity + a launcher and .desktop.
+# Re-running the step upgrades it.
+install_source_antigravity() {
+  local arch url tmp rc=0
+  case "$(uname -m)" in
+    x86_64)  arch=linux-x64 ;;
+    aarch64) arch=linux-arm ;;
+    *) print_error_message "antigravity: no build for $(uname -m)"; return 1 ;;
+  esac
+
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  url=$(curl -fsSL "https://antigravity.google/download?os=linux" \
+        | grep -oE "https://storage.googleapis.com/antigravity-public/antigravity-hub/[0-9][^\"]*/$arch/Antigravity\.tar\.gz" \
+        | head -n 1)
+  [ -n "$url" ] || { print_error_message "antigravity: download link not found on antigravity.google"; return 1; }
+
+  tmp=$(mktemp -d)
+  echo ":: Downloading $url"
+  if curl -fsSL "$url" | tar -xz -C "$tmp"; then
+    # chrome-sandbox must be setuid root: Ubuntu's AppArmor blocks the
+    # unprivileged user namespaces Electron would use instead.
+    # The tarball has no icon file; the AUR package ships one.
+    sudo rm -rf /opt/Antigravity \
+      && sudo cp -a "$tmp"/Antigravity-*/ /opt/Antigravity \
+      && sudo chown root:root /opt/Antigravity/chrome-sandbox \
+      && sudo chmod 4755 /opt/Antigravity/chrome-sandbox \
+      && sudo ln -sf /opt/Antigravity/antigravity /usr/local/bin/antigravity \
+      && curl -fsSL "https://aur.archlinux.org/cgit/aur.git/plain/antigravity.png?h=antigravity" \
+         | sudo tee /usr/share/pixmaps/antigravity.png >/dev/null \
+      && printf '%s\n' "[Desktop Entry]" "Name=Antigravity" "GenericName=Agentic Platform" \
+           "Exec=/usr/local/bin/antigravity %U" "Icon=antigravity" \
+           "Type=Application" "StartupWMClass=Antigravity" "Categories=Development;Utility;" \
+         | sudo tee /usr/share/applications/antigravity.desktop >/dev/null \
+      || rc=1
+  else
+    print_error_message "antigravity: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return $rc
+}
+
+
+# Latest GitHub release tag of <owner/repo>.
+_github_latest_tag() {
+  local json
+  json=$(curl -fsSL "https://api.github.com/repos/$1/releases/latest") || return 1
+  grep -m1 '"tag_name"' <<< "$json" | cut -d'"' -f4
+}
+
+
+# kitty — Ubuntu 26.04 freezes it at 0.45, which lacks custom_shaders and other
+# options kitty.conf uses. Upstream's own build (what its installer.sh fetches)
+# goes into /opt/kitty.app, linked into /usr/local/bin so niri's keybinds find
+# it. It bundles its own Python, terminfo and slangc — kitty looks slangc up on
+# PATH for custom_shaders, so that is linked too. Re-running the step upgrades it.
+install_source_kitty() {
+  local tag arch tmp rc=0
+  case "$(uname -m)" in
+    x86_64)  arch=x86_64 ;;
+    aarch64) arch=arm64 ;;
+    *) print_error_message "kitty: no build for $(uname -m)"; return 1 ;;
+  esac
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tag=$(_github_latest_tag kovidgoyal/kitty) || { print_error_message "kitty: could not find the latest release"; return 1; }
+
+  tmp=$(mktemp -d)
+  echo ":: Downloading kitty $tag"
+  if curl -fsSL "https://github.com/kovidgoyal/kitty/releases/download/$tag/kitty-${tag#v}-$arch.txz" | tar -xJ -C "$tmp"; then
+    sudo rm -rf /opt/kitty.app \
+      && sudo cp -a "$tmp" /opt/kitty.app \
+      && sudo chmod 755 /opt/kitty.app \
+      && sudo ln -sf /opt/kitty.app/bin/kitty /usr/local/bin/kitty \
+      && sudo ln -sf /opt/kitty.app/bin/kitten /usr/local/bin/kitten \
+      && sudo ln -sf /opt/kitty.app/bin/slangc /usr/local/bin/slangc \
+      && sed "s|^Icon=kitty|Icon=/opt/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|; s|^Exec=kitty|Exec=/usr/local/bin/kitty|" \
+           /opt/kitty.app/share/applications/kitty.desktop \
+         | sudo tee /usr/share/applications/kitty.desktop >/dev/null \
+      || rc=1
+  else
+    print_error_message "kitty: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return $rc
+}
+
+
 # ─── Installed checks for the package picker (see the contract above) ─────────
 
 installed_source_clipse()         { command -v clipse &>/dev/null; }
@@ -137,3 +228,5 @@ installed_source_goodix() {
     pkg_installed libfprint-2-tod1-goodix-v2
   fi
 }
+installed_source_antigravity()     { [ -x /opt/Antigravity/antigravity ]; }
+installed_source_kitty()           { [ -x /opt/kitty.app/bin/kitty ]; }
