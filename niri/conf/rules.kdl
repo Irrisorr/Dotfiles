@@ -98,7 +98,7 @@ window-rule {
 
 // Apps that should open on the "ide" workspace
 window-rule {
-    match app-id=r#"code$"#
+    match app-id=r#"Code$"#
     match app-id=r#"jetbrains-idea$"#
     match app-id=r#"antigravity$"#
 

@@ -18,7 +18,7 @@ spawn-sh-at-startup "~/Dotfiles/scripts/wrappers/polkit-agent.sh mate"
 spawn-at-startup "dms" "run"
 
 // Wallpaper swaybg
-spawn-sh-at-startup "swaybg -i /home/irrisorr/Dotfiles/wallpaper/night-sky.png -m fill"
+spawn-sh-at-startup "swaybg -i /home/irrisorr/Dotfiles/wallpaper/snow_leopard_wallpaper.png -m fill"
 
 // Apps 
 // spawn-at-startup "waybar"
