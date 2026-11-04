@@ -216,6 +216,49 @@ install_source_kitty() {
 }
 
 
+# swayimg — Ubuntu 26.04 ships 4.7, older than the Lua config (5.0+) that
+# swayimg/init.lua is written in, and upstream has no binaries, flatpak or PPA.
+# Built from the release tag into /usr/local. Every image format is optional in
+# meson; the -dev packages here switch them on. EXR stays off: swayimg needs
+# OpenEXR >= 3.4, Ubuntu has 3.1. apt's 4.7 is removed so the menu has one
+# entry. Re-running the step upgrades it.
+_SWAYIMG_BUILD_DEPS=(
+  meson ninja-build g++ pkg-config python3
+  libwayland-dev wayland-protocols libxkbcommon-dev libfontconfig-dev
+  libfreetype-dev libluajit-5.1-dev libdrm-dev libexiv2-dev
+  libjpeg-dev libpng-dev libwebp-dev libgif-dev libheif-dev libavif-dev
+  libjxl-dev librsvg2-dev libtiff-dev libraw-dev libopenjp2-7-dev libsixel-dev
+  libminizip-ng-dev libavformat-dev libavcodec-dev libavutil-dev libswscale-dev
+)
+
+install_source_swayimg() {
+  local tag tmp rc=0
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  pkg_install "${_SWAYIMG_BUILD_DEPS[@]}" || return 1
+  tag=$(_github_latest_tag artemsen/swayimg) || { print_error_message "swayimg: could not find the latest release"; return 1; }
+
+  tmp=$(mktemp -d)
+  echo ":: Building swayimg $tag"
+  if curl -fsSL "https://github.com/artemsen/swayimg/archive/refs/tags/$tag.tar.gz" \
+       | tar -xz -C "$tmp" --strip-components=1; then
+    meson setup "$tmp/build" "$tmp" --prefix=/usr/local --buildtype=release \
+        -Dversion="${tag#v}" -Dexr=disabled \
+      && meson compile -C "$tmp/build" \
+      && sudo meson install -C "$tmp/build" --no-rebuild \
+      || rc=1
+  else
+    print_error_message "swayimg: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+
+  if [ $rc -eq 0 ] && pkg_installed swayimg; then
+    sudo apt-get remove -y swayimg
+  fi
+  return $rc
+}
+
+
 # ─── Installed checks for the package picker (see the contract above) ─────────
 
 installed_source_clipse()         { command -v clipse &>/dev/null; }
@@ -230,3 +273,4 @@ installed_source_goodix() {
 }
 installed_source_antigravity()     { [ -x /opt/Antigravity/antigravity ]; }
 installed_source_kitty()           { [ -x /opt/kitty.app/bin/kitty ]; }
+installed_source_swayimg()         { [ -x /usr/local/bin/swayimg ]; }

@@ -77,7 +77,10 @@ gnome-calculator
 gnome-system-monitor
 baobab (disk viewer | on GTK)
 obs-studio
-swayimg (view images)
+swayimg                ubuntu:source=swayimg (view images | Ubuntu: built from source — apt is frozen at 4.7)
+libjpeg-turbo          ubuntu:apt=libjpeg-turbo-progs (needs for swayimg - lossless JPEG rotation on Ctrl+S | jpegtran)
+imagemagick (needs for swayimg - saving rotation of other formats)
+exiv2 (needs for swayimg - resetting EXIF orientation after rotation)
 vlc (view videos)
 wlogout (logout app for wayland)
 clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)

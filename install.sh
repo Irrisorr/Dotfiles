@@ -45,6 +45,7 @@ config_menu() {
     "Kitty|configure_kitty|kitty" \
     "Fish|configure_fish|fish" \
     "Rofi|configure_rofi|rofi" \
+    "Swayimg|configure_swayimg|swayimg" \
     "Spicetify|configure_spicetify|spicetify" \
     "Thunar|configure_thunar|thunar" \
     "Wlogout|configure_wlogout|wlogout" \
