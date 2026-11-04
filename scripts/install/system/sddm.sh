@@ -4,7 +4,7 @@
 # Menu guard: sddm
 configure_sddm() {
   print_styled_message "Configure SDDM"
-  confirm_action "configure SDDM and make it the login screen" || return 1
+  confirm_step "configure SDDM and make it the login screen" || return 1
 
   # Theme and drop-in dirs differ per distro, and /etc/sddm.conf.d may not exist
   # yet. cp -T copies onto the theme dir instead of nesting a second copy inside

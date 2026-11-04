@@ -76,6 +76,7 @@ the same shell is a no-op.
   `/etc/shells` before `chsh` — Ubuntu rejects it otherwise), `python_site_dir`,
   `set_console_font`. Standalone like `distro.sh`.
 * **`gum.sh`** — UI wrappers around `gum` (`gum_choose_wrapper`, `confirm_action`,
+  `confirm_step`,
   `print_success_message`, `print_error_message`, `print_styled_message`,
   `check_success`). Installs gum on first use from the distro repos (on Ubuntu
   it is in universe since 26.04).
@@ -86,8 +87,22 @@ the same shell is a no-op.
   * `menu` — the **universal menu** (see below). One function powers every menu.
   * Execution: `execute_script`, `execute_command`, `create_symlink`:
     * `execute_command "<message>" "<command>"` asks, then runs the command in
-      a fresh bash with `common.sh` loaded. Returns **1** when you decline (no
-      mark in the menu) and **2** when the command fails (✗ in the menu).
+      a fresh bash with `common.sh` loaded, printing the command and its output
+      and a one-line ✓ / ✗ result. Returns **1** when you decline (no mark in
+      the menu) and **2** when the command fails (✗ in the menu).
+    * A failed `execute_command` / `check_success` also sets `STEP_FAILED=1`,
+      and `menu` shows ✗ for the step even if its function returned 0 — a step
+      returns its *last* command's status, so an earlier failed action would
+      otherwise still show ✓.
+    * `confirm_step "<what>"` is the "run this step?" question at the top of a
+      step (`execute_command` uses it too). It is skipped when a whole batch of
+      steps was confirmed up front (`STEPS_CONFIRMED=1`). Real decisions inside
+      a step (delete backups, overwrite a file) stay `confirm_action`.
+    * `run_substeps "<Label|func|guard>"...` — a step made of several actions,
+      one function each, same entry format and guards as `menu`. Runs the ones
+      whose guard passes (only those named in `STEP_ONLY`, if set); returns 2
+      when any failed. `configure_niri` and `configure_hyprland` declare theirs
+      in a `<func>_steps` array.
     * `create_symlink <source> <target>` — whatever was at `<target>` before (a
       real config from an earlier install) is moved to `<target>.bak`; if a
       `.bak` already exists, the new one gets `.bak.<date-time>`. A stale
@@ -219,6 +234,20 @@ function body assumes its command is present.
 `system/` or `apps/` (the engine globs the folder and sources it automatically),
 then add one `"Label|configure_<name>|<guard>"` line to `config_menu` in
 `install.sh`. The engine is never touched.
+
+A step that does several independent things lists them as actions, one
+function each:
+
+```bash
+configure_niri_steps=(
+  "niri config|_niri_link_config"
+  "hyprlock config|_niri_link_hyprlock|hyprlock"
+)
+
+configure_niri() {
+  run_substeps "${configure_niri_steps[@]}"
+}
+```
 
 ## `post_install.sh` (root entry point)
 
