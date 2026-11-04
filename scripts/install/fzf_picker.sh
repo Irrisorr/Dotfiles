@@ -54,13 +54,13 @@ _render() {
     $1 == "P" {
       box = ($2 in chk) ? G "[x]" R : "[ ]"
       deps = $8 > 0 ? "  " D "[+" $8 "]" R : ""
-      printf "%s\t  %s %s%s%s%s%s\n", $2, box, $5, desc($6), mark($7), deps, tag($3)
+      printf "%s\t  %s %s%s%s%s%s\n", $2, box, $5, mark($7), desc($6), deps, tag($3)
       next
     }
     $1 == "D" {
       if (!(("P:" $4) in chk)) next
       box = ($2 in chk) ? G "[x]" R : "[ ]"
-      printf "%s\t      %s└ %s%s %s%s%s%s\n", $2, D, R, box, $5, desc($6), mark($7), tag($4)
+      printf "%s\t      %s└ %s%s %s%s%s%s\n", $2, D, R, box, $5, mark($7), desc($6), tag($4)
     }
   ' "$STATE/data.tsv"
 }
