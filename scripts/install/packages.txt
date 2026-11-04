@@ -6,7 +6,7 @@ google-chrome          ubuntu:flatpak=com.google.Chrome
 
 # Terminals and shells
 kitty                  ubuntu:source=kitty
-shader-slang           ubuntu:skip (needs for kitty - custom shaders | Ubuntu: bundled with the upstream kitty build)
+- shader-slang         ubuntu:skip (custom shaders | Ubuntu: bundled with the upstream kitty build)
 alacritty
 fish
 
@@ -58,13 +58,13 @@ ttf-jetbrains-mono-nerd ubuntu:source=jetbrains_nerd (Ubuntu: official nerd-font
 
 # File managers
 thunar                (xfce/gtk fm)
-tumbler               (needs for thunar - file preview)
-thunar-archive-plugin (needs for thunar - adds archive operations)
-thunar-volman         (needs for thunar - adds removable drives operations)
-unzip                 (needs for thunar | for archive operations in tui)
-gvfs                  (needs for thunar | for removable drivers)
+- tumbler               (file preview)
+- thunar-archive-plugin (adds archive operations)
+- thunar-volman         (adds removable drives operations)
+- unzip                 (for archive operations in tui)
+- gvfs                  (for removable drivers)
 dolphin               (kde/qt fm)
-ark                   (needs for dolphin - adds archive operations)
+- ark                   (adds archive operations)
 nautilus              (gnome/gtk fm)
 
 # Virtual Machines
@@ -77,14 +77,14 @@ gnome-calculator
 gnome-system-monitor
 baobab (disk viewer | on GTK)
 obs-studio
-swayimg                ubuntu:source=swayimg (view images | Ubuntu: built from source — apt is frozen at 4.7)
-libjpeg-turbo          ubuntu:apt=libjpeg-turbo-progs (needs for swayimg - lossless JPEG rotation on Ctrl+S | jpegtran)
-imagemagick (needs for swayimg - saving rotation of other formats)
-exiv2 (needs for swayimg - resetting EXIF orientation after rotation)
+swayimg                ubuntu:source=swayimg (view images | Ubuntu: built from source)
+- libjpeg-turbo        ubuntu:apt=libjpeg-turbo-progs (lossless JPEG rotation on Ctrl+S | jpegtran)
+- imagemagick (saving rotation of other formats)
+- exiv2 (resetting EXIF orientation after rotation)
 vlc (view videos)
 wlogout (logout app for wayland)
 clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)
-wl-clipboard (needs for clipse and dms - wayland clipboard)
+- wl-clipboard (wayland clipboard)
 
 # Settings packages
 pavucontrol (audio control)
@@ -121,9 +121,10 @@ xdg-user-dirs-gtk (for home gtk directories)
 gnome-keyring (implements the Secret portal, required for certain apps to work)
 xwayland-satellite     ubuntu:ppa=duxlabs/dux-repo (to run X11 apps like Steam or Discord)
 dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
+- cliphist (clipboard history)
+- wl-clipboard (wayland clipboard)
 hyprlock (lock manager)
 swaybg (wallpaper tool)
-cliphist (needs for dms - clipboard history)
 
 # work
 nodejs
@@ -150,10 +151,10 @@ figlet (for making large letters in terminal)
 playerctl (for control media player)
 brightnessctl (control brightness)
 sddm (welcome service on startup ur device)
-weston (wayland compositor for the sddm greeter)
-qt6-5compat            ubuntu:apt=qml6-module-qt5compat-graphicaleffects (needs for sddm theme)
-qt6-declarative        ubuntu:apt=qml6-module-qtquick-controls (needs for sddm theme)
-qml6-module-qtqml-models arch:pacman=qt6-declarative (needs for sddm theme | Arch: part of qt6-declarative)
-qt6-svg                ubuntu:apt=qt6-svg-plugins (needs for sddm theme)
+- weston (wayland compositor for the greeter)
+- qt6-5compat          ubuntu:apt=qml6-module-qt5compat-graphicaleffects (for the theme)
+- qt6-declarative      ubuntu:apt=qml6-module-qtquick-controls (for the theme)
+- qml6-module-qtqml-models arch:pacman=qt6-declarative (for the theme | Arch: part of qt6-declarative)
+- qt6-svg              ubuntu:apt=qt6-svg-plugins (for the theme)
 usbutils (tool for check model name of all bus devices like usb or fingerprint)
 arronax                ubuntu:skip (for creating .desktop files | Ubuntu: not packaged)

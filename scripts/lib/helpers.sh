@@ -6,6 +6,7 @@
 # App/system-specific config logic lives in scripts/install/{system,apps}/, not here.
 
 declare -A SELECTED_PACKAGES
+declare -A SELECTED_DEPS          # parent canonical name → its picked dependency lines
 declare -A ACTION_STATUS
 declare -A _PKG_SPEC
 declare -A _PKG_INSTALLED _PKG_UPGRADABLE _PKG_REAL
@@ -151,11 +152,20 @@ fish_quote() {
 #
 # No override for the running distro → native, canonical name.
 # The picker never shows the override tail, so both machines see the same list.
+#
+# A line starting with "-" is a dependency of the package line above it:
+#
+#   swayimg                ubuntu:source=swayimg (view images)
+#   - imagemagick (saving rotation of other formats)
+#
+# The picker lists only the parents; picking one opens its dependencies, all
+# pre-checked. Unpicking the parent drops them. Same tail syntax as any line.
 
 # Split a line into its canonical name (_PKG_NAME) and override tail (_PKG_TAIL).
 # Package names never contain "(", descriptions always start with one.
 _split_package_line() {
   local head="${1%%(*}"
+  head="${head#-}"                 # dependency marker, see the format above
   read -r _PKG_NAME _PKG_TAIL <<< "$head"
 }
 
@@ -329,10 +339,28 @@ _category_lines() {
 }
 
 
-# "(installed/total)" for a category; skipped-on-this-distro packages don't count.
+# Dependency lines of <parent> in <category>, "-" marker stripped.
+_package_deps() {
+  local line in_parent=0
+  while IFS= read -r line; do
+    if [[ $line == -* ]]; then
+      [ $in_parent -eq 1 ] || continue
+      line="${line#-}"
+      printf '%s\n' "${line#"${line%%[![:blank:]]*}"}"
+    else
+      _split_package_line "$line"
+      [ "$_PKG_NAME" = "$2" ] && in_parent=1 || in_parent=0
+    fi
+  done < <(_category_lines "$1")
+}
+
+
+# "(installed/total)" for a category; skipped-on-this-distro packages don't count,
+# and neither do dependencies — the counter is about what the picker lists.
 category_counter() {
   local line backend value repo bin total=0 done=0
   while IFS= read -r line; do
+    [[ $line == -* ]] && continue
     _split_package_line "$line"
     IFS=$'\x1f' read -r backend value repo bin < <(resolve_package "$_PKG_NAME")
     [ "$backend" = skip ] && continue
@@ -355,17 +383,26 @@ package_category_selection() {
   while true; do
     local categories_array=()
     local category_status=()
-    local picked total_picked=0
+    local picked picked_deps suffix line total_picked=0 total_deps=0
 
-    # "✓ " prefix and "· N selected" = packages picked in this category;
-    # "(2/4)" = installed.
+    # "✓ " prefix and "· N selected [+M]" = packages and dependencies picked in
+    # this category; "(2/4)" = installed.
     while IFS= read -r category; do
       categories_array+=("$category")
 
       if [ -n "${SELECTED_PACKAGES[$category]}" ]; then
         picked=$(grep -c . <<< "${SELECTED_PACKAGES[$category]}")
+        picked_deps=0
+        while IFS= read -r line; do
+          _split_package_line "$line"
+          [ -n "${SELECTED_DEPS[$_PKG_NAME]}" ] || continue
+          picked_deps=$((picked_deps + $(grep -c . <<< "${SELECTED_DEPS[$_PKG_NAME]}")))
+        done <<< "${SELECTED_PACKAGES[$category]}"
         total_picked=$((total_picked + picked))
-        category_status+=("✓ $category $(category_counter "$category") · $picked selected")
+        total_deps=$((total_deps + picked_deps))
+        suffix=""
+        [ $picked_deps -gt 0 ] && suffix=" [+$picked_deps]"
+        category_status+=("✓ $category $(category_counter "$category") · $picked selected$suffix")
       else
         category_status+=("  $category $(category_counter "$category")")
       fi
@@ -377,7 +414,7 @@ package_category_selection() {
     print_styled_message "Package Installation
 Select Package Categories
 (installed/total) per category
-Selected: $total_picked package(s)
+Selected: $total_picked package(s) + $total_deps dependencies
 Navigate with arrows, ENTER to confirm"
     echo ""
 
@@ -396,9 +433,10 @@ Navigate with arrows, ENTER to confirm"
       print_styled_message "Skipping package installation"
       break
     else
-      # Strip the "✓ " / "  " prefix, " · N selected" and " (n/m)" added above.
+      # Strip the "✓ " / "  " prefix, " · N selected [+M]" and " (n/m)" added above.
       local clean_choice="${choice#✓ }"
       clean_choice="${clean_choice#  }"
+      clean_choice="${clean_choice% \[+*\]}"
       clean_choice="${clean_choice% · * selected}"
       clean_choice="${clean_choice% (*/*)}"
       select_packages_for_category "$clean_choice"
@@ -429,11 +467,25 @@ start_package_installation() {
   print_styled_message "Preparing to install selected packages..."
   echo ""
 
+  local -A seen=()
+  local parent dep
+
+  # A dependency shared by two parents (wl-clipboard) is installed once.
+  _add_name() {
+    _split_package_line "$1"   # trims the description and any padding
+    [ -n "$_PKG_NAME" ] && [ -z "${seen[$_PKG_NAME]}" ] || return 0
+    seen[$_PKG_NAME]=1
+    names+=("$_PKG_NAME")
+  }
+
   for category in "${!SELECTED_PACKAGES[@]}"; do
     while IFS= read -r line; do
       [ -n "$line" ] || continue
-      _split_package_line "$line"   # trims the description and any padding
-      [ -n "$_PKG_NAME" ] && names+=("$_PKG_NAME")
+      _add_name "$line"
+      parent="$_PKG_NAME"
+      while IFS= read -r dep; do
+        [ -n "$dep" ] && _add_name "$dep"
+      done <<< "${SELECTED_DEPS[$parent]}"
     done <<< "${SELECTED_PACKAGES[$category]}"
   done
 
@@ -616,10 +668,12 @@ ESC or ENTER without selection to cancel"
 
   if [ -n "$selected" ]; then
     SELECTED_PACKAGES["$category"]="$selected"
+    select_dependencies "$category" "$selected"
     local pkg_count=$(echo "$selected" | wc -l)
     print_success_message "Saved $pkg_count package(s) for $category"
   else
     unset SELECTED_PACKAGES["$category"]
+    select_dependencies "$category" ""
     echo ":: No packages selected"
   fi
 
@@ -628,15 +682,95 @@ ESC or ENTER without selection to cancel"
 }
 
 
-# Picker lines of one category: "<name> (description)" plus the ✓ / ✓ ↑ mark
-# at the end, so the package name stays the first word for parsing.
-get_packages_from_category() {
-  local line mark
+# For every picked parent with dependencies, a second picker with them all
+# pre-checked (or as picked last time) to uncheck what isn't wanted. Parents no
+# longer picked lose theirs. Esc keeps the pre-checked set.
+select_dependencies() {
+  local category="$1" selected="$2" line parent options prev chosen
+  local -A picked=()
+  local -a parents=() args=() option_lines=()
+
   while IFS= read -r line; do
+    [ -n "$line" ] || continue
     _split_package_line "$line"
-    mark=$(package_mark "$_PKG_NAME")
-    printf '%s%s\n' "$(_package_display_line "$line")" "${mark:+  $mark}"
+    picked[$_PKG_NAME]=1
+  done <<< "$selected"
+
+  # Collected first: gum must not run inside a loop reading the category.
+  while IFS= read -r line; do
+    [[ $line == -* ]] && continue
+    _split_package_line "$line"
+    parents+=("$_PKG_NAME")
+  done < <(_category_lines "$category")
+
+  for parent in "${parents[@]}"; do
+    if [ -z "${picked[$parent]}" ]; then
+      unset "SELECTED_DEPS[$parent]"
+      continue
+    fi
+    options=$(get_package_deps "$category" "$parent")
+    [ -n "$options" ] || continue
+
+    if [[ -v SELECTED_DEPS[$parent] ]]; then
+      prev="${SELECTED_DEPS[$parent]}"
+    else
+      prev="$options"
+    fi
+    args=(--multi --height 15)
+    while IFS= read -r line; do
+      [ -n "$line" ] && args+=(--selected "$line")
+    done <<< "$prev"
+    mapfile -t option_lines <<< "$options"
+
+    echo ""
+    print_styled_message "$parent — dependencies
+All checked: SPACE to uncheck what you don't need
+ENTER to confirm"
+    echo ""
+    if chosen=$(gum_choose_wrapper "${args[@]}" "${option_lines[@]}"); then
+      SELECTED_DEPS[$parent]="$chosen"
+    else
+      SELECTED_DEPS[$parent]="$prev"
+    fi
+  done
+}
+
+
+# Picker line of one package: "<name> (description)" plus the ✓ / ✓ ↑ mark at
+# the end, so the package name stays the first word for parsing.
+_picker_line() {
+  local mark
+  _split_package_line "$1"
+  mark=$(package_mark "$_PKG_NAME")
+  printf '%s%s' "$(_package_display_line "$1")" "${mark:+  $mark}"
+}
+
+
+# Picker lines of one category — parents only, "[+N]" when one has N dependencies.
+get_packages_from_category() {
+  local line i=-1
+  local -a lines=() deps=()
+  while IFS= read -r line; do
+    if [[ $line == -* ]]; then
+      [ $i -ge 0 ] && deps[i]=$(( ${deps[i]:-0} + 1 ))
+    else
+      i=$((i + 1))
+      lines[i]="$line"
+    fi
   done < <(_category_lines "$1")
+
+  for i in "${!lines[@]}"; do
+    printf '%s%s\n' "$(_picker_line "${lines[i]}")" "${deps[i]:+  [+${deps[i]}]}"
+  done
+}
+
+
+# Picker lines of <parent>'s dependencies in <category>.
+get_package_deps() {
+  local line
+  while IFS= read -r line; do
+    printf '%s\n' "$(_picker_line "$line")"
+  done < <(_package_deps "$1" "$2")
 }
 
 

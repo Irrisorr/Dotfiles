@@ -42,6 +42,11 @@ sqlite                 ubuntu:apt=sqlite3 (needs for sync private dotfiles)
 zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
 logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
 ```
+- Something a package only needs for a feature goes right under it with a `-` — the picker shows it after you pick the package, pre-checked:
+```
+swayimg                ubuntu:source=swayimg (view images)
+- imagemagick (saving rotation of other formats)
+```
 
 # Syncing between machines
 

@@ -284,6 +284,22 @@ notes always go inside the parentheses.
   * `skip` — nothing to install on this distro
 * The picker never shows the tail, so both machines see an identical list.
 * Descriptions are optional; package names never contain `(`.
+* A line starting with `-` is a **dependency** of the package line above it —
+  something that package needs for a feature, not a hard requirement. Same
+  tail syntax as any other line:
+
+  ```
+  swayimg                ubuntu:source=swayimg (view images)
+  - libjpeg-turbo        ubuntu:apt=libjpeg-turbo-progs (lossless JPEG rotation on Ctrl+S)
+  - imagemagick (saving rotation of other formats)
+  ```
+
+  The picker lists only the parents (`swayimg ... [+2]`). Picking one opens a
+  second list with its dependencies **all pre-checked** — uncheck what you
+  don't need (Esc keeps them all). Unpicking the parent drops its dependencies;
+  unchecking one dependency leaves everything else alone. A dependency several
+  packages share (`wl-clipboard` under clipse and dux-shell) is written under
+  each and installed once. The `(installed/total)` counter counts parents only.
 * The parser sticks to POSIX `awk` / `sed` regexes (`[ \t]`, `[[:blank:]]`, never
   `\s` / `\w`): Arch's `awk` is gawk, but Ubuntu's is **mawk**, which silently
   doesn't match GNU escapes — that once made every category look empty.
@@ -292,7 +308,7 @@ notes always go inside the parentheses.
 missing:
 
 ```
-Selected: 2 package(s)                    ← header: everything picked so far
+Selected: 2 package(s) + 3 dependencies   ← header: everything picked so far
 ✓ Browsers (3/4) · 2 selected             ← installed / available · picked here
 zen-browser-bin (based on firefox)  ✓     ← installed
 firefox  ✓ ↑                              ← installed, an update is available
