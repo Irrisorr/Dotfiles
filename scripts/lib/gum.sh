@@ -16,35 +16,6 @@ HAS_GUM=false
 command -v gum &>/dev/null && HAS_GUM=true
 
 
-# Ubuntu has no gum package. Charm's own apt repository has it, and once the
-# repo is added gum upgrades with `apt upgrade` like everything else (a .deb
-# from GitHub releases never would). Asks first — this adds a third-party repo.
-add_charm_repo() {
-  local keyring="/etc/apt/keyrings/charm.gpg"
-  local list="/etc/apt/sources.list.d/charm.list"
-
-  command -v curl &>/dev/null || pkg_install curl || return 1
-  command -v gpg &>/dev/null || pkg_install gnupg || return 1
-
-  sudo mkdir -p /etc/apt/keyrings || return 1
-  curl -fsSL https://repo.charm.sh/apt/gpg.key | sudo gpg --dearmor --yes -o "$keyring" || return 1
-  sudo chmod 0644 "$keyring"
-  echo "deb [signed-by=$keyring] https://repo.charm.sh/apt/ * *" | sudo tee "$list" >/dev/null || return 1
-  pkg_sync
-}
-
-
-_gum_install_apt_repo() {
-  echo ":: 'gum' is not in the Ubuntu repos. It can be installed from Charm's"
-  echo ":: official apt repository (https://repo.charm.sh/apt) and then updates"
-  echo ":: with apt upgrade."
-  read -rp ":: Add the repository and install gum? (y/N): " reply </dev/tty
-  case "$reply" in y | Y) ;; *) return 1 ;; esac
-
-  add_charm_repo && pkg_install gum
-}
-
-
 bootstrap_gum() {
   if command -v gum &>/dev/null; then
     HAS_GUM=true
@@ -54,12 +25,8 @@ bootstrap_gum() {
   echo ":: Installing gum for beautiful output..."
   # Output stays visible: a failure here (stale mirrors, old keyring) is the
   # first thing a fresh install hits, and its reason is only in pacman's output.
-  # apt has no 'gum', so Debian/Ubuntu go straight to Charm's apt repo.
-  if is_debian; then
-    _gum_install_apt_repo
-  else
-    pkg_install gum
-  fi
+  # Ubuntu has it in universe since 26.04, so no third-party repo is needed.
+  pkg_install gum
 
   if command -v gum &>/dev/null; then
     HAS_GUM=true

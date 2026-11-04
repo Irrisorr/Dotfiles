@@ -77,9 +77,8 @@ the same shell is a no-op.
   `set_console_font`. Standalone like `distro.sh`.
 * **`gum.sh`** — UI wrappers around `gum` (`gum_choose_wrapper`, `confirm_action`,
   `print_success_message`, `print_error_message`, `print_styled_message`,
-  `check_success`). Installs gum on first use: from the repos on Arch, from
-  Charm's official apt repository on Ubuntu (apt has no gum; it asks first) —
-  `add_charm_repo`, so gum then upgrades with `apt upgrade`.
+  `check_success`). Installs gum on first use from the distro repos (on Ubuntu
+  it is in universe since 26.04).
   `menu` and the package picker **require** gum (`require_gum`); the small
   helpers fall back to plain bash (`read`/`echo`) without it.
   `DOTFILES_NO_GUM_BOOTSTRAP=1` sources it without installing anything.
