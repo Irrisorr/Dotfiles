@@ -12,7 +12,8 @@ cd Dotfiles
 ./install.sh
 ```
 
-- The package picker marks what's already installed (`✓`, `↑` = an update is available) and shows `(installed/total)` and how many packages you picked next to every category (plus the total in the header), so you can pick only what's missing
+- The package picker and the config menu run in **fzf** (installed automatically; with fzf older than 0.59 the installer falls back to plain gum menus): every category on one screen, `j`/`k` or arrows to move, `Space` to tick, `Ctrl-A` to tick a whole category, `/` or `Ctrl-F` to search. Ticking a package unfolds its dependencies, ticking *Niri* / *Hyprland ecosystem* unfolds what it configures — untick what you don't need. The right panel shows where a package comes from on this distro and whether it is installed (`✓`, `↑` = an update is available)
+- Packages: `Enter` shows the install plan and asks; `No` brings the list back with your ticks. Config: `Enter` asks to run the ticked steps (or the one under the cursor), then runs them with their output on screen; the list comes back with `✓` / `✗` and each step's output in its preview
 
 - After it reboot your device and open new terminal, there will be a hook that will run `post_install.sh` automatically. If something went wrong, you can run it manually:
 ```
@@ -172,10 +173,13 @@ Dotfiles/
       paths.sh       # paths that differ between distros (polkit, portals, sddm, fish, ...)
       gum.sh         # gum bootstrap + UI wrappers
       helpers.sh     # universal menu(), execute_*, create_symlink, package engine, system_update
+      fzf.sh         # shared parts of the fzf pickers (modes, keys, footer) + fzf bootstrap
     wrappers/        # launchers called from WM configs, resolve distro-specific paths (polkit, portals)
     install/
       main.sh        # installer ENGINE: sourcing + core-step functions + run_final_steps (no menus)
       packages.txt   # one line per package, works for both distros
+      fzf_picker.sh  # fzf package picker (run on its own to try it: installs nothing)
+      fzf_config.sh  # fzf config menu (run on its own: dry run)
       system/        # system-level config functions: niri, hyprland, sddm, fingerprint, gtk/bluetooth/polkit, xdg, flatpak, sources.sh (custom installers)
       apps/          # per-app config functions: zen, kitty, fish, thunar, rofi, ...  (ONE file per app)
     functions/       # everyday shell aliases + alias_menu.sh (the `asd` menu)

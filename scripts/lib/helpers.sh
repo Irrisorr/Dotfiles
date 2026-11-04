@@ -378,9 +378,38 @@ category_counter() {
 
 # ─── Package selection engine ─────────────────────────────────────────────────
 
+# fzf picker (install/fzf_picker.sh) when fzf is there: every category on one
+# screen. It hands back the names, install_packages shows its plan and asks;
+# declining it — or nothing installable — brings the list back with the ticks
+# kept. Without fzf, the gum category menu below.
+_fzf_package_selection() {
+  local state names rc
+  local -a picked=()
+  state=$(mktemp -d)
+  names="$state/names"
+
+  while bash "$INSTALL_DIR/fzf_picker.sh" --pick "$state" "$names"; do
+    mapfile -t picked < "$names"
+    install_packages "${picked[@]}"
+    rc=$?
+    [ $rc -eq 1 ] || break
+    read -rp ":: Enter: back to the package list " _ </dev/tty
+  done
+  [ ${#picked[@]} -eq 0 ] && print_styled_message "Skipping package installation"
+
+  rm -rf "$state"
+  return 0
+}
+
+
 # Function to handle interactive category selection and package selection
 package_category_selection() {
   local package_file="$INSTALL_DIR/packages.txt"
+
+  if fzf_ready; then
+    _fzf_package_selection
+    return
+  fi
 
   require_gum "package installation" || return 1
   load_package_status

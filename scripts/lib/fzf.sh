@@ -1,7 +1,8 @@
 #!/bin/bash
 #
 # Shared parts of the fzf pickers (install/fzf_picker.sh, install/fzf_config.sh).
-# Free of common.sh on purpose: fzf sources it again on every key press.
+# The top part is free of common.sh on purpose: fzf sources this file again on
+# every key press. fzf_ready / bootstrap_fzf at the end are for the installer.
 #
 # Both pickers feed fzf "<key>\t<display>" lines and keep their own state; the
 # callbacks fzf runs re-render the list and move the cursor back with pos().
@@ -70,4 +71,29 @@ fzf_base_opts() {
     --bind="esc:transform:[[ \$FZF_INPUT_STATE = enabled ]] && echo '$to_list' || echo abort"
     --bind="enter:transform:[[ \$FZF_INPUT_STATE = enabled ]] && echo '$to_list' || echo accept"
   )
+}
+
+
+# ─── Installer side (needs common.sh) ─────────────────────────────────────────
+
+FZF_MIN_VERSION="0.59"
+
+# fzf is installed and new enough for the pickers; the installer falls back to
+# the gum menus otherwise.
+fzf_ready() {
+  local v major minor
+  command -v fzf &>/dev/null || return 1
+  v=$(fzf --version 2>/dev/null) || return 1
+  IFS=. read -r major minor _ <<< "${v%% *}"
+  [ "${major:-0}" -gt 0 ] || [ "${minor:-0}" -ge "${FZF_MIN_VERSION#0.}" ]
+}
+
+
+# Installs fzf if missing; never fatal — without it the gum menus are used.
+bootstrap_fzf() {
+  fzf_ready && return 0
+  command -v fzf &>/dev/null || { echo ":: Installing fzf for the package and config pickers..."; pkg_install fzf; }
+  fzf_ready && return 0
+  echo ":: fzf >= $FZF_MIN_VERSION is not available — using the plain gum menus" >&2
+  return 1
 }

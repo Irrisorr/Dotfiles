@@ -1,12 +1,14 @@
 #!/bin/bash
 #
-# fzf configuration menu — PROTOTYPE.
+# fzf configuration menu, used by config_menu in install.sh:
 #
-#   bash ~/Dotfiles/scripts/install/fzf_config.sh          dry run: nothing changes
-#   bash ~/Dotfiles/scripts/install/fzf_config.sh --run    really runs the steps
+#   fzf_config.sh --menu <file>   the "Label|func|guard" entries, one per line
+#   fzf_config.sh                 try it on its own: CONFIG_STEPS from
+#                                 install.sh, dry run — nothing changes
+#   fzf_config.sh --run           same, but really runs the steps
 #
-# Steps come from config_menu in install.sh (same labels and guards), grouped
-# by where their function lives: scripts/install/system or scripts/install/apps.
+# Steps are grouped by where their function lives: scripts/install/system or
+# scripts/install/apps.
 # A step with a <func>_steps array (configure_niri, configure_hyprland) unfolds
 # its actions under it when ticked, all ticked; only the ticked ones run.
 #
@@ -231,7 +233,7 @@ fi
 # ─── Start: load the steps, then loop fzf → confirm → run → fzf ──────────────
 
 export DRY_RUN=1
-[ "$1" = "--run" ] && DRY_RUN=0
+[ "$1" = "--run" ] || [ "$1" = "--menu" ] && DRY_RUN=0
 
 _load_steps
 command -v fzf &>/dev/null || { echo ":: fzf is not installed: $(pkg_install_hint fzf)" >&2; exit 1; }
@@ -244,12 +246,17 @@ mkdir -p "$STATE/src" "$STATE/log"
 : > "$STATE/checked"
 : > "$STATE/status"
 
-# The "Label|func|guard" entries of config_menu, read from install.sh — the
-# prototype must not source it, that would start the real installer.
-mapfile -t entries < <(
-  sed -n '/^config_menu() {/,/^}/p' "$HOME/Dotfiles/install.sh" \
-    | grep -oE '^[[:blank:]]+"[^"]*\|[^"]*"' | sed -E 's/^[[:blank:]]+"//; s/"$//'
-)
+# The "Label|func|guard" entries: from the installer, or read out of
+# CONFIG_STEPS in install.sh when run on its own (sourcing install.sh would
+# start the real installer).
+if [ "$1" = "--menu" ]; then
+  mapfile -t entries < "$2"
+else
+  mapfile -t entries < <(
+    sed -n '/^CONFIG_STEPS=(/,/^)/p' "$HOME/Dotfiles/install.sh" \
+      | grep -oE '^[[:blank:]]+"[^"]*\|[^"]*"' | sed -E 's/^[[:blank:]]+"//; s/"$//'
+  )
+fi
 
 _row() { local IFS=$'\t'; printf '%s\n' "$*"; }
 

@@ -1,16 +1,20 @@
 #!/bin/bash
 #
-# fzf package picker — PROTOTYPE. Run it to try the UI; it only prints what it
-# would install and changes nothing.
+# fzf package picker, used by package_category_selection (lib/helpers.sh):
 #
-#   bash ~/Dotfiles/scripts/install/fzf_picker.sh
+#   fzf_picker.sh --pick <state dir> <out file>
+#       writes the picked names to <out file>; exits 1 on Esc. The state dir
+#       keeps the cache and the ticks, so the installer can bring the list back
+#       as it was when its plan is declined.
+#   fzf_picker.sh
+#       try the UI on its own: prints what it would install, changes nothing.
 #
 # One screen for every category. j/k or arrows move (wrapping around), Space
 # ticks, / or Ctrl-F searches (see lib/fzf.sh). Ticking a package unfolds its
 # dependencies (packages.txt "- " lines) right under it, all ticked; unticking
 # it folds them away again. Ctrl-A ticks the cursor's whole category (what the
-# search shows of it), or unticks it when all are. Enter asks before
-# installing; No goes back to the list with the ticks kept.
+# search shows of it), or unticks it when all are. Enter takes the ticked
+# packages, or the one under the cursor when none is.
 #
 # fzf runs this same script for every key press (--render / --toggle /
 # --preview), so those modes read a cache built once at start (in $STATE,
@@ -224,42 +228,49 @@ _source_of() {
   esac
 }
 
-STATE=$(mktemp -d)
+if [ "$1" = "--pick" ]; then
+  STATE="$2" OUT="$3"
+else
+  STATE=$(mktemp -d) OUT=""
+  trap 'rm -rf "$STATE"' EXIT
+fi
 export STATE
-trap 'rm -rf "$STATE"' EXIT
-: > "$STATE/checked"
+[ -e "$STATE/checked" ] || : > "$STATE/checked"
 
-echo ":: Reading packages.txt and checking what is installed..."
-load_package_status
+# Built once per installer run; a declined plan comes back to the same list.
+if [ ! -s "$STATE/data.tsv" ]; then
+  echo ":: Reading packages.txt and checking what is installed..."
+  load_package_status
 
-# One row per header / package / dependency; a package's dependency count is
-# only known after its "- " lines, so a category is read whole first.
-_row() { local IFS=$'\t'; printf '%s\n' "$*"; }
+  # One row per header / package / dependency; a package's dependency count is
+  # only known after its "- " lines, so a category is read whole first.
+  _row() { local IFS=$'\t'; printf '%s\n' "$*"; }
 
-{
-  while IFS= read -r category; do
-    _row H "H:$category" "$category" "" "" "" "" "" ""
-    mapfile -t lines < <(_category_lines "$category")
-    declare -A ndeps=()
-    parent=""
-    for line in "${lines[@]}"; do
-      _split_package_line "$line"
-      [[ $line == -* ]] && ndeps[$parent]=$(( ${ndeps[$parent]:-0} + 1 )) || parent="$_PKG_NAME"
-    done
-    for line in "${lines[@]}"; do
-      _split_package_line "$line"
-      name="$_PKG_NAME" desc=""
-      [[ $line == *"("* ]] && { desc="${line#*(}"; desc="${desc%)*}"; }
-      if [[ $line == -* ]]; then
-        _row D "D:$parent:$name" "$category" "$parent" "$name" "$desc" "$(package_mark "$name")" 0 "$(_source_of "$name")"
-      else
-        parent="$name"
-        _row P "P:$name" "$category" "" "$name" "$desc" "$(package_mark "$name")" "${ndeps[$name]:-0}" "$(_source_of "$name")"
-      fi
-    done
-    unset ndeps
-  done < <(get_all_categories)
-} > "$STATE/data.tsv"
+  {
+    while IFS= read -r category; do
+      _row H "H:$category" "$category" "" "" "" "" "" ""
+      mapfile -t lines < <(_category_lines "$category")
+      declare -A ndeps=()
+      parent=""
+      for line in "${lines[@]}"; do
+        _split_package_line "$line"
+        [[ $line == -* ]] && ndeps[$parent]=$(( ${ndeps[$parent]:-0} + 1 )) || parent="$_PKG_NAME"
+      done
+      for line in "${lines[@]}"; do
+        _split_package_line "$line"
+        name="$_PKG_NAME" desc=""
+        [[ $line == *"("* ]] && { desc="${line#*(}"; desc="${desc%)*}"; }
+        if [[ $line == -* ]]; then
+          _row D "D:$parent:$name" "$category" "$parent" "$name" "$desc" "$(package_mark "$name")" 0 "$(_source_of "$name")"
+        else
+          parent="$name"
+          _row P "P:$name" "$category" "" "$name" "$desc" "$(package_mark "$name")" "${ndeps[$name]:-0}" "$(_source_of "$name")"
+        fi
+      done
+      unset ndeps
+    done < <(get_all_categories)
+  } > "$STATE/data.tsv"
+fi
 
 fzf_base_opts "Packages" "$(fzf_keys "j/k ↑↓" move Space tick Ctrl-A "tick whole category" "/ Ctrl-F" search)
 $(fzf_keys Enter install Esc cancel Ctrl-/ "hide preview")
@@ -275,30 +286,32 @@ _ticked_names() {
 }
 
 while true; do
-  _render | SHELL=/bin/bash fzf "${FZF_OPTS[@]}" \
+  picked=$(_render | SHELL=/bin/bash fzf "${FZF_OPTS[@]}" \
     --header="$(_header)" \
     --preview="$CMD --preview {1}" \
     --preview-window='right,45%,wrap' \
     --bind="space:transform:$CMD --toggle {1}" \
     --bind="tab:transform:$CMD --toggle {1}" \
-    --bind="ctrl-a:transform:$CMD --group {1}" \
-    >/dev/null
-  if [ $? -ne 0 ]; then
-    echo ":: Cancelled — nothing installed"
-    exit 0
-  fi
+    --bind="ctrl-a:transform:$CMD --group {1}")
+  [ $? -eq 0 ] || exit 1
 
+  # Nothing ticked → the package under the cursor, with its dependencies.
+  if ! grep -q . "$STATE/checked"; then
+    key=$(cut -f1 <<< "$picked")
+    [[ $key == [PD]:* ]] || continue
+    [[ $key == D:* ]] && key="P:$(cut -d: -f2 <<< "$key")"
+    _tick "$key"
+  fi
   mapfile -t names < <(_ticked_names)
-  if [ ${#names[@]} -eq 0 ]; then
-    echo ":: Nothing ticked"
+
+  # The installer shows its own plan and asks; on its own, ask here.
+  if [ -n "$OUT" ]; then
+    printf '%s\n' "${names[@]}" > "$OUT"
     exit 0
   fi
-
-  if gum confirm "Install ${#names[@]} package(s)?
-$(printf '  • %s\n' "${names[@]}")" </dev/tty; then
-    break
-  fi
+  gum confirm "Install ${#names[@]} package(s)?
+$(printf '  • %s\n' "${names[@]}")" </dev/tty && break
 done
 
-echo ":: Would install ${#names[@]} package(s) (prototype — nothing installed):"
+echo ":: Would install ${#names[@]} package(s) (trying the picker on its own — nothing installed):"
 printf '   %s\n' "${names[@]}"

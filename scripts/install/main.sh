@@ -24,6 +24,8 @@ esac
 
 # Menus can't run without gum; stop instead of jumping to the final steps.
 require_gum "the installer" || exit 1
+# The package and config pickers; without it they fall back to gum menus.
+bootstrap_fzf
 
 # Load every config function (system first, then apps).
 for f in "$SYSTEM_DIR"/*.sh "$APPS_DIR"/*.sh; do
