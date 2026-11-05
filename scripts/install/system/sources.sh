@@ -232,18 +232,26 @@ _SWAYIMG_BUILD_DEPS=(
 )
 
 install_source_swayimg() {
-  local tag tmp rc=0
+  local tag tmp jobs mem_kb rc=0
   command -v curl &>/dev/null || pkg_install curl || return 1
   pkg_install "${_SWAYIMG_BUILD_DEPS[@]}" || return 1
   tag=$(_github_latest_tag artemsen/swayimg) || { print_error_message "swayimg: could not find the latest release"; return 1; }
 
+  # The biggest g++ job here peaks at ~525 MB (measured on 5.7). ninja's
+  # default (cores + 2) swapped a 12-core VM with 4 GB to a standstill, so
+  # jobs follow free memory: one per 800 MB.
+  mem_kb=$(awk '/^MemAvailable:/ { print $2 }' /proc/meminfo)
+  jobs=$(( mem_kb / 800000 ))
+  [ "$jobs" -lt 1 ] && jobs=1
+  [ "$jobs" -gt "$(nproc)" ] && jobs=$(nproc)
+
   tmp=$(mktemp -d)
-  echo ":: Building swayimg $tag"
+  echo ":: Building swayimg $tag ($jobs parallel jobs for $(( mem_kb / 1024 )) MB free)"
   if curl -fsSL "https://github.com/artemsen/swayimg/archive/refs/tags/$tag.tar.gz" \
        | tar -xz -C "$tmp" --strip-components=1; then
     meson setup "$tmp/build" "$tmp" --prefix=/usr/local --buildtype=release \
         -Dversion="${tag#v}" -Dexr=disabled \
-      && meson compile -C "$tmp/build" \
+      && meson compile -C "$tmp/build" -j "$jobs" \
       && sudo meson install -C "$tmp/build" --no-rebuild \
       || rc=1
   else

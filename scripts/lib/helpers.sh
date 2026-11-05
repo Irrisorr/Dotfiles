@@ -263,6 +263,10 @@ load_package_status() {
   local name backend value repo bin
   local -a native=()
 
+  # package_mark asks installed_source_<name> for custom installers. The
+  # installer has sources.sh loaded already; the fzf picker runs on its own.
+  declare -F installed_source_clipse >/dev/null || . "$SYSTEM_DIR/sources.sh"
+
   load_package_index || return 1
   for name in "${!_PKG_SPEC[@]}"; do
     IFS=$'\x1f' read -r backend value repo bin < <(resolve_package "$name")
