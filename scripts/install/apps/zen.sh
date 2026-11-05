@@ -63,7 +63,7 @@ restore_private_zen() {
 
 configure_zen() {
   print_styled_message "Configuring Zen-Browser"
-  if ! confirm_action "configure Zen-Browser"; then
+  if ! confirm_step "configure Zen-Browser"; then
     return 1
   fi
 

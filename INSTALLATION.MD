@@ -76,18 +76,38 @@ the same shell is a no-op.
   `/etc/shells` before `chsh` — Ubuntu rejects it otherwise), `python_site_dir`,
   `set_console_font`. Standalone like `distro.sh`.
 * **`gum.sh`** — UI wrappers around `gum` (`gum_choose_wrapper`, `confirm_action`,
+  `confirm_step`,
   `print_success_message`, `print_error_message`, `print_styled_message`,
   `check_success`). Installs gum on first use from the distro repos (on Ubuntu
   it is in universe since 26.04).
   `menu` and the package picker **require** gum (`require_gum`); the small
   helpers fall back to plain bash (`read`/`echo`) without it.
   `DOTFILES_NO_GUM_BOOTSTRAP=1` sources it without installing anything.
+* **`fzf.sh`** — shared parts of the fzf pickers: `fzf_base_opts` (look, list /
+  search modes, cycling, footer), `fzf_keys`, `fzf_visible_keys` /
+  `fzf_pos_of` (put the cursor back after a reload — Ubuntu's fzf 0.67 has no
+  `--id-nth`), and for the installer `fzf_ready` / `bootstrap_fzf`. Its top
+  part needs no `common.sh`: fzf sources it on every key press.
 * **`helpers.sh`** — generic, no app-specific code:
   * `menu` — the **universal menu** (see below). One function powers every menu.
   * Execution: `execute_script`, `execute_command`, `create_symlink`:
     * `execute_command "<message>" "<command>"` asks, then runs the command in
-      a fresh bash with `common.sh` loaded. Returns **1** when you decline (no
-      mark in the menu) and **2** when the command fails (✗ in the menu).
+      a fresh bash with `common.sh` loaded, printing the command and its output
+      and a one-line ✓ / ✗ result. Returns **1** when you decline (no mark in
+      the menu) and **2** when the command fails (✗ in the menu).
+    * A failed `execute_command` / `check_success` also sets `STEP_FAILED=1`,
+      and `menu` shows ✗ for the step even if its function returned 0 — a step
+      returns its *last* command's status, so an earlier failed action would
+      otherwise still show ✓.
+    * `confirm_step "<what>"` is the "run this step?" question at the top of a
+      step (`execute_command` uses it too). It is skipped when a whole batch of
+      steps was confirmed up front (`STEPS_CONFIRMED=1`). Real decisions inside
+      a step (delete backups, overwrite a file) stay `confirm_action`.
+    * `run_substeps "<Label|func|guard>"...` — a step made of several actions,
+      one function each, same entry format and guards as `menu`. Runs the ones
+      whose guard passes (only those named in `STEP_ONLY`, if set); returns 2
+      when any failed. `configure_niri` and `configure_hyprland` declare theirs
+      in a `<func>_steps` array.
     * `create_symlink <source> <target>` — whatever was at `<target>` before (a
       real config from an earlier install) is moved to `<target>.bak`; if a
       `.bak` already exists, the new one gets `.bak.<date-time>`. A stale
@@ -158,10 +178,14 @@ the two menus and the final call:
 ```bash
 . "$HOME/Dotfiles/scripts/install/main.sh"   # engine: everything except the menus
 
+CONFIG_STEPS=(                               # one entry per config function
+  "Niri ecosystem|configure_niri|niri"
+  ...
+)
+
 config_menu() {                              # the configuration submenu
-  menu "<─ Back to main menu" \
-    "Niri ecosystem|configure_niri|niri" \
-    ...one line per config function...
+  # fzf_config.sh --menu with CONFIG_STEPS when fzf_ready, else:
+  menu "<─ Back to main menu" "${CONFIG_STEPS[@]}"
 }
 
 menu ">>> Finish & continue <<<" \          # the first menu
@@ -180,10 +204,18 @@ run_final_steps                              # defined in the engine
   `install_window_manager` are in the engine. `Install yay` only shows on Arch.
   `install_window_manager` goes through `install_packages`, so on Ubuntu niri
   gets its PPA like any other package.
-* **`config_menu`**: a function that calls `menu` again with one entry per config
-  function (system first, then apps), each with a guard. Its back button returns
-  to the first menu — that's the nesting, no special casing. **This is the one
-  place to edit when adding/removing a configuration.**
+* **`config_menu`**: shows `CONFIG_STEPS` — one entry per config function
+  (system first, then apps), each with a guard — in the fzf menu
+  (`install/fzf_config.sh --menu`), or with `menu` when fzf is missing. Esc /
+  its back button returns to the first menu. **`CONFIG_STEPS` is the one place
+  to edit when adding/removing a configuration.**
+* **The fzf config menu** groups the steps into System / Apps by the folder
+  their function lives in. Space ticks (a step with a `<func>_steps` array
+  unfolds its actions, all ticked), Enter asks once for everything ticked — or
+  the step under the cursor — then runs each in `script`, so prompts and sudo
+  keep a real terminal while the output is logged. `STEPS_CONFIRMED=1` skips
+  every `confirm_step`, `STEP_ONLY` carries the ticked actions. The list comes
+  back with ✓ / ✗ (same exit codes as `menu`), the step's output in its preview.
 * **`run_final_steps`** (in the engine, called by `install.sh` after the menus):
   list every backup `create_symlink` left in `~/.config` (`*.bak` and
   `*.bak.<date>`, dirs and files) and delete them all if you confirm — `find`
@@ -211,14 +243,28 @@ configure_kitty() {
 ```
 
 The engine (`main.sh`) sources every such file, so the functions exist; then
-`config_menu` (in `install.sh`) lists them with a label and (usually) a guard.
+`CONFIG_STEPS` (in `install.sh`) lists them with a label and (usually) a guard.
 The old top-level `if command -v` check is now the menu's guard field — the
 function body assumes its command is present.
 
 **Adding a config step:** write `configure_<name>()` in a file under
 `system/` or `apps/` (the engine globs the folder and sources it automatically),
-then add one `"Label|configure_<name>|<guard>"` line to `config_menu` in
+then add one `"Label|configure_<name>|<guard>"` line to `CONFIG_STEPS` in
 `install.sh`. The engine is never touched.
+
+A step that does several independent things lists them as actions, one
+function each:
+
+```bash
+configure_niri_steps=(
+  "niri config|_niri_link_config"
+  "hyprlock config|_niri_link_hyprlock|hyprlock"
+)
+
+configure_niri() {
+  run_substeps "${configure_niri_steps[@]}"
+}
+```
 
 ## `post_install.sh` (root entry point)
 
@@ -303,8 +349,19 @@ notes always go inside the parentheses.
   `\s` / `\w`): Arch's `awk` is gawk, but Ubuntu's is **mawk**, which silently
   doesn't match GNU escapes — that once made every category look empty.
 
-**The picker** shows what is already there, so it's easy to pick only what's
-missing:
+**The picker** is `install/fzf_picker.sh` when fzf >= 0.59 is there
+(`bootstrap_fzf` in `main.sh` installs it; `fzf_ready` checks it), else the gum
+category menu below. fzf shows every category on one screen: Space ticks,
+Ctrl-A ticks a whole category, `/` / Ctrl-F search (lib/fzf.sh: in list mode
+the input is hidden and j/k move; in search mode every key types). Ticking a
+package unfolds its `-` dependencies, all ticked. It hands the names to
+`install_packages`, whose plan + "start installation?" is the confirmation —
+declining it, or nothing installable, reopens the list with the ticks kept
+(the cache and ticks live in a state dir `_fzf_package_selection` passes in).
+fzf calls the script back on every key press (`--render`, `--toggle`,
+`--preview`), so those modes only read that cache.
+
+The gum menu marks the same things:
 
 ```
 Selected: 2 package(s) + 3 dependencies   ← header: everything picked so far

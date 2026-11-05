@@ -6,7 +6,7 @@
 # final steps) lives in scripts/install/main.sh, sourced just below.
 #
 # Add a config step: write configure_* in scripts/install/{system,apps}/<name>.sh
-#                    then add a "Label|func|guard" line to config_menu here.
+#                    then add a "Label|func|guard" line to CONFIG_STEPS here.
 #
 # The guard is optional; without it the entry always shows. With it, the entry
 # only shows when the guard passes. Several tokens can be joined with "+", and
@@ -27,33 +27,46 @@
 
 # ─── Configuration submenu ───────────────────────────────────────────────────
 
+# fzf menu when fzf is there (tick several, Enter runs them, Niri/Hyprland
+# unfold into their actions), the gum menu otherwise.
+CONFIG_STEPS=(
+  "Niri ecosystem|configure_niri|niri"
+  "Hyprland ecosystem|configure_hyprland|hyprland"
+  "SDDM|configure_sddm|sddm"
+  "Enable Flatpak + Flathub|enable_flatpak|distro:debian"
+  "Enable Bluetooth service|enable_bluetooth|bluetoothctl"
+  "Start GNOME polkit agent|start_polkit_gnome|test:has_polkit_gnome"
+  "Start MATE polkit agent|start_polkit_mate|test:has_polkit_mate"
+  "GTK (window control buttons)|configure_gtk"
+  "Update user directories|update_user_dirs|xdg-user-dirs-update"
+  "Convert Russian XDG dirs to English|convert_xdg_dirs"
+  "Fingerprint authentication|configure_fingerprint|fprintd-enroll"
+  "Git|configure_git|git"
+  "Zen Browser|configure_zen|zen-browser"
+  "Kitty|configure_kitty|kitty"
+  "Fish|configure_fish|fish"
+  "Rofi|configure_rofi|rofi"
+  "Swayimg|configure_swayimg|swayimg"
+  "Spicetify|configure_spicetify|spicetify"
+  "Thunar|configure_thunar|thunar"
+  "Wlogout|configure_wlogout|wlogout"
+  "Wofi|configure_wofi|wofi"
+  "Clipse|configure_clipse|clipse"
+  "Fastfetch|configure_fastfetch|fastfetch"
+  "Zoom|configure_zoom|zoom"
+  "Java|configure_java|java"
+)
+
 config_menu() {
-  menu "<─ Back to main menu" \
-    "Niri ecosystem|configure_niri|niri" \
-    "Hyprland ecosystem|configure_hyprland|hyprland" \
-    "SDDM|configure_sddm|sddm" \
-    "Enable Flatpak + Flathub|enable_flatpak|distro:debian" \
-    "Enable Bluetooth service|enable_bluetooth|bluetoothctl" \
-    "Start GNOME polkit agent|start_polkit_gnome|test:has_polkit_gnome" \
-    "Start MATE polkit agent|start_polkit_mate|test:has_polkit_mate" \
-    "GTK (window control buttons)|configure_gtk" \
-    "Update user directories|update_user_dirs|xdg-user-dirs-update" \
-    "Convert Russian XDG dirs to English|convert_xdg_dirs" \
-    "Fingerprint authentication|configure_fingerprint|fprintd-enroll" \
-    "Git|configure_git|git" \
-    "Zen Browser|configure_zen|zen-browser" \
-    "Kitty|configure_kitty|kitty" \
-    "Fish|configure_fish|fish" \
-    "Rofi|configure_rofi|rofi" \
-    "Swayimg|configure_swayimg|swayimg" \
-    "Spicetify|configure_spicetify|spicetify" \
-    "Thunar|configure_thunar|thunar" \
-    "Wlogout|configure_wlogout|wlogout" \
-    "Wofi|configure_wofi|wofi" \
-    "Clipse|configure_clipse|clipse" \
-    "Fastfetch|configure_fastfetch|fastfetch" \
-    "Zoom|configure_zoom|zoom" \
-    "Java|configure_java|java"
+  if fzf_ready; then
+    local entries
+    entries=$(mktemp)
+    printf '%s\n' "${CONFIG_STEPS[@]}" > "$entries"
+    bash "$INSTALL_DIR/fzf_config.sh" --menu "$entries"
+    rm -f "$entries"
+  else
+    menu "<─ Back to main menu" "${CONFIG_STEPS[@]}"
+  fi
 }
 
 

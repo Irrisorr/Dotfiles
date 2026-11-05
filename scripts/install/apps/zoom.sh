@@ -5,7 +5,7 @@
 # The flatpak (Ubuntu) reads its config from its own XDG dir, not ~/.config.
 configure_zoom() {
   print_styled_message "Configuring Zoom"
-  if ! confirm_action "configure Zoom for Wayland"; then
+  if ! confirm_step "configure Zoom for Wayland"; then
     return 1
   fi
 

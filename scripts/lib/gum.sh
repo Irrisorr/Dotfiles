@@ -105,6 +105,16 @@ choose_action_no_limit() {
 }
 
 
+# The "run this step?" question at the top of a config step — as opposed to a
+# real decision inside one (delete backups, overwrite a file), which stays
+# confirm_action. Skipped when the user already confirmed a whole batch of
+# steps up front (STEPS_CONFIRMED=1, set by the fzf config menu).
+confirm_step() {
+  [ -n "$STEPS_CONFIRMED" ] && return 0
+  confirm_action "$1"
+}
+
+
 # Function to confirm an action with the user (returns 0 for yes, 1 for no)
 confirm_action() {
   local message=$1
@@ -134,6 +144,7 @@ check_success() {
     print_success_message "$1"
   else
     print_error_message "$1"
+    STEP_FAILED=1
     return 1
   fi
 }

@@ -4,7 +4,7 @@
 # Set JAVA_HOME env var with existing java versions on the system
 set_java_env() {
   print_styled_message "Configuring Java"
-  if confirm_action "configure Java environment"; then
+  if confirm_step "configure Java environment"; then
     java_dirs=($(find /usr/lib/jvm -maxdepth 1 -type d -name "*java*" ! -name "jvm" | sort))
 
     if [ ${#java_dirs[@]} -gt 0 ]; then

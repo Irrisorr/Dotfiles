@@ -4,7 +4,7 @@
 # Menu guard: fprintd-enroll
 configure_fingerprint() {
   print_styled_message "Fingerprint Configuration"
-  if confirm_action "configure fingerprint authentication"; then
+  if confirm_step "configure fingerprint authentication"; then
     execute_script sudo systemctl enable fprintd.service
     print_styled_message "Place your finger several times to scan it"
     execute_script fprintd-enroll

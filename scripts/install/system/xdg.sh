@@ -23,7 +23,7 @@ convert_xdg_dirs() {
   fi
 
   print_styled_message "Converting Russian XDG user directories to English"
-  if ! confirm_action "Do you want to convert XDG user directories to English?"; then
+  if ! confirm_step "convert XDG user directories to English"; then
     return 1
   fi
 

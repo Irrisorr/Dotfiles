@@ -8,6 +8,7 @@
 declare -A SELECTED_PACKAGES
 declare -A SELECTED_DEPS          # parent canonical name → its picked dependency lines
 declare -A ACTION_STATUS
+STEP_FAILED=0                     # set by any failed action inside a config step
 declare -A _PKG_SPEC
 declare -A _PKG_INSTALLED _PKG_UPGRADABLE _PKG_REAL
 
@@ -89,8 +90,12 @@ menu() {
     local i
     for i in "${!funcs[@]}"; do
       if [ "${options[$i]}" = "$choice" ]; then
+        STEP_FAILED=0
         "${funcs[$i]}"
         local rc=$?
+        # A step returns its last command's status; an earlier failed action
+        # inside it would otherwise still show ✓.
+        [ $rc -eq 0 ] && [ "$STEP_FAILED" -eq 1 ] && rc=2
         if [ $rc -eq 0 ]; then
           ACTION_STATUS[${funcs[$i]}]="✓"
         elif [ $rc -eq 1 ]; then
@@ -258,6 +263,10 @@ load_package_status() {
   local name backend value repo bin
   local -a native=()
 
+  # package_mark asks installed_source_<name> for custom installers. The
+  # installer has sources.sh loaded already; the fzf picker runs on its own.
+  declare -F installed_source_clipse >/dev/null || . "$SYSTEM_DIR/sources.sh"
+
   load_package_index || return 1
   for name in "${!_PKG_SPEC[@]}"; do
     IFS=$'\x1f' read -r backend value repo bin < <(resolve_package "$name")
@@ -373,9 +382,38 @@ category_counter() {
 
 # ─── Package selection engine ─────────────────────────────────────────────────
 
+# fzf picker (install/fzf_picker.sh) when fzf is there: every category on one
+# screen. It hands back the names, install_packages shows its plan and asks;
+# declining it — or nothing installable — brings the list back with the ticks
+# kept. Without fzf, the gum category menu below.
+_fzf_package_selection() {
+  local state names rc
+  local -a picked=()
+  state=$(mktemp -d)
+  names="$state/names"
+
+  while bash "$INSTALL_DIR/fzf_picker.sh" --pick "$state" "$names"; do
+    mapfile -t picked < "$names"
+    install_packages "${picked[@]}"
+    rc=$?
+    [ $rc -eq 1 ] || break
+    read -rp ":: Enter: back to the package list " _ </dev/tty
+  done
+  [ ${#picked[@]} -eq 0 ] && print_styled_message "Skipping package installation"
+
+  rm -rf "$state"
+  return 0
+}
+
+
 # Function to handle interactive category selection and package selection
 package_category_selection() {
   local package_file="$INSTALL_DIR/packages.txt"
+
+  if fzf_ready; then
+    _fzf_package_selection
+    return
+  fi
 
   require_gum "package installation" || return 1
   load_package_status
@@ -785,19 +823,49 @@ execute_script() {
 
 # Run a command after confirmation. Return codes follow menu(): 1 = declined
 # (no mark), 2 = failed (✗), so a real failure is never shown as skipped.
+# Prints the command and lets its output through, then a one-line result.
 execute_command() {
   local message=$1
   local script=$2
+  local rc
 
-  print_styled_message "$message"
-  confirm_action "$message" || return 1
+  printf '\n\e[1;35m==>\e[0m \e[1m%s\e[0m\n' "$message"
+  confirm_step "$message" || return 1
 
-  if bash -c ". $HOME/Dotfiles/scripts/lib/common.sh && $script"; then
-    print_success_message "$message"
+  printf '\e[90m  → %s\e[0m\n' "${script//$HOME/\~}"
+  bash -c ". $HOME/Dotfiles/scripts/lib/common.sh && $script"
+  rc=$?
+  if [ $rc -eq 0 ]; then
+    printf '\e[32m  ✓ %s\e[0m\n' "$message"
   else
-    print_error_message "Failed to $message"
+    printf '\e[31m  ✗ %s (exit %d)\e[0m\n' "$message" "$rc"
+    STEP_FAILED=1
     return 2
   fi
+}
+
+
+# run_substeps <entry>... — a config step made of several actions, each its own
+# function. entry = "Label|function|guard", same format and guards as menu().
+# The fzf config menu lists them under the step and passes the ticked ones in
+# STEP_ONLY (space-separated function names); unset runs every applicable one.
+# Returns 2 when any action failed, 1 when nothing ran, else 0.
+run_substeps() {
+  local e label func guard rc ran=0 failed=0
+  for e in "$@"; do
+    IFS='|' read -r label func guard <<< "$e"
+    [ -n "$guard" ] && ! guard_passes "$guard" && continue
+    if [ -n "${STEP_ONLY+set}" ] && [[ " $STEP_ONLY " != *" $func "* ]]; then
+      continue
+    fi
+    "$func"
+    rc=$?
+    [ $rc -eq 1 ] || ran=1
+    [ $rc -ge 2 ] && failed=1
+  done
+  [ $failed -eq 1 ] && return 2
+  [ $ran -eq 1 ] && return 0
+  return 1
 }
 
 
