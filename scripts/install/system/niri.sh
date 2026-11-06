@@ -22,7 +22,7 @@ _niri_link_config() {
 }
 
 _niri_link_dux() {
-  execute_command "Configure Dux shell (panel-bar)" "create_symlink $HOME/Dotfiles/DankMaterialShell $HOME/.config/DankMaterialShell"
+  execute_command "Configure Dux shell (panel-bar)" "create_symlink $HOME/Dotfiles/dms $HOME/.config/dms"
 }
 
 _niri_link_hyprlock() {

@@ -7,9 +7,10 @@
 // ╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝╚═════╝░
 
 
-// Wallpaper
+// Wallpaper (swaybg / DMS)
 layer-rule {
     match namespace="^wallpaper$"
+    match namespace="^quickshell$"
     place-within-backdrop true
 }
 
