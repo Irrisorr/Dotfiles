@@ -1,3 +1,3 @@
-function sync-private --description 'Back up private/sensitive files into the private repo'
-    bash $HOME/Dotfiles/scripts/functions/sync/sync_private.sh $argv
+function sync-private --description 'Back up the files listed in sync_map.json'
+    bash $HOME/Dotfiles/scripts/functions/sync/sync.sh map $argv
 end

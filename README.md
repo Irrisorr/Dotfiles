@@ -183,7 +183,7 @@ Dotfiles/
       system/        # system-level config functions: niri, hyprland, sddm, fingerprint, gtk/bluetooth/polkit, xdg, flatpak, sources.sh (custom installers)
       apps/          # per-app config functions: zen, kitty, fish, thunar, rofi, ...  (ONE file per app)
     functions/       # everyday shell aliases + alias_menu.sh (the `asd` menu)
-      sync/          # private-files backup tool: sync_private.sh + sync_map.json (see below)
+      sync/          # sync.sh: copies live configs back into Dotfiles (modules/ + sync_map.json, see below)
 ```
 
 A script that needs its own folder (assets, a JSON config, ...) just gets a
@@ -210,13 +210,16 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
     - `rain` - Rain animation (if installed `terminal-rain` package)
     - `rain-float` - Rain animation in mini floating window (if installed `terminal-rain` package)
     - `vim` - open **nvim** on **ide** workspace and maximize window (if installed `neovim` package)
-    - `sync-private` - back up private/sensitive files into `~/Dotfiles-private` (requires `jq`; see below)
+    - `Sync to Dotfiles` (`scripts/functions/sync/sync.sh`) - menu of sync modules: Zen Sine mod settings, the files in `sync_map.json` (`sync-private` runs just the latter; see below)
     - 'System packages' - update / upgrade on both distros:
         - `update` - sync package lists (`yay -Sy` / `apt update`)
         - `upgrade` - install all updates: `yay -Syu` / `apt full-upgrade`, plus `flatpak update` (asks before installing, like running them by hand)
 
-#### Private/sensitive files backup (`scripts/functions/sync/`)
+#### Syncing live configs back (`scripts/functions/sync/`)
 
+- `sync.sh` lists the modules in `modules/` (fzf menu, Space ticks several); `sync.sh <name>...` runs them without the menu. A new `modules/<name>.sh` with `SYNC_TITLE`, `SYNC_DESC` and `sync_module` shows up on its own
+- `zen` - the settings of the Sine mods (only their own `prefs.js` keys) → `zen-browser/sine-prefs.js`; the mods themselves live in `zen-browser/chrome` (the profile's `chrome` links there). The other way round is `configure_zen` (config menu): it links `zen-browser/*` into the profile (`chrome/` as a whole), installs Sine with its official `updater.sh` (native package only — it asks for root via pkexec for the bootloader in `/opt`) and writes `sine-prefs.js` back into `prefs.js`
+- `map` - the files in `sync_map.json` (`sync-private` runs just this one):
 - Sensitive profile data (Zen sessions, etc.) lives in a separate **private** repo (`~/Dotfiles-private`), not here
 - `scripts/functions/sync/sync_map.json` is an array of two kinds of entry:
     - **file group**: `{ "dest": "~/Dotfiles-private/zen-browser", "sources": ["fileA", "folderB", ...] }` — files or folders (copied recursively), `~` and `*` globs supported

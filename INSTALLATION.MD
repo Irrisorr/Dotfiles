@@ -29,8 +29,9 @@ Dotfiles/
       apps/          # per-app config functions (one file per app)
     functions/       # shell-alias functions shown in the `asd` menu (incl. alias_menu.sh)
       sync/          # an alias that needs its own folder
-        sync_private.sh  # back up live/sensitive files into the private repo
-        sync_map.json    # dest -> [sources] mapping
+        sync.sh          # entry point: menu over the modules below
+        sync_map.json    # dest -> [sources] mapping (used by modules/map.sh)
+        modules/         # one sync per file: map.sh (the map), zen.sh (Sine mod settings)
 ```
 
 ## `common.sh` (constants + includes)
@@ -468,10 +469,31 @@ line there via `fish_apply` (in `lib/helpers.sh`). The variable is live in the
 current shell right away, no restart. Run from the `asd` menu there is no
 wrapper, so the change only shows up in new terminals.
 
-## `functions/sync/` (private-files backup)
+## `functions/sync/` (live configs → Dotfiles)
 
-An alias that lives in its own folder. `sync_map.json` (next to the script) is an
-array of objects. Two kinds of entry:
+`sync.sh` is the one entry point: with no arguments it opens an fzf menu (gum
+without fzf) of the modules in `modules/`, Space ticks several, Enter runs them;
+`sync.sh zen map` runs modules by name without the menu (handy for fish
+aliases). A module is `modules/<name>.sh` that sets `SYNC_TITLE` and `SYNC_DESC`
+and defines `sync_module`; a new file shows up in the menu on its own. Modules
+run in a subshell, so their helper names don't clash. Afterwards `sync.sh` shows
+`git status` of Dotfiles — committing is up to you.
+
+- `modules/zen.sh` — picks a Zen profile (from `profiles.ini` under
+  `~/.config/zen` or the flatpak dir) and writes the settings of its Sine mods
+  to `zen-browser/sine-prefs.js`: only the `prefs.js` lines whose keys the mods
+  declare in their `preferences.json` (`"property"`). The mods themselves need no
+  copying — the profile's `chrome/` is a symlink to `zen-browser/chrome`.
+  `configure_zen` does the other direction, as three actions: link
+  `zen-browser/*` into the profile (`chrome/` as a whole; Sine's engine `JS/`,
+  `utils/` lands there too and is git-ignored), install Sine through its own
+  `updater.sh` with the versions from Sine's `engine.json` (native package only:
+  the bootloader goes into the root-owned browser dir via pkexec), and put
+  `sine-prefs.js` back into `prefs.js` (the profile's lines for those keys are
+  dropped first; Zen must be closed).
+- `modules/map.sh` — the files listed in `sync_map.json`, described below.
+
+`sync_map.json` (next to `sync.sh`) is an array of objects. Two kinds of entry:
 
 ```json
 [
@@ -493,7 +515,7 @@ array of objects. Two kinds of entry:
   the DB with `file:<db>?immutable=1` (read-only, no locking), so it works even
   while Zen is running — no "database is locked" error.
 
-Run it as `sync-private` or from the `asd` menu. It checks its dependencies and
+Run it as `sync.sh map`, `sync-private`, or from the `asd` menu. It checks its dependencies and
 tells you which package to install if one is missing (`jq` is required; `sqlite`
 is required only when the map has table entries — those are skipped otherwise).
 Before overwriting files that already exist in a dest, you get one

@@ -4,7 +4,7 @@
 # Sourced by lib/common.sh AFTER lib/distro.sh (bootstrap_gum needs pkg_install).
 #
 # gum is required: menu() and the package picker refuse to run without it. The
-# smaller helpers here and in functions/{set_env,delete_env,sync_private}.sh do
+# smaller helpers here and in functions/{set_env,delete_env,sync/modules/map}.sh do
 # keep a plain-bash `read` fallback behind $HAS_GUM.
 #
 # DOTFILES_NO_GUM_BOOTSTRAP=1 sources this file without triggering an install.

@@ -1,9 +1,7 @@
 #!/bin/bash
-. "$HOME/Dotfiles/scripts/lib/common.sh"
-
-# Copies live/sensitive files into your private dotfiles repo so they can be
-# committed and restored after a crash/reinstall. Mappings live in sync_map.json
-# (next to this file) as an array of objects:
+#
+# Files listed in sync_map.json (next to sync.sh) → their dest. Sourced by
+# sync.sh. The map is an array of objects:
 #
 #   file group  { "dest": "~/Dotfiles-private/zen-browser", "sources": ["a", "b"] }
 #   sqlite table { "dest": "...", "sqlite": "~/.../places.sqlite", "table": "name" }
@@ -13,9 +11,11 @@
 #
 # Anything that already exists in a dest (a file OR a <table>.sql dump) is offered
 # in one selection: every conflict is pre-selected (= will be overwritten);
-# UNSELECT the ones you want to keep as-is.
-#
-# Usage: sync-private [path/to/sync_map.json]
+# UNSELECT the ones you want to keep as-is. When a dest is the private repo, the
+# result is committed and pushed after a confirmation.
+
+SYNC_TITLE="Files from sync_map.json"
+SYNC_DESC="file groups and sqlite tables listed in the map"
 
 # Expand a leading ~ to $HOME
 _sync_expand_home() {
@@ -59,7 +59,7 @@ _sync_commit_push() {
   fi
 }
 
-sync_private() {
+sync_module() {
   local sync_map="${1:-$FUNCTIONS_DIR/sync/sync_map.json}"
 
   if ! command -v jq &>/dev/null; then
@@ -85,7 +85,7 @@ Install it: $(pkg_install_hint "$(is_arch && echo sqlite || echo sqlite3)")
 Table entries will be skipped."
   fi
 
-  print_styled_message "Syncing private files
+  print_styled_message "Syncing files
 $sync_map"
 
   local copied=0 skipped=0 failed=0 missing=0
@@ -245,4 +245,3 @@ $skipped kept, $missing missing, $failed failed"
   fi
 }
 
-[ "${BASH_SOURCE[0]}" = "$0" ] && sync_private "$@"
