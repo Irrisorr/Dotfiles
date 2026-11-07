@@ -199,6 +199,16 @@ zen_profile_root() {
     "$HOME/.var/app/$ZEN_FLATPAK_ID/.zen"
 }
 
+# The native install dir (zen-bin + defaults/), where Sine's bootloader goes.
+# None for the flatpak: its app dir is read-only.
+zen_install_dir() {
+  local d
+  for d in /opt/zen-browser-bin /opt/zen-browser /usr/lib/zen-browser; do
+    [ -x "$d/zen-bin" ] && [ -d "$d/defaults/pref" ] && { echo "$d"; return 0; }
+  done
+  return 1
+}
+
 is_zen_flatpak() {
   command -v flatpak &>/dev/null && flatpak info "$ZEN_FLATPAK_ID" &>/dev/null
 }

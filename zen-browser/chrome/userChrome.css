@@ -34,7 +34,6 @@
   display: none !important;
 }
 
-/* make tab height smaller in split view */
 tab-group[split-view-group] {
   & .tab-group-container {
     &>.tabbrowser-tab {

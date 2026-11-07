@@ -56,15 +56,3 @@ user_pref("general.smoothScroll.msdPhysics.slowdownSpringConstant", 5000);
 user_pref("toolkit.scrollbox.horizontalScrollDistance", 4);   // horizontal wheel step
 user_pref("toolkit.scrollbox.verticalScrollDistance", 5);     // vertical wheel step
 user_pref("mousewheel.min_line_scroll_amount", 30);           // min pixels per wheel notch
-
-// ─── Sidebar Expand on Hover Mod ─────────────────────────────────────────────
-user_pref("mod.autoexpand.animation_duration", "200ms");
-user_pref("mod.autoexpand.animation_delay", "0ms");
-user_pref("mod.autoexpand.collapse_delay", "100ms");
-user_pref("mod.autoexpand.expanded_width", "450px");          // sidebar width when expanded
-user_pref("mod.autoexpand.collapsed_width", "45px");          // sidebar width when collapsed
-user_pref("mod.autoexpand.essentials_vertical", false);
-user_pref("mod.autoexpand.fade_sleeping_tabs", true);         // dim unloaded/sleeping tabs
-user_pref("mod.autoexpand.hide_workspace_indicator", false);
-user_pref("mod.autoexpand.remove_line_separator", false);
-user_pref("mod.autoexpand.performance_mode", "potato");       // lightest animations preset
