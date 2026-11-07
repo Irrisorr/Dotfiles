@@ -6,3 +6,8 @@
     active:         #414868FF;
     urgent:         #F7768EFF;
 }
+
+* {
+    background:     transparent;
+    text:           #1A1B26FF;
+}

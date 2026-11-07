@@ -1,0 +1,160 @@
+# Browsers
+zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
+firefox
+vivaldi                ubuntu:flatpak=com.vivaldi.Vivaldi (based on chromium)
+google-chrome          ubuntu:flatpak=com.google.Chrome
+
+# Terminals and shells
+kitty                  ubuntu:source=kitty
+- shader-slang         ubuntu:skip (custom shaders | Ubuntu: bundled with the upstream kitty build)
+alacritty
+fish
+
+# Runners
+wofi
+rofi
+anyrun                 ubuntu:skip (Ubuntu: no .deb, tarball only)
+walker                 ubuntu:skip (Ubuntu: no .deb, tarball only)
+
+# Sync
+syncthing (sync service (f.e. for obsidian sync between devices))
+
+# IDE's
+neovim
+visual-studio-code-bin ubuntu:flatpak=com.visualstudio.code ubuntu:bin=code
+intellij-idea-ultimate-edition ubuntu:flatpak=com.jetbrains.IntelliJ-IDEA-Ultimate
+antigravity            ubuntu:source=antigravity (Google's agentic IDE)
+postman-bin            ubuntu:flatpak=com.getpostman.Postman
+podman-desktop-bin     ubuntu:flatpak=io.podman_desktop.PodmanDesktop
+podman
+
+# Media
+telegram-desktop       ubuntu:flatpak=org.telegram.desktop (Ubuntu: dropped from the archive)
+slack
+iMe (fork of telegram with some features | DONT INSTALL HERE WILL BE LATER IF U WANT)
+vesktop-bin            ubuntu:flatpak=dev.vencord.Vesktop
+discord                ubuntu:flatpak=com.discordapp.Discord
+spotify                ubuntu:flatpak=com.spotify.Client
+spicetify-cli          ubuntu:skip (spotify extensions manager | Ubuntu: install script only)
+zoom                   ubuntu:flatpak=us.zoom.Zoom
+
+# Notes and Offices
+obsidian               ubuntu:flatpak=md.obsidian.Obsidian
+freeoffice             ubuntu:source=freeoffice (Ubuntu: adds the SoftMaker apt repo)
+rnote                  ubuntu:flatpak=com.github.flxzt.rnote
+
+# Themes
+vimix-gtk-themes       ubuntu:skip (Ubuntu: not packaged)
+adwaita-qt6
+
+# Cursors
+bibata-cursor-theme
+
+# Icons
+papirus-icon-theme
+
+# Fonts
+ttf-jetbrains-mono-nerd ubuntu:source=jetbrains_nerd (Ubuntu: official nerd-fonts release, re-run to update)
+
+# File managers
+thunar                (xfce/gtk fm)
+- tumbler               (file preview)
+- thunar-archive-plugin (adds archive operations)
+- thunar-volman         (adds removable drives operations)
+- unzip                 (for archive operations in tui)
+- gvfs                  (for removable drivers)
+dolphin               (kde/qt fm)
+- ark                   (adds archive operations)
+nautilus              (gnome/gtk fm)
+
+# Virtual Machines
+gnome-boxes
+scrcpy (display and control ur Android device | duplicating screen on laptop through cabel)
+waydroid               ubuntu:skip (android vm for wayland | Ubuntu: own repo at repo.waydro.id)
+
+# Packages For System
+gnome-calculator
+gnome-system-monitor
+baobab (disk viewer | on GTK)
+obs-studio
+swayimg                ubuntu:source=swayimg (view images | Ubuntu: built from source)
+- libjpeg-turbo        ubuntu:apt=libjpeg-turbo-progs (lossless JPEG rotation on Ctrl+S | jpegtran)
+- imagemagick (saving rotation of other formats)
+- exiv2 (resetting EXIF orientation after rotation)
+vlc (view videos)
+wlogout (logout app for wayland)
+clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)
+- wl-clipboard (wayland clipboard)
+
+# Settings packages
+pavucontrol (audio control)
+nwg-look (themes/icons/cursors etc. control)
+polkit-gnome           ubuntu:apt=policykit-1-gnome (for apps that required gui roots)
+mate-polkit (for apps that required gui roots)
+libfprint-2-tod1-goodix-v2 arch:source=goodix ubuntu:source=goodix (driver for my fingerprint device (27c6:550a: Shenzhen Goodix Technology))
+fprintd (for setting ur fingerprint for lock-managers)
+logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
+
+# Games and Launchers
+steam                  ubuntu:apt=steam-installer
+lutris
+
+# Hypr Ecosystem | hyprland
+hyprshot               ubuntu:skip (Ubuntu: shell script, no .deb)
+hyprswitch             ubuntu:skip (Ubuntu: no releases, source only)
+ags-hyprpanel-git      ubuntu:skip (Ubuntu: not packaged)
+hyprpaper
+hyprlock
+xdg-desktop-portal
+xdg-user-dirs (for home directories)
+xdg-desktop-portal-hyprland
+hyprpicker
+nwg-displays (monitor control)
+
+# niri Ecosystem | niri
+niri                   ubuntu:ppa=duxlabs/dux-repo (the compositor itself)
+xdg-desktop-portal (default portal)
+xdg-desktop-portal-gtk (implements most of the basic functionality)
+xdg-desktop-portal-gnome (required for screencasting support)
+xdg-user-dirs (for home directories)
+xdg-user-dirs-gtk (for home gtk directories)
+gnome-keyring (implements the Secret portal, required for certain apps to work)
+xwayland-satellite     ubuntu:ppa=duxlabs/dux-repo (to run X11 apps like Steam or Discord)
+dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
+- cliphist (clipboard history)
+- wl-clipboard (wayland clipboard)
+hyprlock (lock manager)
+swaybg (wallpaper tool)
+
+# work
+nodejs
+npm
+git
+rsync
+claude-code
+claude-desktop
+
+# Additional Packages
+sqlite                 ubuntu:apt=sqlite3 (needs for sync private dotfiles)
+jq (needs for sync private dotfiles)
+gowall                 ubuntu:skip (image converter | Ubuntu: no .deb, tarball only)
+inxi (tui app for get info about ur system)
+terminal-rain-lightning ubuntu:skip (tui rain in terminal | Ubuntu: pip only)
+thefuck (tui app that fixes errors in previous console commands)
+python-pip             ubuntu:apt=python3-pip
+github-cli             ubuntu:apt=gh (github client for terminal)
+jdk21-openjdk          ubuntu:apt=openjdk-21-jdk
+jdk25-openjdk          ubuntu:apt=openjdk-25-jdk (current LTS)
+maven (java project management)
+fastfetch (fast neofetch)
+figlet (for making large letters in terminal)
+playerctl (for control media player)
+brightnessctl (control brightness)
+sddm (welcome service on startup ur device)
+- weston (wayland compositor for the greeter)
+- qt6-5compat          ubuntu:apt=qml6-module-qt5compat-graphicaleffects (for the theme)
+- qt6-declarative      ubuntu:apt=qml6-module-qtquick-controls (for the theme)
+- qml6-module-qtqml-models arch:pacman=qt6-declarative (for the theme | Arch: part of qt6-declarative)
+- qt6-svg              ubuntu:apt=qt6-svg-plugins (for the theme)
+usbutils (tool for check model name of all bus devices like usb or fingerprint)
+arronax                ubuntu:skip (for creating .desktop files | Ubuntu: not packaged)
