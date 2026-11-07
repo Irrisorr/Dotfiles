@@ -171,6 +171,49 @@ install_source_antigravity() {
 }
 
 
+# Zen — not in apt, and the flatpak's read-only app dir can't take Sine's
+# bootloader. The AUR package is upstream's tarball, so that is used here too,
+# unpacked into ~/.local/share/zen and owned by the user: Zen's own updater
+# (linux.mar) keeps it current from inside the browser, and Sine installs
+# without root. Linked into /usr/local/bin as zen-browser, the Arch package's
+# name, for niri's keybinds and the menu guards. Re-running the step reinstalls
+# the latest release; Sine's bootloader files are carried over.
+install_source_zen() {
+  local arch tmp f dir="$ZEN_TARBALL_DIR" rc=0
+  [ -n "$dir" ] || return 1   # rm -rf below
+  case "$(uname -m)" in
+    x86_64|aarch64) arch=$(uname -m) ;;
+    *) print_error_message "zen: no build for $(uname -m)"; return 1 ;;
+  esac
+  command -v curl &>/dev/null || pkg_install curl || return 1
+
+  tmp=$(mktemp -d)
+  echo ":: Downloading Zen ($arch)"
+  if curl -fsSL "https://github.com/zen-browser/desktop/releases/latest/download/zen.linux-$arch.tar.xz"        | tar -xJ -C "$tmp"; then
+    for f in config.js defaults/pref/config-prefs.js; do
+      [ -f "$dir/$f" ] || continue
+      mkdir -p "$tmp/zen/$(dirname "$f")" && cp -a "$dir/$f" "$tmp/zen/$f"
+    done
+    rm -rf "$dir" \
+      && mkdir -p "$(dirname "$dir")" "$HOME/.local/share/applications" \
+      && mv "$tmp/zen" "$dir" \
+      && sudo ln -sf "$dir/zen" /usr/local/bin/zen-browser \
+      && printf '%s\n' "[Desktop Entry]" "Name=Zen Browser" "GenericName=Web Browser" \
+           "Exec=/usr/local/bin/zen-browser %u" "Icon=$dir/browser/chrome/icons/default/default128.png" \
+           "Type=Application" "StartupWMClass=zen" "StartupNotify=true" \
+           "Categories=Network;WebBrowser;" \
+           "MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;" \
+         > "$HOME/.local/share/applications/zen.desktop" \
+      || rc=1
+  else
+    print_error_message "zen: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return $rc
+}
+
+
 # Latest GitHub release tag of <owner/repo>.
 _github_latest_tag() {
   local json
@@ -282,3 +325,4 @@ installed_source_goodix() {
 installed_source_antigravity()     { [ -x /opt/Antigravity/antigravity ]; }
 installed_source_kitty()           { [ -x /opt/kitty.app/bin/kitty ]; }
 installed_source_swayimg()         { [ -x /usr/local/bin/swayimg ]; }
+installed_source_zen()             { [ -x "$ZEN_TARBALL_DIR/zen-bin" ]; }

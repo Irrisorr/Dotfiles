@@ -25,8 +25,9 @@ cd Dotfiles
 
 - Same steps, same menus — nothing to choose by hand. Differences the installer handles by itself:
     - **niri**, `xwayland-satellite` and the **Dux shell** (formerly DankMaterialShell; the Ubuntu package is still called `dms`) come from the author's PPAs (`ppa:duxlabs/dux-repo`, `ppa:duxlabs/dms`) — they are not in the Ubuntu repos
-    - apps that are only in the AUR (Zen, VS Code, Obsidian, Discord, Spotify, ...) are installed from **Flathub** — and get a command with the usual name in `/usr/local/bin` (`zen-browser`, `code`, `spotify`, ...), so niri keybinds and the config menu work the same as on Arch
-    - `clipse` (release binary), JetBrains Mono Nerd Font (official nerd-fonts release), **kitty** (upstream build into `/opt/kitty.app` — apt's 0.45 is too old for this `kitty.conf`; it brings its own `slangc` for custom shaders), Antigravity (Google's tarball, into `/opt/Antigravity`), **swayimg** (built from the release tag into `/usr/local` — apt's 4.7 predates the Lua config) and FreeOffice (SoftMaker's apt repo) have their own installers in `scripts/install/system/sources.sh`; re-run the package step to update clipse, kitty, the font, Antigravity and swayimg
+    - apps that are only in the AUR (VS Code, Obsidian, Discord, Spotify, ...) are installed from **Flathub** — and get a command with the usual name in `/usr/local/bin` (`code`, `spotify`, ...), so niri keybinds and the config menu work the same as on Arch
+    - **Zen** is upstream's tarball in `~/.local/share/zen` (linked as `/usr/local/bin/zen-browser`), not the flatpak: the flatpak's read-only app dir can't take the Sine bootloader. It is owned by you, so Zen updates itself from inside the browser
+    - `clipse` (release binary), JetBrains Mono Nerd Font (official nerd-fonts release), **kitty** (upstream build into `/opt/kitty.app` — apt's 0.45 is too old for this `kitty.conf`; it brings its own `slangc` for custom shaders), Antigravity (Google's tarball, into `/opt/Antigravity`), **swayimg** (built from the release tag into `/usr/local` — apt's 4.7 predates the Lua config) and FreeOffice (SoftMaker's apt repo) have their own installers in `scripts/install/system/sources.sh`; re-run the package step to update clipse, kitty, the font, Antigravity and swayimg (Zen updates itself)
     - SDDM replaces GDM as the login screen (the **SDDM** config step switches it; it prints the command to switch back)
 - Known differences:
     - 13 packages have no Ubuntu source and are skipped (the installer names them before installing): `shader-slang` (bundled with the upstream kitty build), `anyrun`, `walker`, `gowall`, `hyprswitch`, `hyprshot`, `arronax`, `vimix-gtk-themes`, `waydroid`, `spicetify-cli`, `terminal-rain-lightning`, `logmein-hamachi`, `ags-hyprpanel-git`
@@ -40,7 +41,7 @@ cd Dotfiles
 ```
 neovim
 sqlite                 ubuntu:apt=sqlite3 (needs for sync private dotfiles)
-zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
+zen-browser-bin        ubuntu:source=zen (based on firefox | Ubuntu: upstream tarball, updates itself)
 logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
 ```
 - Something a package only needs for a feature goes right under it with a `-` — the picker shows it after you pick the package, pre-checked:

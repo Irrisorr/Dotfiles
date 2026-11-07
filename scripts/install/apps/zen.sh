@@ -10,8 +10,9 @@
 #
 # Works for the native package (Arch) and the flatpak (Ubuntu, where
 # `zen-browser` is a shim around `flatpak run`). The profile root differs per
-# install — zen_profile_root in lib/paths.sh knows all of them. Sine needs the
-# native package: its bootloader goes into the browser's own (root) dir.
+# install — zen_profile_root in lib/paths.sh knows all of them. Sine needs a
+# native install (the Arch package, or the tarball install_source_zen puts on
+# Ubuntu): its bootloader goes into the browser's own dir.
 #
 # Mods: the profile's chrome/ is a symlink to Dotfiles/zen-browser/chrome, which
 # holds userChrome.css and the Sine mods (sine-mods/). Their settings are kept in
@@ -209,9 +210,9 @@ _zen_sine_supported() {
 
 # Sine (github.com/CosmoCreeper/Sine) via its own updater.sh — what the GUI
 # installer runs too: the engine goes into <profile>/chrome (JS/, utils/; mods
-# are kept with -s), the bootloader (config.js) into the browser dir, for which
-# it asks for root itself through pkexec. Versions come from Sine's engine.json,
-# like the GUI installer's.
+# are kept with -s), the bootloader (config.js) into the browser dir — through
+# pkexec when that dir is root's (Arch's /opt). Versions come from Sine's
+# engine.json, like the GUI installer's.
 install_sine() {
   local browser_dir engine boot sine tmp
   browser_dir=$(zen_install_dir) || { print_error_message "Zen install dir not found"; return 2; }

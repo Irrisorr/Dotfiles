@@ -1,5 +1,5 @@
 # Browsers
-zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
+zen-browser-bin        ubuntu:source=zen (based on firefox | Ubuntu: upstream tarball, updates itself)
 firefox
 vivaldi                ubuntu:flatpak=com.vivaldi.Vivaldi (based on chromium)
 google-chrome          ubuntu:flatpak=com.google.Chrome

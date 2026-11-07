@@ -296,15 +296,15 @@ distro actually differs:
 ```
 neovim
 sqlite                 ubuntu:apt=sqlite3 (needs for sync private dotfiles)
-zen-browser-bin        ubuntu:flatpak=app.zen_browser.zen (based on firefox)
+zen-browser-bin        ubuntu:source=zen (based on firefox | Ubuntu: upstream tarball, updates itself)
 niri                   ubuntu:ppa=duxlabs/dux-repo (the compositor itself)
 dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
 clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)
 logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
 ```
 
-`neovim` has the same name everywhere; `sqlite` is renamed on Ubuntu; Zen comes
-from Flathub; niri and dms come from a PPA (dms under another name as well);
+`neovim` has the same name everywhere; `sqlite` is renamed on Ubuntu; Zen is
+upstream's tarball (`install_source_zen`); niri and dms come from a PPA (dms under another name as well);
 clipse is built by `install_source_clipse`; hamachi is not installed on Ubuntu.
 Everything after the name that is not in `(...)` is read as a tail token, so
 notes always go inside the parentheses.
@@ -314,7 +314,7 @@ notes always go inside the parentheses.
   * `apt` / `aur` / `pacman` — native manager, under this name
   * `flatpak=<app id>` — from Flathub. Also gets a shim in `/usr/local/bin`
     (`exec flatpak run <app id>`) named like the native command — the canonical
-    name minus `-bin` (`zen-browser-bin` → `zen-browser`), so WM keybinds, menu
+    name minus `-bin` (`postman-bin` → `postman`), so WM keybinds, menu
     guards and scripts call it the same way on both distros
   * `bin=<command>` — the shim's name when that default is wrong
     (`visual-studio-code-bin ubuntu:flatpak=com.visualstudio.code ubuntu:bin=code`)
