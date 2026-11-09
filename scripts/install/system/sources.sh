@@ -84,6 +84,10 @@ install_source_freeoffice() {
 # it, so fprintd stays satisfied), then install, and put libfprint back if that
 # fails so fprintd is never left without it.
 #
+# libfprint-tod itself is built from its AUR PKGBUILD with the thermal model
+# turned off (see _build_libfprint_tod). An AUR update of libfprint-tod brings
+# the stock build back — re-run the step then.
+#
 # Ubuntu: the PPA has no 26.04 build, so the noble .deb the AUR package
 # repackages is installed directly; apt pulls libfprint-2-tod1 from the archive.
 # Does not update by itself.
@@ -99,10 +103,54 @@ install_source_goodix() {
     sudo pacman -Rdd --noconfirm libfprint || return 1
   fi
 
-  if ! pkg_install libfprint-tod libfprint-2-tod1-goodix-v2; then
+  if ! _build_libfprint_tod || ! pkg_install libfprint-2-tod1-goodix-v2; then
     pacman -Qq libfprint &>/dev/null || pkg_install libfprint
     return 1
   fi
+  sudo systemctl try-restart fprintd.service
+}
+
+
+# libfprint stops a reader after ~3 min of continuous use ("Device disabled to
+# prevent overheating") and keeps it off for minutes — a lock screen that waits
+# for a finger runs into it every time. Match-on-chip readers don't heat up
+# while waiting, so their drivers opt out (temp_hot_seconds = -1: goodixmoc,
+# synaptics, elanmoc, ...). The proprietary Goodix TOD driver predates that
+# field and gets the 3/9-minute default instead; the patch makes the default
+# "disabled". It also covers any other driver relying on the default — this
+# machine has only the Goodix reader.
+LIBFPRINT_TOD_PATCHED="no thermal limit"
+
+_build_libfprint_tod() {
+  local tmp rc=0
+  tmp=$(mktemp -d)
+  git clone -q https://aur.archlinux.org/libfprint-tod.git "$tmp/libfprint-tod" || { rm -rf "$tmp"; return 1; }
+
+  # pkgdesc marks the build, so `pacman -Qi libfprint-tod` tells which one is in.
+  # prepare() fails the build when the lines it replaces are gone upstream.
+  cat >> "$tmp/libfprint-tod/PKGBUILD" <<EOF
+
+pkgdesc+=" ($LIBFPRINT_TOD_PATCHED)"
+
+prepare() {
+  cd "\$_pkgdirname"
+  grep -q 'priv->temp_hot_seconds = DEFAULT_TEMP_HOT_SECONDS;' libfprint/fp-device.c || return 1
+  sed -i -e 's/priv->temp_hot_seconds = DEFAULT_TEMP_HOT_SECONDS;/priv->temp_hot_seconds = -1;/' \\
+         -e 's/priv->temp_cold_seconds = DEFAULT_TEMP_COLD_SECONDS;/priv->temp_cold_seconds = -1;/' \\
+         libfprint/fp-device.c
+}
+EOF
+
+  echo ":: Building libfprint-tod without the thermal limit (a minute or two)"
+  # -r drops the build-only dependencies again; no --needed, so an installed
+  # stock build of the same version is replaced.
+  (cd "$tmp/libfprint-tod" && makepkg -sri --nocheck --noconfirm) || rc=1
+  rm -rf "$tmp"
+  return $rc
+}
+
+libfprint_tod_patched() {
+  pacman -Qi libfprint-tod 2>/dev/null | grep -q "$LIBFPRINT_TOD_PATCHED"
 }
 
 
