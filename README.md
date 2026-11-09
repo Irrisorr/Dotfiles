@@ -82,6 +82,10 @@ swayimg                ubuntu:source=swayimg (view images)
 
 You should change this configuration by urself using command `niri msg outputs` to get names of ur monitors (ex. `eDP-1` or `HDMI-1`) and set necessary flags reading [official wiki](https://yalter.github.io/niri/Configuration%3A-Outputs.html)
 
+### DMS-generated files (`niri/dms/`)
+
+DMS writes these itself from its Settings (keybinds, outputs, layout overrides, cursor, alt-tab, wallpaper blur, ...) and overwrites manual edits. They are tracked so a new machine gets the same state, but only `dms/binds.kdl` is included in `niri/config.kdl` (`optional=true`, so niri also starts before DMS creates it). The rest is not loaded — monitors, for example, come from `niri/conf/output.kdl`; DMS applies its own output changes at runtime through `wlr-output-management`, so they last until niri restarts.
+
 ### Layout (`niri/config.kdl`)
 
 - Small gaps (10 px) between window's edges and no background color (transparent)
