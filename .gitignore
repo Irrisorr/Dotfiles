@@ -11,3 +11,5 @@ zen-browser/chrome/sine-mods/*/*.jpg
 # DMS run-state markers (first launch, seen changelogs)
 dms/.firstlaunch
 dms/.changelog-*
+# DMS plugin clones — restored from dms/plugins.lock.json
+dms/plugins/

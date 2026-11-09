@@ -94,10 +94,10 @@ DMS writes these itself from its Settings (keybinds, outputs, layout overrides, 
 | **Dank Pomodoro Timer** | [duxlabs-dev/dux-plugins](https://github.com/duxlabs-dev/dux-plugins) | Pomodoro timer widget |
 | **Niri Windows** | [rochacbruno/DankNiriWindows](https://github.com/rochacbruno/DankNiriWindows) | Open-window switcher inside the launcher (`Ctrl+Space`, or `!` in the launcher) |
 
-`dms/plugins.lock.json` pins each plugin's repo and commit (written by `dms plugins lock`), `dms/plugin_settings.json` holds their settings. On a new machine:
+Only `dms/plugins.lock.json` (each plugin's repo and commit) and `dms/plugin_settings.json` (their settings) are tracked; the plugin clones in `dms/plugins/` are ignored. `configure_niri` clones them back with `dms plugins restore`. After installing, updating or removing a plugin, refresh the lockfile:
 
 ```bash
-dms plugins restore ~/.config/dms/plugins.lock.json
+dms plugins lock
 ```
 
 ### Layout (`niri/config.kdl`)

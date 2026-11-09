@@ -8,6 +8,7 @@
 configure_niri_steps=(
   "niri config|_niri_link_config"
   "Dux shell config (panel bar)|_niri_link_dux"
+  "Dux shell plugins|_niri_restore_dux_plugins|dms"
   "hyprlock config|_niri_link_hyprlock|hyprlock"
   "Disable globally enabled DMS units|_disable_global_dms_units|test:_global_dms_units"
 )
@@ -23,6 +24,13 @@ _niri_link_config() {
 
 _niri_link_dux() {
   execute_command "Configure Dux shell (panel-bar)" "create_symlink $HOME/Dotfiles/dms $HOME/.config/dms"
+}
+
+# Plugin code isn't tracked (dms/plugins/ is ignored): the lockfile pins each
+# plugin's repo and commit, restore clones them. Their settings are in the tracked
+# dms/plugin_settings.json.
+_niri_restore_dux_plugins() {
+  execute_command "Restore Dux shell plugins" "dms plugins restore $HOME/.config/dms/plugins.lock.json"
 }
 
 _niri_link_hyprlock() {
