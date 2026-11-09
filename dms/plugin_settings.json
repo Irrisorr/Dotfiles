@@ -22,7 +22,7 @@
     "desktopShowMetrics": false,
     "desktopBackgroundOpacity": 0,
     "showHints": true
-  }s,
+  },
   "niriWindows": {
     "enabled": true,
     "noTrigger": false
