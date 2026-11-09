@@ -4,5 +4,27 @@
   },
   "dankActions": {
     "enabled": true
+  },
+  "bongoCat": {
+    "enabled": true,
+    "catSizePercent": 66,
+    "catSkin": "classic",
+    "catColorMode": "primary",
+    "classicIdle": false,
+    "selectedDevicePath": "all",
+    "waitingTimeout": 2,
+    "pawHoldTime": 50,
+    "mouseEnabled": false,
+    "showMetrics": false,
+    "metricsWindowSec": 56,
+    "soundEnabled": false,
+    "soundProfile": "pop",
+    "desktopShowMetrics": false,
+    "desktopBackgroundOpacity": 0,
+    "showHints": true
+  }s,
+  "niriWindows": {
+    "enabled": true,
+    "noTrigger": false
   }
 }

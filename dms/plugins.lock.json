@@ -1,4 +1,19 @@
 {
   "lockfileVersion": 1,
-  "plugins": {}
+  "plugins": {
+    "bongoCat": {
+      "repo": "https://github.com/hthienloc/dms-plugins",
+      "path": "bongoCat",
+      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+    },
+    "dankPomodoroTimer": {
+      "repo": "https://github.com/duxlabs-dev/dux-plugins",
+      "path": "DankPomodoroTimer",
+      "commit": "7a964dad725964550734e43dbbcf88c72829d847"
+    },
+    "niriWindows": {
+      "repo": "https://github.com/rochacbruno/DankNiriWindows",
+      "commit": "411d5ee9f7707029f4c12c824ec3b24ca6756a0d"
+    }
+  }
 }

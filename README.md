@@ -86,6 +86,20 @@ You should change this configuration by urself using command `niri msg outputs` 
 
 DMS writes these itself from its Settings (keybinds, outputs, layout overrides, cursor, alt-tab, wallpaper blur, ...) and overwrites manual edits. They are tracked so a new machine gets the same state, but only `dms/binds.kdl` is included in `niri/config.kdl` (`optional=true`, so niri also starts before DMS creates it). The rest is not loaded — monitors, for example, come from `niri/conf/output.kdl`; DMS applies its own output changes at runtime through `wlr-output-management`, so they last until niri restarts.
 
+### Dux shell plugins (`dms/`)
+
+| Plugin | Source | What it does |
+| :--- | :--- | :--- |
+| **Bongo Cat** | [hthienloc/dms-plugins](https://github.com/hthienloc/dms-plugins) | Cat in the middle of the bar that taps along with typing |
+| **Dank Pomodoro Timer** | [duxlabs-dev/dux-plugins](https://github.com/duxlabs-dev/dux-plugins) | Pomodoro timer widget |
+| **Niri Windows** | [rochacbruno/DankNiriWindows](https://github.com/rochacbruno/DankNiriWindows) | Open-window switcher inside the launcher (`Ctrl+Space`, or `!` in the launcher) |
+
+`dms/plugins.lock.json` pins each plugin's repo and commit (written by `dms plugins lock`), `dms/plugin_settings.json` holds their settings. On a new machine:
+
+```bash
+dms plugins restore ~/.config/dms/plugins.lock.json
+```
+
 ### Layout (`niri/config.kdl`)
 
 - Small gaps (10 px) between window's edges and no background color (transparent)
@@ -261,6 +275,7 @@ These live in `niri/dms/binds.kdl`, which DMS writes itself (Settings → Keybin
 | Keybinding                 | Action                         |
 | :---                       | :---                           |
 | `Alt+Space`                | Application Launcher           |
+| `Ctrl+Space`               | Switch Windows (Niri Windows)  |
 | `Mod+Comma`                | Settings                       |
 | `Mod+L`                    | Lock Screen                    |
 | `Mod+Shift+L`              | Power Menu                     |
