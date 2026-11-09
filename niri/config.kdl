@@ -7,6 +7,8 @@ include "conf/input.kdl"
 include "conf/output.kdl"
 include "conf/rules.kdl"
 include "conf/workspaces.kdl"
+// DMS Include Configs
+include optional=true "dms/binds.kdl"
 
 // If using niri newer than 271534e115e5915231c99df287bbfe396185924d (~aug 17 2025)
 // you can add this to disable built in config load errors since dank shell provides this

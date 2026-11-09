@@ -238,21 +238,41 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
 
 ### Apps
 
-| Keybinding    | App                       |
-| :---          | :---                      |
-| `Mod+Return`  | Kitty (Terminal)          |
-| `Mod+B`       | Zen Browser (Browser)     |
-| `Mod+E`       | Thunar (File Explorer)    |
-| `Mod+C`       | VSCode                    |
-| `Mod+N`       | Obsidian (Notes)          |
-| `Mod+M`       | Spotify (Music)           |
-| `Mod+Shift+T` | iMe (Telegram client)     |
-| `Mod+D`       | Vesktop (Discord client)  |
-| `Alt+Space`   | Rofi (App Launcher)       |
-| `Ctrl+Space`  | Rofi (Window Manager)     |
-| `Mod+V`       | Clipse (Clipboard)        |
-| `Mod+L`       | Hyprlock (Lock Screen)    |
-| `Mod+Shift+L` | Wlogout (Logout Manager)  |
+| Keybinding    | App                         |
+| :---          | :---                        |
+| `Mod+Return`  | Kitty (Terminal)            |
+| `Mod+B`       | Zen Browser (Browser)       |
+| `Mod+E`       | Nautilus (File Explorer)    |
+| `Mod+C`       | VSCode                      |
+| `Mod+N`       | Obsidian (Notes)            |
+| `Mod+M`       | Spotify (Music)             |
+| `Mod+Shift+T` | iMe (Telegram client)       |
+| `Mod+D`       | Vesktop (Discord client)    |
+| `Mod+V`       | Clipse (Clipboard)          |
+
+### Dux shell (DMS)
+
+These live in `niri/dms/binds.kdl`, which DMS writes itself (Settings → Keybinds) and which `niri/config.kdl` includes after `conf/binds.kdl` — so for the same key DMS wins. The rofi / Hyprlock / Wlogout / volume binds it replaced are kept commented out in `conf/binds.kdl`.
+
+| Keybinding                 | Action                         |
+| :---                       | :---                           |
+| `Alt+Space`                | Application Launcher           |
+| `Mod+Comma`                | Settings                       |
+| `Mod+L`                    | Lock Screen                    |
+| `Mod+Shift+L`              | Power Menu                     |
+| `Mod+Shift+M`              | Task Manager                   |
+| `Mod+Shift+N`              | Notepad                        |
+| `Mod+Shift+W`              | Browse Wallpapers              |
+| `Mod+Shift+/`              | Keybinds Cheatsheet            |
+| `XF86AudioRaiseVolume`     | Volume +5%                     |
+| `XF86AudioLowerVolume`     | Volume -5%                     |
+| `XF86AudioMute`            | Toggle Mute                    |
+| `XF86AudioMicMute`         | Toggle Mic Mute                |
+| `XF86MonBrightnessUp`      | Brightness +5%                 |
+| `XF86MonBrightnessDown`    | Brightness -5%                 |
+| `Mod+XF86AudioRaiseVolume` | Media: Next Track              |
+| `Mod+XF86AudioLowerVolume` | Media: Previous Track          |
+| `Mod+XF86AudioMute`        | Media: Play / Pause            |
 
 ### Window's actions
 
@@ -305,20 +325,13 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
 
 | Keybinding               | Action                      |
 | :---                     | :---                        |
-| `Mod+Shift+/`            | Hotkey Overlay              |
 | `Mod+Shift+S`            | Screenshot (Ctrl+C to copy) |
 | `Mod+Shift+End`          | Screenshot Screen           |
 | `Mod+End`                | Screenshot Window           |
 | `Mod+Backspace`          | Pick Window for Screencast  |
 | `Mod+Shift+Backspace`    | Pick Monitor for Screencast |
 | `Mod+Alt+Backspace`      | Clear Dynamic Screencast    |
-| `Mod+TouchpadScrollDown` | Volume -0.02                |
-| `Mod+TouchpadScrollUp`   | Volume +0.02                |
-| `XF86AudioRaiseVolume`   | Volume +0.1                 |
-| `XF86AudioLowerVolume`   | Volume -0.1                 |
-| `XF86MonBrightnessUp`    | Brightness +5%              |
-| `XF86MonBrightnessDown`  | Brightness -5%              |
-| `XF86AudioMute`          | Toggle Mute                 |
-| `XF86AudioMicMute`       | Toggle Mic Mute             |
+| `Mod+TouchpadScrollDown` | Volume -2%                  |
+| `Mod+TouchpadScrollUp`   | Volume +2%                  |
 | `Mod+Shift+P`            | Power Off Monitors          |
  
