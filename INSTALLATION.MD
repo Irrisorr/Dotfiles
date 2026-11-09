@@ -14,6 +14,7 @@ branches on the distro.
 Dotfiles/
   install.sh         # installer entry point  (./install.sh)
   post_install.sh    # runs once after reboot  (./post_install.sh)
+  etc/               # system files the config steps copy into /etc (udev/hwdb.d: keyboard fixes, configure_hwdb)
   scripts/
     lib/
       common.sh      # path constants + sources lib/  (source this everywhere)

@@ -41,6 +41,7 @@ CONFIG_STEPS=(
   "Update user directories|update_user_dirs|xdg-user-dirs-update"
   "Convert Russian XDG dirs to English|convert_xdg_dirs"
   "Fingerprint authentication|configure_fingerprint|fprintd-enroll"
+  "Keyboard fixes (udev hwdb)|configure_hwdb|systemd-hwdb"
   "Git|configure_git|git"
   "Zen Browser|configure_zen|zen-browser"
   "Kitty|configure_kitty|kitty"

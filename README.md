@@ -33,6 +33,9 @@ cd Dotfiles
     - 13 packages have no Ubuntu source and are skipped (the installer names them before installing): `shader-slang` (bundled with the upstream kitty build), `anyrun`, `walker`, `gowall`, `hyprswitch`, `hyprshot`, `arronax`, `vimix-gtk-themes`, `waydroid`, `spicetify-cli`, `terminal-rain-lightning`, `logmein-hamachi`, `ags-hyprpanel-git`
     - fingerprint driver (`libfprint-2-tod1-goodix-v2`, 27c6:550a) is installed from the same `.deb` the AUR package repackages — it doesn't update by itself
     - `iMe`, `claude-code` and `claude-desktop` have no Ubuntu source yet — the installer reports them as `missing:` and installs everything else
+- Hardware fixes (both distros):
+    - fingerprint (Arch): `libfprint-tod` is built from its AUR PKGBUILD with libfprint's thermal model turned off — otherwise the Goodix reader is disabled "to prevent overheating" after ~3 min on the lock screen. `pacman -Qi libfprint-tod` shows `(no thermal limit)` on the patched build; an AUR update brings the stock one back, re-run the package step then
+    - volume keys (ThinkBook 14 G8 IRL): the keyboard controller sometimes drops the key release, so volume keeps changing. `etc/udev/hwdb.d/61-thinkbook-volume-release.hwdb` makes the kernel release them itself; the **Keyboard fixes (udev hwdb)** config step installs it (a hardware quirk, so the same on Ubuntu). Check: `cat /sys/bus/serio/devices/serio0/force_release` lists `174,176`
 
 
 ### Adding a package
@@ -167,6 +170,7 @@ The two entry points sit at the repo root; everything else lives under `scripts/
 Dotfiles/
   install.sh         # the installer MENUS only (sources the engine, then config_menu + first menu)  (./install.sh)
   post_install.sh    # runs once after reboot: ./post_install.sh
+  etc/               # system files copied into /etc by config steps (udev hwdb keyboard fixes)
   scripts/
     lib/             # reusable helpers (no app-specific logic)
       common.sh      # path constants + sources lib/  (source this everywhere)
@@ -181,7 +185,7 @@ Dotfiles/
       packages.txt   # one line per package, works for both distros
       fzf_picker.sh  # fzf package picker (run on its own to try it: installs nothing)
       fzf_config.sh  # fzf config menu (run on its own: dry run)
-      system/        # system-level config functions: niri, hyprland, sddm, fingerprint, gtk/bluetooth/polkit, xdg, flatpak, sources.sh (custom installers)
+      system/        # system-level config functions: niri, hyprland, sddm, fingerprint, hwdb, gtk/bluetooth/polkit, xdg, flatpak, sources.sh (custom installers)
       apps/          # per-app config functions: zen, kitty, fish, thunar, rofi, ...  (ONE file per app)
     functions/       # everyday shell aliases + alias_menu.sh (the `asd` menu)
       sync/          # sync.sh: copies live configs back into Dotfiles (modules/ + sync_map.json, see below)
