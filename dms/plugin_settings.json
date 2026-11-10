@@ -5,9 +5,12 @@
   "dankActions": {
     "enabled": true
   },
+  "quickCapture": {
+    "enabled": true
+  },
   "bongoCat": {
     "enabled": true,
-    "catSizePercent": 66,
+    "catSizePercent": 70,
     "catSkin": "classic",
     "catColorMode": "primary",
     "classicIdle": false,
@@ -23,8 +26,18 @@
     "desktopBackgroundOpacity": 0,
     "showHints": true
   },
+  "fullscreenPowerMenu": {
+    "enabled": false
+  },
   "niriWindows": {
     "enabled": true,
     "noTrigger": false
+  },
+  "wallpaperCarousel": {
+    "enabled": true,
+    "carouselMode": "infinite",
+    "expandSelected": "true",
+    "expandMultiplier": 200,
+    "selectedScale": 108
   }
 }

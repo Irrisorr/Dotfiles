@@ -296,6 +296,7 @@ These live in `niri/dms/binds.kdl`, which DMS writes itself (Settings → Keybin
 | `Mod+Shift+M`              | Task Manager                   |
 | `Mod+Shift+N`              | Notepad                        |
 | `Mod+Shift+W`              | Browse Wallpapers              |
+| `Mod+Alt+W`                | Wallpaper Carousel             |
 | `Mod+Shift+/`              | Keybinds Cheatsheet            |
 | `XF86AudioRaiseVolume`     | Volume +5%                     |
 | `XF86AudioLowerVolume`     | Volume -5%                     |

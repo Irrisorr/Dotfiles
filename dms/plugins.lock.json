@@ -14,6 +14,10 @@
     "niriWindows": {
       "repo": "https://github.com/rochacbruno/DankNiriWindows",
       "commit": "411d5ee9f7707029f4c12c824ec3b24ca6756a0d"
+    },
+    "wallpaperCarousel": {
+      "repo": "https://github.com/motor-dev/wallpaperCarousel",
+      "commit": "0ed803b40736359d3b32aa9cd3aaf342b3695759"
     }
   }
 }

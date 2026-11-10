@@ -1,6 +1,6 @@
 {
-  "currentThemeName": "purple",
-  "currentThemeCategory": "generic",
+  "currentThemeName": "dynamic",
+  "currentThemeCategory": "dynamic",
   "customThemeFile": "",
   "registryThemeVariants": {},
   "matugenScheme": "scheme-tonal-spot",
@@ -1341,5 +1341,9 @@
   "batteryLowNotificationType": 0,
   "batteryCriticalThreshold": 10,
   "batteryAutoPowerSaver": true,
-  "avatarRing": "none"
+  "avatarRing": "none",
+  "matugenSpec": "dms",
+  "matugenSourceMode": "saturation",
+  "matugenContrast": 0,
+  "terminalPalette": "medium"
 }
