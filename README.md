@@ -111,8 +111,11 @@ With Settings → Theme → **Dynamic**, DMS runs [matugen](https://github.com/I
 | :--- | :--- | :--- |
 | niri (focus ring, border, shadow, tabs, insert hint) | `niri/dms/colors.kdl` | `include` next to `dms/binds.kdl` in `niri/config.kdl` — before its `layout` block, which would override any color it sets, so the gradients there are commented out |
 | kitty | `kitty/dank-theme.conf` | `globinclude` in `kitty/kitty.conf` (the old static palette is kept commented) |
+| Zen browser | `dms/zen.css` | `@import` at the top of `zen-browser/chrome/userChrome.css`, through the `chrome/dms-colors.css` symlink (fills the window background, so Zen's workspace gradients don't show) |
+| Vesktop | `~/.config/vesktop/themes/dank-discord.css` | `configure_vesktop` enables it in Vencord's settings (native install only — the flatpak can't read it) |
+| VS Code | the `DankLinux.dms-theme` extension's theme files | `configure_vscode` installs the extension and sets `workbench.colorTheme` (settings.json stays untracked) |
 
-These files change with every wallpaper, so they are in `.gitignore`; DMS recreates them on a new machine. Until then niri and kitty use their defaults.
+The generated files inside Dotfiles change with every wallpaper, so they are in `.gitignore`; DMS recreates them on a new machine (after the next wallpaper change). Until then every app falls back to its own colors.
 
 ### Layout (`niri/config.kdl`)
 

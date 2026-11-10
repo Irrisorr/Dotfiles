@@ -1,3 +1,7 @@
+/* Wallpaper colors DMS writes with matugen (dms-colors.css -> Dotfiles/dms/zen.css).
+   @import must come first; the rules below override it where they overlap. */
+@import url("dms-colors.css");
+
 /* toolbar height (url + extension etc.) */
 *|*:root {
   --zen-toolbar-height: 38px !important;
