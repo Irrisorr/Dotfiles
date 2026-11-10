@@ -2,6 +2,9 @@
 zen-browser/chrome/JS/
 zen-browser/chrome/utils/
 zen-browser/chrome/zen-themes.css
+# Sine rewrites these from mods.json on every start, with this machine's profile path
+zen-browser/chrome/sine-mods/chrome.css
+zen-browser/chrome/sine-mods/content.css
 # Sine mod files only used by their README / the store page
 zen-browser/chrome/sine-mods/*/.asset/
 zen-browser/chrome/sine-mods/*/README.md
