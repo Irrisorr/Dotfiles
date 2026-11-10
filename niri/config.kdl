@@ -9,6 +9,9 @@ include "conf/rules.kdl"
 include "conf/workspaces.kdl"
 // DMS Include Configs
 include optional=true "dms/binds.kdl"
+// Wallpaper colors from DMS (matugen). The layout below still wins for anything it
+// sets, so its focus-ring / insert-hint colors stay commented out.
+include optional=true "dms/colors.kdl"
 
 // If using niri newer than 271534e115e5915231c99df287bbfe396185924d (~aug 17 2025)
 // you can add this to disable built in config load errors since dank shell provides this
@@ -58,7 +61,8 @@ layout {
         // width of the focus ring in logical pixels  
         // active-color "#7fc8ff"
         // inactive-color "#505050"
-        active-gradient from="#16ffed" to="#792faaff" angle=45 in="oklch shorter hue" // active gradient color of the focus ring
+        // Colors come from dms/colors.kdl (matugen) — a gradient would win over them
+        // active-gradient from="#16ffed" to="#792faaff" angle=45 in="oklch shorter hue" // active gradient color of the focus ring
     }
 
     shadow {                                    // shadow drawn below windows
@@ -70,7 +74,7 @@ layout {
     }
 
     insert-hint {                               // settings for the window insert position hint during an interactive window move
-        gradient from="#16ffed" to="#792faaff" angle=45 in="oklch shorter hue" relative-to="workspace-view"
+        // gradient from="#16ffed" to="#792faaff" angle=45 in="oklch shorter hue" relative-to="workspace-view"
     }
     
     struts {                                    // shrink the area occupied by windows, similarly to layer-shell panels

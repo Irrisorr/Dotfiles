@@ -9,6 +9,7 @@ configure_niri_steps=(
   "niri config|_niri_link_config"
   "Dux shell config (panel bar)|_niri_link_dux"
   "Dux shell plugins|_niri_restore_dux_plugins|dms"
+  "Add user to the input group (Bongo Cat)|_niri_input_group|test:_niri_not_in_input_group"
   "hyprlock config|_niri_link_hyprlock|hyprlock"
   "Disable globally enabled DMS units|_disable_global_dms_units|test:_global_dms_units"
 )
@@ -31,6 +32,16 @@ _niri_link_dux() {
 # dms/plugin_settings.json.
 _niri_restore_dux_plugins() {
   execute_command "Restore Dux shell plugins" "dms plugins restore $HOME/.config/dms/plugins.lock.json"
+}
+
+_niri_not_in_input_group() {
+  ! id -nG "$USER" | grep -qw input
+}
+
+# Bongo Cat reads /dev/input/event* through evtest / libinput. Note: the input
+# group lets any of the user's processes read every keystroke. Needs a re-login.
+_niri_input_group() {
+  execute_command "Add $USER to the input group (re-login to apply)" "sudo usermod -aG input $USER"
 }
 
 _niri_link_hyprlock() {

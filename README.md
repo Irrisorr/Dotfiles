@@ -84,7 +84,7 @@ You should change this configuration by urself using command `niri msg outputs` 
 
 ### DMS-generated files (`niri/dms/`)
 
-DMS writes these itself from its Settings (keybinds, outputs, layout overrides, cursor, alt-tab, wallpaper blur, ...) and overwrites manual edits. They are tracked so a new machine gets the same state, but only `dms/binds.kdl` is included in `niri/config.kdl` (`optional=true`, so niri also starts before DMS creates it). The rest is not loaded — monitors, for example, come from `niri/conf/output.kdl`; DMS applies its own output changes at runtime through `wlr-output-management`, so they last until niri restarts.
+DMS writes these itself from its Settings (keybinds, outputs, layout overrides, cursor, alt-tab, wallpaper blur, ...) and overwrites manual edits. They are tracked so a new machine gets the same state (except `colors.kdl`, see below), but only `dms/binds.kdl` and `dms/colors.kdl` are included in `niri/config.kdl` (`optional=true`, so niri also starts before DMS creates them). The rest is not loaded — monitors, for example, come from `niri/conf/output.kdl`; DMS applies its own output changes at runtime through `wlr-output-management`, so they last until niri restarts.
 
 ### Dux shell plugins (`dms/`)
 
@@ -93,6 +93,7 @@ DMS writes these itself from its Settings (keybinds, outputs, layout overrides, 
 | **Bongo Cat** | [hthienloc/dms-plugins](https://github.com/hthienloc/dms-plugins) | Cat in the middle of the bar that taps along with typing |
 | **Dank Pomodoro Timer** | [duxlabs-dev/dux-plugins](https://github.com/duxlabs-dev/dux-plugins) | Pomodoro timer widget |
 | **Niri Windows** | [rochacbruno/DankNiriWindows](https://github.com/rochacbruno/DankNiriWindows) | Open-window switcher inside the launcher (`Ctrl+Space`, or `!` in the launcher) |
+| **Wallpaper Carousel** | [motor-dev/wallpaperCarousel](https://github.com/motor-dev/wallpaperCarousel) | Fullscreen carousel to pick a wallpaper (needs DMS to manage the wallpaper, not swaybg) |
 
 Only `dms/plugins.lock.json` (each plugin's repo and commit) and `dms/plugin_settings.json` (their settings) are tracked; the plugin clones in `dms/plugins/` are ignored. `configure_niri` clones them back with `dms plugins restore`. After installing, updating or removing a plugin, refresh the lockfile:
 
@@ -100,13 +101,26 @@ Only `dms/plugins.lock.json` (each plugin's repo and commit) and `dms/plugin_set
 dms plugins lock
 ```
 
+Bongo Cat reads the keyboard through `evtest` / `libinput` (`libinput-tools`), so the user has to be in the `input` group — `configure_niri` adds it (re-login to apply).
+
+### Wallpaper colors (matugen)
+
+With Settings → Theme → **Dynamic**, DMS runs [matugen](https://github.com/InioX/matugen) on every wallpaper change: it builds a Material You palette from the wallpaper and fills DMS's templates with it. The scheme (`matugenScheme`) and the per-app templates (`matugenTemplate*`) are in `dms/settings.json`.
+
+| App | Generated file | Hooked up in |
+| :--- | :--- | :--- |
+| niri (focus ring, border, shadow, tabs, insert hint) | `niri/dms/colors.kdl` | `include` next to `dms/binds.kdl` in `niri/config.kdl` — before its `layout` block, which would override any color it sets, so the gradients there are commented out |
+| kitty | `kitty/dank-theme.conf` | `globinclude` in `kitty/kitty.conf` (the old static palette is kept commented) |
+
+These files change with every wallpaper, so they are in `.gitignore`; DMS recreates them on a new machine. Until then niri and kitty use their defaults.
+
 ### Layout (`niri/config.kdl`)
 
 - Small gaps (10 px) between window's edges and no background color (transparent)
 - Never centered a window when changing focus between windows and always center when only 1 window is on a worskspace
 - Default window (column) width is 100%
 - Presets for actions like `switch-preset-column-width (Mod+R)` and `switch-preset-window-height (Mod+Shift+R)` are 0.5 (50%) and 1.0 (100%)
-- Border (with gradient) around active window
+- Focus ring around active window (colors from the wallpaper, see above)
 - Shadows below windows (u can see them )
 
 ### Workspace (`niri/conf/workspaces.kdl`)
