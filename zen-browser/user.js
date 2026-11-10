@@ -35,6 +35,7 @@ user_pref("browser.toolbars.bookmarks.visibility", "always"); // always show the
 
 // ─── Developer & custom styling ──────────────────────────────────────────────
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true); // enable userChrome.css / userContent.css
+user_pref("sine.allow-unsafe-js", true);                      // run JS of non-store Sine mods (the local dms-colors)
 user_pref("devtools.debugger.remote-enabled", true);          // allow remote debugging
 user_pref("devtools.chrome.enabled", true);                   // enable the browser toolbox / chrome devtools
 

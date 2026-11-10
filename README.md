@@ -111,7 +111,7 @@ With Settings → Theme → **Dynamic**, DMS runs [matugen](https://github.com/I
 | :--- | :--- | :--- |
 | niri (focus ring, border, shadow, tabs, insert hint) | `niri/dms/colors.kdl` | `include` next to `dms/binds.kdl` in `niri/config.kdl` — before its `layout` block, which would override any color it sets, so the gradients there are commented out |
 | kitty | `kitty/dank-theme.conf` | `globinclude` in `kitty/kitty.conf` (the old static palette is kept commented) |
-| Zen browser | `dms/zen.css` | `@import` at the top of `zen-browser/chrome/userChrome.css`, through the `chrome/dms-colors.css` symlink (fills the window background, so Zen's workspace gradients don't show) |
+| Zen browser | `dms/zen.css` | local Sine mod `zen-browser/chrome/sine-mods/dms-colors`: its script loads the file and reloads it within ~2 s of every change (no Zen restart; needs `sine.allow-unsafe-js` from `user.js`), its CSS lets folders take the color too. Fills the window background, so Zen's workspace gradients don't show |
 | Vesktop | `~/.config/vesktop/themes/dank-discord.css` | `configure_vesktop` enables it in Vencord's settings (native install only — the flatpak can't read it) |
 | VS Code | the `DankLinux.dms-theme` extension's theme files | `configure_vscode` installs the extension and sets `workbench.colorTheme` (settings.json stays untracked) |
 
