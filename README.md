@@ -84,7 +84,7 @@ You should change this configuration by urself using command `niri msg outputs` 
 
 ### DMS-generated files (`niri/dms/`)
 
-DMS writes these itself from its Settings (keybinds, outputs, layout overrides, cursor, alt-tab, wallpaper blur, ...) and overwrites manual edits. They are tracked so a new machine gets the same state (except `colors.kdl`, see below), but only `dms/binds.kdl` and `dms/colors.kdl` are included in `niri/config.kdl` (`optional=true`, so niri also starts before DMS creates them). The rest is not loaded — monitors, for example, come from `niri/conf/output.kdl`; DMS applies its own output changes at runtime through `wlr-output-management`, so they last until niri restarts.
+DMS writes these itself from its Settings (keybinds, outputs, layout overrides, cursor, alt-tab, wallpaper blur, ...) and overwrites manual edits. Only the files `niri/config.kdl` includes matter: `dms/binds.kdl` (tracked) and `dms/colors.kdl` (wallpaper colors, regenerated, ignored) — both `optional=true`, so niri also starts before DMS creates them. The rest is ignored by git: niri doesn't load it, and some of it is per machine (`outputs.kdl` lists this PC's monitors — they come from `niri/conf/output.kdl`; DMS applies its own output changes at runtime through `wlr-output-management`, so they last until niri restarts).
 
 ### Dux shell plugins (`dms/`)
 
