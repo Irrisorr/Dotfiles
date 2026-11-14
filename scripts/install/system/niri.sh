@@ -12,6 +12,7 @@ configure_niri_steps=(
   "Add user to the input group (Bongo Cat)|_niri_input_group|test:_niri_not_in_input_group"
   "Dux greeter (login screen, replaces SDDM/GDM)|_niri_dux_greeter|dms-greeter"
   "Dux calendar config|_niri_link_dux_calendar|dcal"
+  "Dux files config (default file manager, open/save dialogs)|_niri_dux_files|dfiles"
   "hyprlock config|_niri_link_hyprlock|hyprlock"
   "Disable globally enabled DMS units|_disable_global_dms_units|test:_global_dms_units"
 )
@@ -59,6 +60,17 @@ _niri_dux_greeter() {
 # so add them again on a new machine (dcal account add google).
 _niri_link_dux_calendar() {
   execute_command "Configure Dux calendar" "create_symlink $HOME/Dotfiles/dankcal $HOME/.config/dankcal"
+}
+
+# The portal file is the one `dfiles portal install` writes: only the
+# FileChooser line, so dfiles serves open/save dialogs with gnome/gtk as fallback.
+# xdg-desktop-portal reads it at startup, hence the restart.
+_niri_dux_files() {
+  execute_command "Configure Dux files" \
+    "create_symlink $HOME/Dotfiles/dfiles $HOME/.config/dfiles \
+     && create_symlink $HOME/Dotfiles/xdg-desktop-portal/niri-portals.conf $HOME/.config/xdg-desktop-portal/niri-portals.conf \
+     && xdg-mime default dev.duxlabs.files.desktop inode/directory \
+     && systemctl --user try-restart xdg-desktop-portal.service"
 }
 
 _niri_link_hyprlock() {

@@ -129,6 +129,7 @@ dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
 - wl-clipboard (wayland clipboard)
 dux-greeter-bin        ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-greeter (DMS login screen, replaces SDDM | Ubuntu: 26.04+)
 dux-calendar-bin       ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-calendar (dcal: Google/CalDAV calendar and tasks, DMS calendar backend | Ubuntu: 26.04+)
+dux-files-bin          ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-files (dfiles: file manager, also serves open/save dialogs | Ubuntu: 26.04+)
 hyprlock (lock manager)
 swaybg (wallpaper tool)
 
