@@ -1,0 +1,43 @@
+{
+  "dankPomodoroTimer": {
+    "enabled": true
+  },
+  "dankActions": {
+    "enabled": true
+  },
+  "quickCapture": {
+    "enabled": true
+  },
+  "bongoCat": {
+    "enabled": true,
+    "catSizePercent": 70,
+    "catSkin": "classic",
+    "catColorMode": "primary",
+    "classicIdle": false,
+    "selectedDevicePath": "all",
+    "waitingTimeout": 2,
+    "pawHoldTime": 50,
+    "mouseEnabled": false,
+    "showMetrics": false,
+    "metricsWindowSec": 56,
+    "soundEnabled": false,
+    "soundProfile": "pop",
+    "desktopShowMetrics": false,
+    "desktopBackgroundOpacity": 0,
+    "showHints": true
+  },
+  "fullscreenPowerMenu": {
+    "enabled": false
+  },
+  "niriWindows": {
+    "enabled": true,
+    "noTrigger": false
+  },
+  "wallpaperCarousel": {
+    "enabled": true,
+    "carouselMode": "infinite",
+    "expandSelected": "true",
+    "expandMultiplier": 200,
+    "selectedScale": 108
+  }
+}

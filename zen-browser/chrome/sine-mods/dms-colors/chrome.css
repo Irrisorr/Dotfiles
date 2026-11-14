@@ -1,0 +1,5 @@
+/* Each space sets its own --zen-primary-color inline (from its theme), which
+   hides the DMS one set on :root — folders then take the space's gray. */
+zen-workspace {
+  --zen-primary-color: inherit !important;
+}
