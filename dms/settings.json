@@ -186,7 +186,7 @@
   "lockDateFormat": "",
   "greeterRememberLastSession": true,
   "greeterRememberLastUser": true,
-  "greeterEnableFprint": false,
+  "greeterEnableFprint": true,
   "greeterEnableU2f": false,
   "browserPickerViewMode": "grid",
   "appPickerViewMode": "grid",
@@ -913,7 +913,7 @@
   ],
   "greeterWidgetInstances": [
     {
-      "id": "lock_clock",
+      "id": "gw_lock_clock",
       "widgetType": "desktopClock",
       "enabled": true,
       "config": {
@@ -937,7 +937,7 @@
       }
     },
     {
-      "id": "lock_date",
+      "id": "gw_lock_date",
       "widgetType": "lockDate",
       "enabled": false,
       "config": {
@@ -951,7 +951,7 @@
       }
     },
     {
-      "id": "lock_auth",
+      "id": "gw_lock_auth",
       "widgetType": "lockAuth",
       "enabled": true,
       "config": {
@@ -960,12 +960,12 @@
         ],
         "syncPositionAcrossScreens": true,
         "style": "expressive",
-        "profileVisibility": "never",
+        "profileVisibility": "always",
         "passwordVisibility": "always"
       }
     },
     {
-      "id": "lock_power",
+      "id": "gw_lock_power",
       "widgetType": "lockPower",
       "enabled": false,
       "config": {
@@ -977,50 +977,10 @@
       }
     },
     {
-      "id": "lw_1794017221900_yn9hlagig",
-      "widgetType": "desktopClock",
-      "name": "Clock",
-      "enabled": true,
-      "config": {
-        "syncPositionAcrossScreens": true,
-        "style": "digital",
-        "transparency": 0,
-        "colorMode": "primary",
-        "customColor": "#ffffff",
-        "showDate": false,
-        "showAnalogNumbers": false,
-        "showAnalogSeconds": true,
-        "displayPreferences": [
-          "all"
-        ],
-        "autoPosition": false,
-        "showDigitalSeconds": true,
-        "fontFamily": "JetBrainsMono Nerd Font",
-        "weight": 600,
-        "italic": false,
-        "twoTone": false
-      }
-    },
-    {
-      "id": "lw_1794017394818_fy9qungzq",
-      "widgetType": "lockDate",
-      "name": "Date",
-      "enabled": true,
-      "config": {
-        "syncPositionAcrossScreens": true,
-        "displayPreferences": [
-          "all"
-        ],
-        "format": "short",
-        "colorMode": "default",
-        "customColor": "#ffffff"
-      }
-    },
-    {
-      "id": "lw_1794181620477_qzhioltdv",
+      "id": "gw_lw_1794181620477_qzhioltdv",
       "widgetType": "lockStatus",
       "name": "Status",
-      "enabled": true,
+      "enabled": false,
       "config": {
         "syncPositionAcrossScreens": true,
         "displayPreferences": [
@@ -1043,6 +1003,34 @@
           "all"
         ],
         "syncPositionAcrossScreens": true
+      }
+    },
+    {
+      "id": "gw_1794613087788_i1qvaka18",
+      "widgetType": "lockDate",
+      "name": "Date",
+      "enabled": true,
+      "config": {
+        "syncPositionAcrossScreens": true,
+        "displayPreferences": [
+          "all"
+        ],
+        "format": "long",
+        "colorMode": "default",
+        "customColor": "#ffffff"
+      }
+    },
+    {
+      "id": "gw_1794613145187_gidkkpr51",
+      "widgetType": "lockPower",
+      "name": "Power",
+      "enabled": true,
+      "config": {
+        "syncPositionAcrossScreens": true,
+        "displayPreferences": [
+          "all"
+        ],
+        "shape": "round"
       }
     }
   ],
@@ -1345,5 +1333,6 @@
   "matugenSpec": "dms",
   "matugenSourceMode": "saturation",
   "matugenContrast": 0,
-  "terminalPalette": "medium"
+  "terminalPalette": "medium",
+  "greeterFollowLockScreen": false
 }

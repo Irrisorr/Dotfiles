@@ -29,6 +29,7 @@ cd Dotfiles
     - **Zen** is upstream's tarball in `~/.local/share/zen` (linked as `/usr/local/bin/zen-browser`), not the flatpak: the flatpak's read-only app dir can't take the Sine bootloader. It is owned by you, so Zen updates itself from inside the browser
     - `clipse` (release binary), JetBrains Mono Nerd Font (official nerd-fonts release), **kitty** (upstream build into `/opt/kitty.app` — apt's 0.45 is too old for this `kitty.conf`; it brings its own `slangc` for custom shaders), Antigravity (Google's tarball, into `/opt/Antigravity`), **swayimg** (built from the release tag into `/usr/local` — apt's 4.7 predates the Lua config) and FreeOffice (SoftMaker's apt repo) have their own installers in `scripts/install/system/sources.sh`; re-run the package step to update clipse, kitty, the font, Antigravity and swayimg (Zen updates itself)
     - SDDM replaces GDM as the login screen (the **SDDM** config step switches it; it prints the command to switch back)
+    - the **Dux greeter** needs Ubuntu 26.04+ (that's the oldest release `ppa:duxlabs/dux-repo` builds it for)
 - Known differences:
     - 13 packages have no Ubuntu source and are skipped (the installer names them before installing): `shader-slang` (bundled with the upstream kitty build), `anyrun`, `walker`, `gowall`, `hyprswitch`, `hyprshot`, `arronax`, `vimix-gtk-themes`, `waydroid`, `spicetify-cli`, `terminal-rain-lightning`, `logmein-hamachi`, `ags-hyprpanel-git`
     - fingerprint driver (`libfprint-2-tod1-goodix-v2`, 27c6:550a) is installed from the same `.deb` the AUR package repackages — it doesn't update by itself
@@ -114,6 +115,8 @@ With Settings → Theme → **Dynamic**, DMS runs [matugen](https://github.com/I
 | Zen browser | `dms/zen.css` | local Sine mod `zen-browser/chrome/sine-mods/dms-colors`: its script loads the file and reloads it within ~2 s of every change (no Zen restart; needs `sine.allow-unsafe-js` from `user.js`), its CSS lets folders take the color too. Fills the window background, so Zen's workspace gradients don't show |
 | Vesktop | `~/.config/vesktop/themes/dank-discord.css` | `configure_vesktop` enables it in Vencord's settings (native install only — the flatpak can't read it) |
 | VS Code | the `DankLinux.dms-theme` extension's theme files | `configure_vscode` installs the extension and sets `workbench.colorTheme` (settings.json stays untracked) |
+| dgop (`dgop top`) | `~/.config/dgop/colors.json` | nothing to do: dgop reads it itself (`keybinds.json` next to it is dgop's own default, not tracked) |
+| Dux greeter | — | reads DMS's `dms-colors.json` through `/var/cache/dms-greeter/colors.json`, see [Dux greeter](#dux-greeter-login-screen) |
 
 The generated files inside Dotfiles change with every wallpaper, so they are in `.gitignore`; DMS recreates them on a new machine (after the next wallpaper change). Until then every app falls back to its own colors.
 
@@ -175,6 +178,14 @@ The generated files inside Dotfiles change with every wallpaper, so they are in 
 - `OBSIDIAN_USE_WAYLAND "1"` - Force Obsidian to use the native Wayland display protocol instead of running through the XWayland compatibility layer
 - `QT_QPA_PLATFORMTHEME "gtk3"` - Force Qt applications to use the GTK3 platform theme for better integration with the desktop environment
 
+### Dux greeter (login screen)
+
+- The [Dux greeter](https://duxlabs.dev/docs/dms-greeter/installation) (`dux-greeter-bin` from the AUR, `dux-greeter` from `ppa:duxlabs/dux-repo` on Ubuntu 26.04+) runs DMS's login screen under greetd and replaces SDDM
+- **Niri ecosystem → Dux greeter** in the config menu runs `dms-greeter install --yes`: installs greetd, sets `/etc/greetd/config.toml`, disables the old display manager, adds you to the `greeter` group, gives that group read access to `~`, `~/.config`, `~/Dotfiles` and the DMS state, and links `/var/cache/dms-greeter/{settings,session,colors}.json` to your live DMS files
+- So the login screen follows DMS: wallpaper, matugen colors, fonts and the `greeter*` keys in `dms/settings.json` — its own widget layout (`greeterWidgetInstances`, `greeterFollowLockScreen: false`, edited in Settings → Greeter), and fingerprint login (`greeterEnableFprint` writes the `pam_fprintd` line into `/etc/pam.d/greetd` on sync)
+- The group applies after the next login; until then `dms-greeter status` can't read `/var/cache/dms-greeter` and reports the links as missing
+- After toggling fingerprint/U2F in Settings → Greeter: `dms-greeter sync`. Logs: `journalctl -t dms-greeter/niri -b`, `journalctl -t dms-greeter/session -b`. Back to the previous display manager: `dms-greeter uninstall`
+
 ### SDDM (`sddm/`)
 
 - Theme **corners** — based on [aczw/sddm-theme-corners](https://github.com/aczw/sddm-theme-corners), ported to **Qt6** (upstream is Qt5-only), so the same theme works on Arch and Ubuntu (Ubuntu's sddm has only the Qt6 greeter)
@@ -220,7 +231,7 @@ Dotfiles/
       packages.txt   # one line per package, works for both distros
       fzf_picker.sh  # fzf package picker (run on its own to try it: installs nothing)
       fzf_config.sh  # fzf config menu (run on its own: dry run)
-      system/        # system-level config functions: niri, hyprland, sddm, fingerprint, hwdb, gtk/bluetooth/polkit, xdg, flatpak, sources.sh (custom installers)
+      system/        # system-level config functions: niri (+ Dux shell, plugins, greeter), hyprland, sddm, fingerprint, hwdb, gtk/bluetooth/polkit, xdg, flatpak, sources.sh (custom installers)
       apps/          # per-app config functions: zen, kitty, fish, thunar, rofi, ...  (ONE file per app)
     functions/       # everyday shell aliases + alias_menu.sh (the `asd` menu)
       sync/          # sync.sh: copies live configs back into Dotfiles (modules/ + sync_map.json, see below)

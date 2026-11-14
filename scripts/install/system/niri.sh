@@ -10,6 +10,7 @@ configure_niri_steps=(
   "Dux shell config (panel bar)|_niri_link_dux"
   "Dux shell plugins|_niri_restore_dux_plugins|dms"
   "Add user to the input group (Bongo Cat)|_niri_input_group|test:_niri_not_in_input_group"
+  "Dux greeter (login screen, replaces SDDM/GDM)|_niri_dux_greeter|dms-greeter"
   "hyprlock config|_niri_link_hyprlock|hyprlock"
   "Disable globally enabled DMS units|_disable_global_dms_units|test:_global_dms_units"
 )
@@ -42,6 +43,15 @@ _niri_not_in_input_group() {
 # group lets any of the user's processes read every keystroke. Needs a re-login.
 _niri_input_group() {
   execute_command "Add $USER to the input group (re-login to apply)" "sudo usermod -aG input $USER"
+}
+
+# Installs greetd, points it at dms-greeter, disables the old display manager,
+# then syncs: greeter group, ACLs on ~ and the DMS config, links to settings,
+# wallpaper and colors, fingerprint PAM if greeterEnableFprint is on.
+# It escalates by itself and refuses to run under sudo.
+_niri_dux_greeter() {
+  execute_command "Make the Dux greeter the login screen (re-login, then: dms-greeter status; back: dms-greeter uninstall)" \
+    "dms-greeter install --yes"
 }
 
 _niri_link_hyprlock() {

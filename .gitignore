@@ -17,7 +17,9 @@ dms/.changelog-*
 # DMS plugin clones — restored from dms/plugins.lock.json
 dms/plugins/
 # Wallpaper colors DMS writes with matugen (change with every wallpaper)
-niri/dms/colors.kdl
 kitty/dank-*.conf
 dms/zen.css
 dms/firefox.css
+# DMS writes all of niri/dms/; only the files niri/config.kdl includes are kept
+niri/dms/*
+!niri/dms/binds.kdl
