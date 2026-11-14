@@ -11,6 +11,7 @@ configure_niri_steps=(
   "Dux shell plugins|_niri_restore_dux_plugins|dms"
   "Add user to the input group (Bongo Cat)|_niri_input_group|test:_niri_not_in_input_group"
   "Dux greeter (login screen, replaces SDDM/GDM)|_niri_dux_greeter|dms-greeter"
+  "Dux calendar config|_niri_link_dux_calendar|dcal"
   "hyprlock config|_niri_link_hyprlock|hyprlock"
   "Disable globally enabled DMS units|_disable_global_dms_units|test:_global_dms_units"
 )
@@ -52,6 +53,12 @@ _niri_input_group() {
 _niri_dux_greeter() {
   execute_command "Make the Dux greeter the login screen (re-login, then: dms-greeter status; back: dms-greeter uninstall)" \
     "dms-greeter install --yes"
+}
+
+# Only the UI settings; accounts live in ~/.local/share/dankcal and the keyring,
+# so add them again on a new machine (dcal account add google).
+_niri_link_dux_calendar() {
+  execute_command "Configure Dux calendar" "create_symlink $HOME/Dotfiles/dankcal $HOME/.config/dankcal"
 }
 
 _niri_link_hyprlock() {

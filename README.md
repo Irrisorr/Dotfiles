@@ -186,6 +186,12 @@ The generated files inside Dotfiles change with every wallpaper, so they are in 
 - The group applies after the next login; until then `dms-greeter status` can't read `/var/cache/dms-greeter` and reports the links as missing
 - After toggling fingerprint/U2F in Settings → Greeter: `dms-greeter sync`. Logs: `journalctl -t dms-greeter/niri -b`, `journalctl -t dms-greeter/session -b`. Back to the previous display manager: `dms-greeter uninstall`
 
+### Dux calendar (`dankcal/`)
+
+- [Dux calendar](https://duxlabs.dev/docs/dcal/installation) (`dcal`, `dux-calendar-bin` from the AUR, `dux-calendar` from `ppa:duxlabs/dux-repo` on Ubuntu 26.04+) is DMS's calendar backend (`calendarBackend: "dankcal"` in `dms/settings.json`); no autostart entry is needed
+- **Niri ecosystem → Dux calendar config** links `dankcal/` to `~/.config/dankcal` — only the UI settings (`ui-settings.json`). Accounts, tokens and the event cache are per machine (`~/.local/share/dankcal`), so add the Google account again: `dcal account add google`
+- Google Tasks come through the shared built-in OAuth client, whose daily Tasks API quota can run out (log: `Google Tasks failed ... retry deferred`, fixes itself at midnight Pacific). For your own quota: `dcal account setup google`, then `dcal account add google --client-id ... --client-secret ...`
+
 ### SDDM (`sddm/`)
 
 - Theme **corners** — based on [aczw/sddm-theme-corners](https://github.com/aczw/sddm-theme-corners), ported to **Qt6** (upstream is Qt5-only), so the same theme works on Arch and Ubuntu (Ubuntu's sddm has only the Qt6 greeter)
