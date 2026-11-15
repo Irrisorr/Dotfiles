@@ -1,8 +1,8 @@
 # Spotify (spicetify)
 
-Spotify painted in the wallpaper colors, plus Marketplace, Listening Stats and
-Spicy Lyrics with their settings kept here. Everything is driven by the `spice`
-menu and the installer's Spicetify step.
+Spotify painted in the wallpaper colors, plus Marketplace and Listening Stats.
+What's installed in Marketplace and Spicy Lyrics' settings are two JSON files
+here, exported and imported from Spotify itself.
 
 ## How it fits together
 
@@ -28,23 +28,22 @@ wallpaper change ─► DMS runs matugen ─► Themes/dms-colors/color.ini
 
 | File | What it is |
 |---|---|
-| `config-xpui.ini` | spicetify's config: theme (`current_theme`, `color_scheme`), `extensions`, `custom_apps`. `spice` writes it; commit its changes |
+| `config-xpui.ini` | spicetify's config: theme `dms-colors`, `extensions`, `custom_apps`. The app installers write it; commit its changes |
 | `Themes/dms-colors/user.css` | The wallpaper theme: paints Spotify's own color tokens (`--background-base`, `--text-subdued`, the green accent, …) with the matugen colors, mixes 10-20 % of the accent into the near-black DMS surfaces, accent on the play button and progress bars |
 | `Themes/dms-colors/color.ini` | The colors themselves, written by DMS on every wallpaper change. Not in git |
-| `Themes/marketplace/color.ini` | Placeholder theme Marketplace needs while one of its themes is picked |
 | `Extensions/dms-live.js` | Repaints an open Spotify when `colors.css` / `user.css` change (swaps the stylesheet, nothing flashes) |
-| `Extensions/lyrics-settings.js` | Spicy Lyrics' saved settings (`SAVED`, written by `spice lyrics`); gives them to a Spotify that hasn't had them and adds "Restore saved Spicy Lyrics settings" to the profile menu |
+| `Extensions/lyrics-settings.js` | Adds "Export / Import Spicy Lyrics settings" to the profile menu (Spicy Lyrics has no export of its own) |
 | `CustomApps/marketplace/`, `CustomApps/listening-stats/` | Downloaded by their official installers. Not in git: the installer step and `spice` → Update apps put them back |
-| `marketplace-backup.json` | Marketplace's own backup (installed themes, extensions, snippets), once saved with `spice` → Marketplace backup |
+| `marketplace-backup.json` | What's installed in Marketplace (themes, extensions, snippets): Marketplace → Settings → Back up/Restore → Export, saved here |
+| `spicy-lyrics-settings.json` | Spicy Lyrics' settings: profile menu → Export Spicy Lyrics settings, saved here |
 
 Elsewhere in the dotfiles:
 
 | File | What it is |
 |---|---|
 | `scripts/functions/spicetify.sh` | The `spice` menu |
-| `fish/functions/spice.fish` | `spice` in fish; passes its arguments on (`spice lyrics`) |
+| `fish/functions/spice.fish` | `spice` in fish |
 | `scripts/functions/alias_menu.sh` | "Spotify (spicetify)" in the `asd` menu runs `spice` |
-| `scripts/lib/spotify_storage.py` | Reads one localStorage value of Spotify from disk (LevelDB, no module needed; works while Spotify runs) |
 | `scripts/install/apps/spicetify.sh` | The installer's Spicetify step (`configure_spicetify`) |
 | `matugen/config.toml`, `matugen/templates/spicetify-color.ini` | The matugen template that writes `color.ini` |
 | `etc/pacman.d/hooks/spicetify.hook` | Re-applies spicetify after every Spotify install / update, as the owner of each `~/.config/spicetify` |
@@ -52,54 +51,42 @@ Elsewhere in the dotfiles:
 ## `spice`
 
 `spice` in a terminal (or "Spotify (spicetify)" in `asd`) opens the menu; the
-line above it shows the theme, the custom apps and the extensions that are on.
+line above it shows the custom apps.
 
 | Item | What it does |
 |---|---|
-| Theme | Picks `dms-colors` (wallpaper colors, follows every change) or `marketplace` (the theme installed in Marketplace → Themes). Both stay in `Themes/`; the choice is kept in `config-xpui.ini`, then applies |
-| Update apps | Marketplace and Listening Stats: installed version → latest release; outdated or missing ones are preselected. Runs each repo's official installer, which downloads into `CustomApps/` and applies. The picked theme stays |
-| Marketplace backup | Save: after Marketplace → Settings → Back up (copies a JSON), stores the clipboard in `marketplace-backup.json`. Restore: copies it back for Marketplace → Settings → Restore |
-| Lyrics settings | Same as `spice lyrics`, below |
-| Extensions | Turns the files in `Extensions/` on / off, then applies. Marketplace's extensions are managed in Marketplace |
-| Apply again | `spicetify apply`, after editing the config by hand |
-| Repair after a Spotify update | `spicetify backup apply` — what the pacman hook does |
-| Restore stock Spotify | `spicetify restore` (asks first); Repair puts spicetify back |
-| DevTools | `spicetify enable-devtools` |
+| Update apps | Marketplace and Listening Stats: installed version → latest release; outdated or missing ones are preselected. Runs each repo's official installer, which downloads into `CustomApps/` and applies. |
+| Repair | Applies spicetify again: `backup apply` when Spotify is stock after an update (what the pacman hook does), else `apply` (e.g. after editing `config-xpui.ini` by hand) |
+| Restore stock Spotify | `spicetify restore` (asks first): Spotify without spicetify, e.g. to see if a problem is Spotify's or an extension's. Repair puts spicetify back |
 
-`spice lyrics` saves Spicy Lyrics' current settings into the dotfiles: reads
-`SL:settings` from Spotify's storage, prints what changed against the saved
-ones (`lyricsSize: 90 → 100`) and writes them into `lyrics-settings.js`. Turns
-the extension on first if it's off. Spotify can stay open.
+## Plugins and their settings
 
-## What updates itself, and where settings live
-
-- **Marketplace themes and extensions** load from their GitHub repos (via
-  jsdelivr) on every Spotify start, so they update by themselves (jsdelivr may
-  lag up to ~12 h). Marketplace stores only which ones are installed.
-- **Marketplace and Listening Stats themselves** are files in `CustomApps/`:
-  `spice` → Update apps.
-- **Extension and app settings** are not files: each one keeps them in
-  Spotify's localStorage (`~/.cache/spotify/Browser/Local Storage/leveldb`).
-  A page in Spotify can't write files, so they get to the dotfiles only this
-  way:
-  - Marketplace's list of installed themes / extensions / snippets → Marketplace backup;
-  - Spicy Lyrics → `spice lyrics`;
-  - Listening Stats' history → export / import in its own Settings (JSON / CSV).
+- **Marketplace's extensions** load from their GitHub repos on
+  every Spotify start, so they update by themselves. Marketplace keeps only
+  the list of what's installed, inside Spotify — that's `marketplace-backup.json`.
+  After installing or removing something: Marketplace → Settings → Back up/Restore
+  → Export, save over `Dotfiles/spicetify/marketplace-backup.json`, commit.
+- **Spicy Lyrics' settings** live inside Spotify too: profile menu → Export
+  Spicy Lyrics settings, save over `Dotfiles/spicetify/spicy-lyrics-settings.json`.
+- **Marketplace and Listening Stats themselves** are files in `CustomApps/`,
+  not in git: the installer and `spice` → Update apps download them.
+- Listening Stats' history: export / import in its own Settings, if you want it.
 
 ## New machine
 
-1. Packages (`scripts/install/packages.txt`): `spotify`, `spicetify-cli` and its
-   dependencies `unzip`, `python`, `wl-clipboard`; `jq`, `curl` and `gum` are used too.
+1. Packages (`scripts/install/packages.txt`): `spotify`, `spicetify-cli` (with
+   `unzip` for Listening Stats' installer).
 2. Installer → Spicetify step:
    - links `~/.config/spicetify` and `~/.config/matugen`;
    - makes `/opt/spotify` writable for spicetify (sudo);
    - installs the pacman hook (sudo);
    - applies (`backup apply` on an untouched Spotify);
    - installs Marketplace and Listening Stats.
-3. Change the wallpaper once: DMS writes `color.ini`, Spotify takes the colors.
-4. Start Spotify: `lyrics-settings.js` gives Spicy Lyrics its saved settings.
-   Install Spicy Lyrics etc. from Marketplace, or paste `marketplace-backup.json`
-   with `spice` → Marketplace backup → Restore.
+3. Start Spotify, log in:
+   - Marketplace → Settings → Back up/Restore → Import from file →
+     `Dotfiles/spicetify/marketplace-backup.json`: installs every plugin from it;
+   - profile menu → Import Spicy Lyrics settings → `Dotfiles/spicetify/spicy-lyrics-settings.json`.
+4. Change the wallpaper once: DMS writes `color.ini`, Spotify takes the colors.
 
 ## When something's off
 
@@ -108,8 +95,3 @@ the extension on first if it's off. Spotify can stay open.
 - **Colors don't follow the wallpaper** — setting the same wallpaper again
   doesn't regenerate; pick another. A Spotify started before `dms-live.js` was
   on needs one restart.
-- **A Marketplace theme instead of the wallpaper colors** — `spice` → Theme → DMS.
-  (Marketplace's installer takes a theme name of 3 letters or less for "none";
-  that's why the theme is `dms-colors`.)
-- **`spice lyrics`: "No Spicy Lyrics settings in Spotify yet"** — Spicy Lyrics
-  writes them on the first change in its settings.

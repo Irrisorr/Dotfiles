@@ -6,7 +6,7 @@
 # Spotify in the wallpaper colors: the "dms-colors" theme's color.ini is a matugen
 # template DMS fills on every wallpaper change (matugen/config.toml), its
 # post_hook runs `spicetify refresh -s` and the dms-live extension repaints an
-# open Spotify. Marketplace themes replace "dms-colors" while one is picked.
+# open Spotify.
 
 SPOTIFY_DIR=/opt/spotify
 
