@@ -846,16 +846,20 @@ execute_command() {
 
 
 # run_substeps <entry>... — a config step made of several actions, each its own
-# function. entry = "Label|function|guard", same format and guards as menu().
-# The fzf config menu lists them under the step and passes the ticked ones in
-# STEP_ONLY (space-separated function names); unset runs every applicable one.
+# function. entry = "Label|function|guard[|optional]", same format and guards
+# as menu(). The fzf config menu lists them under the step and passes the ticked
+# ones in STEP_ONLY (space-separated function names); unset runs every
+# applicable one. An "optional" action is a per-machine tweak: it runs only when
+# ticked by hand, or in the gum menu where every action asks first.
 # Returns 2 when any action failed, 1 when nothing ran, else 0.
 run_substeps() {
-  local e label func guard rc ran=0 failed=0
+  local e label func guard opt rc ran=0 failed=0
   for e in "$@"; do
-    IFS='|' read -r label func guard <<< "$e"
+    IFS='|' read -r label func guard opt <<< "$e"
     [ -n "$guard" ] && ! guard_passes "$guard" && continue
-    if [ -n "${STEP_ONLY+set}" ] && [[ " $STEP_ONLY " != *" $func "* ]]; then
+    if [ -n "${STEP_ONLY+set}" ]; then
+      [[ " $STEP_ONLY " == *" $func "* ]] || continue
+    elif [ "$opt" = optional ] && [ -n "$STEPS_CONFIRMED" ]; then
       continue
     fi
     "$func"

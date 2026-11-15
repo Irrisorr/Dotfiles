@@ -484,11 +484,12 @@
         {
           "id": "battery",
           "enabled": true,
-          "showBatteryPercentOnlyOnBattery": false,
+          "showBatteryPercentOnlyOnBattery": true,
           "showBatteryTime": false,
           "showBatteryPowerCharging": false,
           "showBatteryPowerDischarging": false,
-          "batteryStyle": "solid"
+          "batteryStyle": "solid",
+          "showBatteryPercent": true
         },
         {
           "id": "controlCenterButton",
@@ -1334,5 +1335,6 @@
   "matugenSourceMode": "saturation",
   "matugenContrast": 0,
   "terminalPalette": "medium",
-  "greeterFollowLockScreen": false
+  "greeterFollowLockScreen": false,
+  "batteryCriticalAnimation": true
 }

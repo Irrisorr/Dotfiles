@@ -11,6 +11,7 @@ configure_niri_steps=(
   "Dux shell plugins|_niri_restore_dux_plugins|dms"
   "Add user to the input group (Bongo Cat)|_niri_input_group|test:_niri_not_in_input_group"
   "Dux greeter (login screen, replaces SDDM/GDM)|_niri_dux_greeter|dms-greeter"
+  "Dux greeter: wait 5 min for a fingerprint|_niri_greeter_fprint_timeout|dms-greeter|optional"
   "Dux calendar config|_niri_link_dux_calendar|dcal"
   "Dux files config (default file manager, open/save dialogs)|_niri_dux_files|dfiles"
   "hyprlock config|_niri_link_hyprlock|hyprlock"
@@ -54,6 +55,16 @@ _niri_input_group() {
 _niri_dux_greeter() {
   execute_command "Make the Dux greeter the login screen (re-login, then: dms-greeter status; back: dms-greeter uninstall)" \
     "dms-greeter install --yes"
+}
+
+# dms-greeter hardcodes timeout=10 in its PAM line: the password check waits
+# behind pam_fprintd, so it keeps that short. The greeter cancels the wait when a
+# password is entered, so a long one costs nothing. dms-greeter sync (and the
+# fingerprint toggle in Settings → Greeter) writes timeout=10 back.
+_niri_greeter_fprint_timeout() {
+  execute_command "Wait 5 min for a fingerprint at the greeter" \
+    "grep -q pam_fprintd.so /etc/pam.d/greetd || { echo ':: No pam_fprintd line in /etc/pam.d/greetd: turn on fingerprint in Settings → Greeter, then dms-greeter sync'; exit 2; }
+     sudo sed -i -E 's/(pam_fprintd\.so .*timeout=)[0-9]+/\1300/' /etc/pam.d/greetd && grep pam_fprintd.so /etc/pam.d/greetd"
 }
 
 # Only the UI settings; accounts live in ~/.local/share/dankcal and the keyring,

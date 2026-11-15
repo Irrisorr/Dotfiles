@@ -185,6 +185,7 @@ The generated files inside Dotfiles change with every wallpaper, so they are in 
 - So the login screen follows DMS: wallpaper, matugen colors, fonts and the `greeter*` keys in `dms/settings.json` — its own widget layout (`greeterWidgetInstances`, `greeterFollowLockScreen: false`, edited in Settings → Greeter), and fingerprint login (`greeterEnableFprint` writes the `pam_fprintd` line into `/etc/pam.d/greetd` on sync)
 - The group applies after the next login; until then `dms-greeter status` can't read `/var/cache/dms-greeter` and reports the links as missing
 - After toggling fingerprint/U2F in Settings → Greeter: `dms-greeter sync`. Logs: `journalctl -t dms-greeter/niri -b`, `journalctl -t dms-greeter/session -b`. Back to the previous display manager: `dms-greeter uninstall`
+- Fingerprint at the greeter: dms-greeter writes `pam_fprintd.so max-tries=2 timeout=10` into `/etc/pam.d/greetd`, so the reader gives up 10 s after the greeter appears. The optional action **Niri ecosystem → Dux greeter: wait 5 min for a fingerprint** (not ticked with the step, tick it on machines with a reader) sets `timeout=300`; typing the password still logs in at once. `dms-greeter sync` and the fingerprint toggle write `timeout=10` back, so re-run it after them
 
 ### Dux calendar (`dankcal/`)
 

@@ -10,7 +10,8 @@
 # Steps are grouped by where their function lives: scripts/install/system or
 # scripts/install/apps.
 # A step with a <func>_steps array (configure_niri, configure_hyprland) unfolds
-# its actions under it when ticked, all ticked; only the ticked ones run.
+# its actions under it when ticked, all ticked except "optional" ones (per-
+# machine tweaks, ticked by hand); only the ticked ones run.
 #
 # j/k or arrows move (wrapping around), Space ticks, Ctrl-A ticks the cursor's
 # group, / or Ctrl-F searches (lib/fzf.sh). Enter asks to run the ticked steps —
@@ -26,7 +27,7 @@ SELF="$(readlink -f "${BASH_SOURCE[0]}")"
 CMD="bash $(printf %q "$SELF")"     # works without the exec bit
 . "$HOME/Dotfiles/scripts/lib/fzf.sh"
 
-# data.tsv columns: kind  key  group  label  func  file  parent  subs
+# data.tsv columns: kind  key  group  label  func  file  parent  subs  optional
 #   kind: H group header, S step, U action of a step (its parent's func)
 #   key:  H:<group>, S:<func>, U:<parent>:<func>
 # checked: ticked keys;  status: "<func>\t✓|✗" of the last run;
@@ -56,7 +57,8 @@ _render() {
     $1 == "U" {
       if (!(("S:" $7) in chk)) next
       box = ($2 in chk) ? G "[x]" R : "[ ]"
-      printf "%s\t      %s└ %s%s %s  %s· %s%s\n", $2, D, R, box, $4, D, label[$7], R
+      opt = $9 == 1 ? "  " D "(optional)" R : ""
+      printf "%s\t      %s└ %s%s %s%s  %s· %s%s\n", $2, D, R, box, $4, opt, D, label[$7], R
     }
   ' "$STATE/data.tsv"
 }
@@ -76,7 +78,7 @@ _redraw() {
 _tick() {   # a step brings all its actions
   grep -qxF "$1" "$STATE/checked" && return
   echo "$1" >> "$STATE/checked"
-  [[ $1 == S:* ]] && awk -F'\t' -v p="${1#S:}" '$1 == "U" && $7 == p { print $2 }' \
+  [[ $1 == S:* ]] && awk -F'\t' -v p="${1#S:}" '$1 == "U" && $7 == p && $9 != 1 { print $2 }' \
     "$STATE/data.tsv" >> "$STATE/checked"
 }
 
@@ -279,14 +281,14 @@ for e in "${entries[@]}"; do
   if declare -p "${func}_steps" &>/dev/null; then
     declare -n _steps="${func}_steps"
     for s in "${_steps[@]}"; do
-      IFS='|' read -r slabel sfunc sguard <<< "$s"
+      IFS='|' read -r slabel sfunc sguard sopt <<< "$s"
       [ -n "$sguard" ] && ! guard_passes "$sguard" && continue
       declare -f "$sfunc" > "$STATE/src/$sfunc"
-      subs+="$(_row U "U:$func:$sfunc" "$group" "$slabel" "$sfunc" "${file#"$HOME/Dotfiles/"}" "$func" 0)"$'\n'
+      subs+="$(_row U "U:$func:$sfunc" "$group" "$slabel" "$sfunc" "${file#"$HOME/Dotfiles/"}" "$func" 0 "$([ "$sopt" = optional ] && echo 1 || echo 0)")"$'\n'
     done
     unset -n _steps
   fi
-  group_rows[$group]+="$(_row S "S:$func" "$group" "$label" "$func" "${file#"$HOME/Dotfiles/"}" "" "$(grep -c . <<< "$subs")")"$'\n'"$subs"
+  group_rows[$group]+="$(_row S "S:$func" "$group" "$label" "$func" "${file#"$HOME/Dotfiles/"}" "" "$(grep -c . <<< "$subs")" 0)"$'\n'"$subs"
 done
 shopt -u extdebug
 
@@ -306,7 +308,7 @@ _plan() {
   awk -F'\t' -v cur="$1" '
     BEGIN { while ((getline line < (ENVIRON["STATE"] "/checked")) > 0) { chk[line] = 1; any = 1 } }
     $1 == "S" { order[++n] = $5; label[$5] = $4; has[$5] = $8 > 0 }
-    $1 == "U" && (!any || ($2 in chk)) { af[$7] = af[$7] " " $5; al[$7] = al[$7] ", " $4 }
+    $1 == "U" && (any ? ($2 in chk) : $9 != 1) { af[$7] = af[$7] " " $5; al[$7] = al[$7] ", " $4 }
     END {
       for (i = 1; i <= n; i++) {
         f = order[i]
