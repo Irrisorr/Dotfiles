@@ -1373,4 +1373,4 @@ default_apps() {
     "File types — every type by extension, links, your own extensions|da_types"
 }
 
-[ "${BASH_SOURCE[0]}" = "$0" ] && "$@"
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then "$@"; fi

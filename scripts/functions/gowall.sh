@@ -1150,4 +1150,4 @@ gw() {
   fi
 }
 
-[ "${BASH_SOURCE[0]}" = "$0" ] && "$@"
+if [ "${BASH_SOURCE[0]}" = "$0" ]; then "$@"; fi
