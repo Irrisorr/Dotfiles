@@ -4,7 +4,7 @@
     "bongoCat": {
       "repo": "https://github.com/hthienloc/dms-plugins",
       "path": "bongoCat",
-      "commit": "47fd82f6046dc03bd5ca323a3d7f6fd00431ce1c"
+      "commit": "ab2e2f8d00fa2951c581babbddc71c2f11bd3489"
     },
     "dankPomodoroTimer": {
       "repo": "https://github.com/duxlabs-dev/dux-plugins",

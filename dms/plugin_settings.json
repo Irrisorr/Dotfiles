@@ -24,7 +24,8 @@
     "soundProfile": "pop",
     "desktopShowMetrics": false,
     "desktopBackgroundOpacity": 0,
-    "showHints": true
+    "showHints": true,
+    "enableBlinking": true
   },
   "fullscreenPowerMenu": {
     "enabled": false
