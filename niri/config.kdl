@@ -6,7 +6,6 @@ include "conf/envs.kdl"
 include "conf/input.kdl"
 include "conf/output.kdl"
 include "conf/rules.kdl"
-include optional=true "sensitive_rules.kdl"
 include "conf/workspaces.kdl"
 // DMS Include Configs
 include optional=true "dms/binds.kdl"
