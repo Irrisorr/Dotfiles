@@ -116,7 +116,7 @@ With Settings → Theme → **Dynamic**, DMS runs [matugen](https://github.com/I
 | Vesktop | `~/.config/vesktop/themes/dank-discord.css` | `configure_vesktop` enables it in Vencord's settings (native install only — the flatpak can't read it) |
 | VS Code | the `DankLinux.dms-theme` extension's theme files | `configure_vscode` installs the extension and sets `workbench.colorTheme` (settings.json stays untracked) |
 | VLC (Qt5) | `qt5ct/colors/matugen.conf` (also `qt6ct/` for Qt6 apps) | `configure_vlc`: links `qt5ct/` and `qt6ct/` (Fusion style, the matugen palette, Adwaita icons and fonts) and starts VLC with `QT_QPA_PLATFORMTHEME=qt5ct` through a copy of `vlc.desktop` in `~/.local/share/applications`; the rest of Qt keeps `gtk3`, whose Qt5 side gives no colors. VLC takes the colors when it starts |
-| Spotify (spicetify) | `spicetify/Themes/dms-colors/color.ini` from our own template `matugen/templates/spicetify-color.ini` (`matugen/config.toml` → `~/.config/matugen`; DMS runs user templates after its own) | `configure_spicetify`: theme `dms-colors` in `spicetify/config-xpui.ini`; the template's `post_hook` runs `spicetify refresh -s`, the `dms-live.js` extension swaps the colors in an open Spotify within ~2 s (no restart). A pacman / apt hook (`etc/pacman.d/hooks/spicetify.hook`, `etc/apt/apt.conf.d/99spicetify`) re-applies spicetify after every Spotify update. More: [`spicetify/README.md`](spicetify/README.md) |
+| Spotify (spicetify) | `spicetify/Themes/dms-colors/color.ini` from our own template `matugen/templates/spicetify-color.ini` (`matugen/config.toml` → `~/.config/matugen`; DMS runs user templates after its own) | `configure_spicetify`: theme `dms-colors` in `spicetify/config-xpui.ini`; the template's `post_hook` runs `spicetify refresh -s`, the `dms-live.js` extension swaps the colors in an open Spotify within ~2 s (no restart). A pacman / apt hook (`etc/pacman.d/hooks/spicetify.hook`, `etc/apt/apt.conf.d/99spicetify`) re-applies spicetify after every Spotify update. More: [Spotify](#spotify-spicetify) |
 | dgop (`dgop top`) | `~/.config/dgop/colors.json` | nothing to do: dgop reads it itself (`keybinds.json` next to it is dgop's own default, not tracked) |
 | Dux greeter | — | reads DMS's `dms-colors.json` through `/var/cache/dms-greeter/colors.json`, see [Dux greeter](#dux-greeter-login-screen) |
 
@@ -214,6 +214,112 @@ sddm-greeter-qt6 --test-mode --theme ~/Dotfiles/sddm/corners
 ```
 - `configure_sddm` copies the theme and `default.conf` into the system dirs, so after editing them re-run the **SDDM** step in `./install.sh`
 
+### Spotify (`spicetify/`)
+
+Spotify painted in the wallpaper colors, plus Marketplace and Listening Stats.
+What's installed in Marketplace and Spicy Lyrics' settings are two JSON files
+in `spicetify/`, exported and imported from Spotify itself.
+
+#### How it fits together
+
+```
+wallpaper change ─► DMS runs matugen ─► spicetify/Themes/dms-colors/color.ini
+                                            │ post_hook: spicetify refresh -s
+                                            ▼
+                   <Spotify>/Apps/xpui/colors.css, user.css
+                                            │ dms-live.js re-reads them every 2 s
+                                            ▼
+                                  open Spotify repaints, no restart
+```
+
+- `~/.config/spicetify` is a symlink to `Dotfiles/spicetify`, as a whole. Whatever
+  spicetify, the installers or `spice` write lands here, so a plugin update
+  never breaks the link; it only shows up as a change in `git status`.
+- `~/.config/matugen` is a symlink to `Dotfiles/matugen`: our own matugen
+  template, which DMS runs after its own (`runUserMatugenTemplates`).
+- spicetify patches Spotify's files: `/opt/spotify` on Arch, `/usr/share/spotify`
+  on Ubuntu (Spotify's apt repo — the flatpak can't be patched). A Spotify update
+  undoes the patch; the pacman / apt hook puts it back (`spicetify backup apply`).
+- spicetify writes this machine's paths (Spotify, its prefs — with the user
+  name) and its `[Backup]` version into `config-xpui.ini`. A git filter blanks
+  them in commits and puts this machine's back on a pull, so one config serves
+  both machines without conflicts.
+
+#### Files (`spicetify/`)
+
+| File | What it is |
+|---|---|
+| `config-xpui.ini` | spicetify's config: theme `dms-colors`, `extensions`, `custom_apps`. The app installers write it; commit its changes. `spotify_path`, `prefs_path` and `[Backup]` stay blank in git (the filter) |
+| `Themes/dms-colors/user.css` | The wallpaper theme: paints Spotify's own color tokens (`--background-base`, `--text-subdued`, the green accent, …) with the matugen colors, mixes 10-20 % of the accent into the near-black DMS surfaces, accent on the play button and progress bars |
+| `Themes/dms-colors/color.ini` | The colors themselves, written by DMS on every wallpaper change. Not in git |
+| `Extensions/dms-live.js` | Repaints an open Spotify when `colors.css` / `user.css` change (swaps the stylesheet, nothing flashes) |
+| `Extensions/lyrics-settings.js` | Adds "Export / Import Spicy Lyrics settings" to the profile menu (Spicy Lyrics has no export of its own) |
+| `CustomApps/marketplace/`, `CustomApps/listening-stats/` | Downloaded by their official installers. Not in git: the installer step and `spice` → Update apps put them back |
+| `marketplace-backup.json` | What's installed in Marketplace (themes, extensions, snippets): Marketplace → Settings → Back up/Restore → Export, saved here |
+| `spicy-lyrics-settings.json` | Spicy Lyrics' settings: profile menu → Export Spicy Lyrics settings, saved here |
+
+Elsewhere in the dotfiles:
+
+| File | What it is |
+|---|---|
+| `scripts/functions/spicetify.sh` | The `spice` menu |
+| `fish/functions/spice.fish` | `spice` in fish |
+| `scripts/functions/alias_menu.sh` | "Spotify (spicetify)" in the `asd` menu runs `spice` |
+| `scripts/install/apps/spicetify.sh` | The installer's Spicetify step (`configure_spicetify`) |
+| `matugen/config.toml`, `matugen/templates/spicetify-color.ini` | The matugen template that writes `color.ini` |
+| `etc/spicetify-reapply.sh` | Installed as `/usr/local/bin/spicetify-reapply`: when Spotify is stock (after an install / update), re-applies spicetify as the owner of each `~/.config/spicetify` |
+| `etc/pacman.d/hooks/spicetify.hook` | Arch: runs `spicetify-reapply` after `spotify` is installed / updated |
+| `etc/apt/apt.conf.d/99spicetify` | Ubuntu: runs `spicetify-reapply` after every dpkg run (it does nothing unless Spotify is stock) |
+| `.gitattributes`, `scripts/wrappers/spicetify-config-filter.sh` | The git filter for `config-xpui.ini`; this machine's values wait in `.git/spicetify-machine.ini` |
+| `scripts/install/system/sources.sh` | Ubuntu: `install_source_spotify` (Spotify's apt repo), `install_source_spicetify` (release into `/opt/spicetify-cli`, linked to `/usr/local/bin`) |
+
+#### `spice`
+
+The menu: update Marketplace / Listening Stats, Repair, Restore stock — see [Scripts](#scripts-just-type-name-of-script-in-terminal-or-use-asd-menu).
+
+#### Plugins and their settings
+
+- **Marketplace's extensions** load from their GitHub repos on
+  every Spotify start, so they update by themselves. Marketplace keeps only
+  the list of what's installed, inside Spotify — that's `marketplace-backup.json`.
+  After installing or removing something: Marketplace → Settings → Back up/Restore
+  → Export, save over `Dotfiles/spicetify/marketplace-backup.json`, commit.
+- **Spicy Lyrics' settings** live inside Spotify too: profile menu → Export
+  Spicy Lyrics settings, save over `Dotfiles/spicetify/spicy-lyrics-settings.json`.
+- **Marketplace and Listening Stats themselves** are files in `CustomApps/`,
+  not in git: the installer and `spice` → Update apps download them.
+- Listening Stats' history: export / import in its own Settings, if you want it.
+
+#### New machine
+
+1. Packages (`scripts/install/packages.txt`): `spotify`, `spicetify-cli` (with
+   `unzip` for Listening Stats' installer). On Ubuntu: Spotify from its apt repo
+   (remove the flatpak `com.spotify.Client` if it's there), spicetify from its
+   GitHub release.
+2. Installer → Spicetify step:
+   - links `~/.config/spicetify` and `~/.config/matugen`;
+   - registers the git filter for `config-xpui.ini` in this clone;
+   - makes Spotify's folder writable for spicetify (sudo);
+   - installs `spicetify-reapply` and the pacman (Arch) or apt (Ubuntu) hook (sudo);
+   - applies (`backup apply` on an untouched Spotify);
+   - installs Marketplace and Listening Stats.
+3. Start Spotify, log in:
+   - Marketplace → Settings → Back up/Restore → Import from file →
+     `Dotfiles/spicetify/marketplace-backup.json`: installs every plugin from it;
+   - profile menu → Import Spicy Lyrics settings → `Dotfiles/spicetify/spicy-lyrics-settings.json`.
+4. Change the wallpaper once: DMS writes `color.ini`, Spotify takes the colors.
+
+#### When something's off
+
+- **Spotify is stock after an update** — `spice` → Repair. The hook should have
+  done it: installer → Spicetify step → the hook substep.
+- **`git status` shows `config-xpui.ini` changed, but `git diff` is empty** — the
+  file only changed size (spicetify wrote a path); `git add spicetify/config-xpui.ini`
+  clears it, nothing is staged.
+- **Colors don't follow the wallpaper** — setting the same wallpaper again
+  doesn't regenerate; pick another. A Spotify started before `dms-live.js` was
+  on needs one restart.
+
 ### Aliases (`fish/functions/*`)
 
 > Right now there is only **fish** shell aliases, but u can add shell scripts for other shells too using their functions
@@ -234,7 +340,7 @@ The two entry points sit at the repo root; everything else lives under `scripts/
 Dotfiles/
   install.sh         # the installer MENUS only (sources the engine, then config_menu + first menu)  (./install.sh)
   post_install.sh    # runs once after reboot: ./post_install.sh
-  etc/               # system files copied into /etc by config steps (udev hwdb keyboard fixes)
+  etc/               # system files copied into /etc by config steps (udev hwdb keyboard fixes; spicetify-reapply + its pacman / apt hook)
   scripts/
     lib/             # reusable helpers (no app-specific logic)
       common.sh      # path constants + sources lib/  (source this everywhere)
@@ -243,7 +349,7 @@ Dotfiles/
       gum.sh         # gum bootstrap + UI wrappers
       helpers.sh     # universal menu(), execute_*, create_symlink, package engine, system_update
       fzf.sh         # shared parts of the fzf pickers (modes, keys, footer) + fzf bootstrap
-    wrappers/        # launchers called from WM configs, resolve distro-specific paths (polkit, portals)
+    wrappers/        # launchers called from WM configs, resolve distro-specific paths (polkit, portals); git's filter for spicetify/config-xpui.ini
     install/
       main.sh        # installer ENGINE: sourcing + core-step functions + run_final_steps (no menus)
       packages.txt   # one line per package, works for both distros
@@ -286,9 +392,10 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
     - 'Image tools (gowall)' (`scripts/functions/gowall.sh`, if `gowall` is installed) - every gowall feature with a description before each one:
         - `gw` - the menu; `gw <image>` - straight to editing that image
         - Edit an image: recolor to a theme, replace a color, invert, format, brightness/contrast/gamma/saturation, grayscale, flip/mirror, 3D tilt, pixel art, border/grid/round corners, resize, compress, AI upscale, remove background. Every change opens in `swayimg` first: keep it, retry with other settings or drop it; changes stack, Undo goes back one. History lists every version of the session (dropped tries too) with what was done and an image preview in fzf; any of them can be opened, saved or continued from. Nothing reaches `~/Pictures/gowall` until Finish → Save (or Save and set as wallpaper through DMS, or copy to clipboard)
-        - Also: the same change on many images (previewed on the first), stack images / make a GIF, OCR (image or PDF; local `tesseract` comes with the packages — `tesseract-data-eng`/`-rus`, language `eng+rus` for both; other providers and keys: [gowall docs](https://achno.github.io/gowall-docs/ocr/introduction)), palette of an image, themes and their colors, color tools (blend, lighten/darken, variants, color wheel, gradient image), recolor an SVG/ICO icon, wallpaper of the day (the top r/wallpaper post of the day, read from the RSS feed like gowall's master does: `gowall -w` in 0.2.4 gets 403 from Reddit)
+        - Also: the same change on many images (previewed on the first), stack images / make a GIF, OCR (image or PDF; local `tesseract` comes with the packages — `tesseract-data-eng`/`-rus` (Ubuntu: `tesseract-ocr-eng`/`-rus`), language `eng+rus` for both; other providers and keys: [gowall docs](https://achno.github.io/gowall-docs/ocr/introduction)), palette of an image, themes and their colors, color tools (blend, lighten/darken, variants, color wheel, gradient image), recolor an SVG/ICO icon, wallpaper of the day (the top r/wallpaper post of the day, read from the RSS feed like gowall's master does: `gowall -w` in 0.2.4 gets 403 from Reddit)
         - Images come from the current wallpaper, the clipboard (a niri screenshot lands there), fzf over `~/Pictures` (with a preview in kitty) or a typed path
         - Edits go through gowall's stdout; compress, upscale, stack, gif and bg write a temp file instead (they can't use stdout, or ask to download a model on the first run)
+        - Something missing (tesseract, its language, rsvg-convert, magick, ollama, …) → it says what to install, with this distro's package names. On Ubuntu gowall itself is the release binary in `/usr/local/bin` (installer's package step)
     - `defapps` - 'Default apps' (`scripts/functions/default_apps.sh`): which app opens what; a menu with two parts. Every installed app is offered, also hidden ones (swayimg) and ones that don't claim the type (VS Code for text). Choices go to `~/.config/mimeapps.list` — the file DMS Settings → Default apps, `xdg-open`, the portals and dfiles read; "Ask every time (DMS chooser)" is DMS's own picker (`dms-open`)
         - **Default apps** — the roles DMS has (terminal, browser, file manager, text editor, image viewer, video, music, PDF, mail, calendar), each writing the same group of types DMS writes, so both show the same. Terminal has no file type: it goes first in `~/.config/xdg-terminals.list` (read by DMS for `Terminal=true` apps and by `xdg-terminal-exec`). The preview says what each role does and doesn't affect — e.g. "Show in folder" is the `org.freedesktop.FileManager1` D-Bus service, not mimeapps.list
         - Terminal, browser and file manager follow niri: on every start `defapps` reads their binds in `niri/conf/binds.kdl` (`Mod+Return`, `Mod+B`, `Mod+E`), finds the app each starts (by Exec, else by package: `zen-browser` → `zen.desktop`) and makes it the default everywhere — so editing a bind by hand carries over; what was taken is shown at the top. It also sets the bind's title to what it starts (`Terminal (Alacritty)`) and rewrites binds that run a command inside a terminal (`Mod+V`: `kitty --class clipse -e 'clipse'` → `alacritty --class clipse -e 'clipse'`, class kept so window rules still match; kitty, alacritty, foot, wezterm). Window rules in `niri/conf/rules.kdl` and `niri/conf/sensitive_rules.kdl` (if there is one) cover the new app too: next to every match line of another app of the same kind (another terminal, browser, file manager) goes a copy with the new app's app-id (taken from its open window via `niri msg windows`, else `StartupWMClass`, else the desktop id), rest of the line kept, and the comment above the rule gets the name added; nothing is added where a line already matches the new app (`r#"(?i)chrome"#` covers google-chrome), so switching back and forth changes nothing. The rules themselves match case-insensitive substrings (`app-id=r#"(?i)obsidian"#`, `title=r#"(?i)santander"#`), so a renamed app-id (Obsidian 1.15: `md.obsidian.Obsidian`) or a flatpak id still matches; only clipse is exact (`(?i)^clipse$`, it would catch Eclipse). Picking one of them in `defapps` rewrites that bind line in place (title and spawn; reverted if `niri validate` fails). A role set to "Ask every time" stays, a bind can't ask. `Mod+C` stays VS Code
@@ -296,11 +403,16 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
         - Enter on a row picks its app; Space ticks rows (on a category: all of it) and Alt+Enter picks one app for the ticked ones, or for the whole category under the cursor. Ctrl-R resets to what the system picks
         - Extensions come from shared-mime-info (`/usr/share/mime`, updated by packages), read on every start — a package that adds a type shows up by itself. **Your extensions → + Add extension** handles the rest: an unknown extension gets its own type (`application/x-<ext>`) or opens like an existing one (`.conf` as text/plain); a known one can be split off into its own type. Stored in `~/.local/share/mime/packages/defapps.xml` (then `update-mime-database`); Ctrl-D removes one
         - **Dotfiles:** on exit `defapps` saves this machine's choices to `defapps/` — `mimeapps.list` (only `[Default Applications]`; entries of apps not installed here, kept from another PC, stay) and `xdg-terminals.list`; `defapps.xml` lives there and the mime dir links to it. Changes made in DMS get saved on the next `defapps` run. The installer step **Default apps (defapps)** puts them back: links the extensions (+ `update-mime-database`), merges the saved defaults into `~/.config/mimeapps.list` for the apps installed (lists the skipped ones, the rest of the file stays) and writes the terminal order
+        - Ubuntu: flatpak apps are found right after the installer put them in (before the next login adds them to `XDG_DATA_DIRS`), and a default saved under an app's Arch id finds its flatpak (`vesktop.desktop` ↔ `dev.vencord.Vesktop.desktop`, also VS Code, Obsidian, Chrome, IntelliJ — the `DA_SAME_APP` table) and back
     - `fonts` - 'Fonts' (`scripts/functions/fonts.sh`): one interface font, one monospace font and the interface size, written to every place that keeps its own; the menu shows each place and ✓ / ✗ against the choice. Fonts are picked in fzf with a sample drawn in the font itself (kitty)
         - **fontconfig** (`fontconfig/fonts.conf` → `~/.config/fontconfig`): what `sans-serif`, `serif`, `system-ui` and `monospace` mean — Electron apps, niri's hotkey overlay, alacritty, web pages and everything else that asks for a generic family
-        - **GTK** (gsettings `font-name` / `document-font-name` / `monospace-font-name`, `gtk-font-name` in `settings.ini`), **Qt** (`qt5ct/`, `qt6ct/` — VLC), **DMS** (`fontFamily`, `monoFontFamily` in `dms/settings.json`; it was "Fira Code", which isn't installed), **Zen** (`font.name.*` in `zen-browser/user.js`, on Zen's next start), **kitty** (`font_family`, reloaded at once), **VS Code** (editor and terminal font)
+        - **GTK** (gsettings `font-name` / `document-font-name` / `monospace-font-name`, `gtk-font-name` in `settings.ini`), **Qt** (`qt5ct/`, `qt6ct/` — VLC), **DMS** (`fontFamily`, `monoFontFamily` in `dms/settings.json`; it was "Fira Code", which isn't installed), **Zen** (`font.name.*` in `zen-browser/user.js`, on Zen's next start), **kitty** (`font_family`, reloaded at once), **VS Code** (editor and terminal font; the flatpak's settings under `~/.var/app` on Ubuntu)
         - The choice lives in the dotfiles (families in `fontconfig/fonts.conf`, size in `qt5ct.conf`); the installer's Fonts step links `fontconfig/` and writes GTK and VS Code from them. Telegram and Obsidian (Appearance → Font) keep their own, set them there
-    - `spice` - 'Spotify (spicetify)' (`scripts/functions/spicetify.sh`): update Marketplace and Listening Stats, repair (apply again), restore stock Spotify. Plugins (`spicetify/marketplace-backup.json`) and Spicy Lyrics settings (`spicetify/spicy-lyrics-settings.json`) are exported / imported in Spotify. Files, menu items, new-machine steps: [`spicetify/README.md`](spicetify/README.md)
+    - `spice` - 'Spotify (spicetify)' (`scripts/functions/spicetify.sh`), the whole setup: [Spotify](#spotify-spicetify)
+        - Update apps — Marketplace and Listening Stats: installed → latest version, outdated ones preselected; runs each repo's official installer
+        - Repair — applies spicetify again: `backup apply` when Spotify is stock after an update (what the pacman / apt hook does), else `apply`
+        - Restore stock Spotify — removes spicetify (asks first), to see whether a problem is Spotify's or a plugin's; Repair puts it back
+        - Plugins and Spicy Lyrics settings aren't in the menu: they are exported / imported in Spotify itself (`spicetify/marketplace-backup.json`, `spicetify/spicy-lyrics-settings.json`)
 
 #### Syncing live configs back (`scripts/functions/sync/`)
 

@@ -14,15 +14,16 @@ branches on the distro.
 Dotfiles/
   install.sh         # installer entry point  (./install.sh)
   post_install.sh    # runs once after reboot  (./post_install.sh)
-  etc/               # system files the config steps copy into /etc (udev/hwdb.d: keyboard fixes, configure_hwdb)
+  etc/               # system files the config steps copy into /etc (udev/hwdb.d: keyboard fixes, configure_hwdb;
+                     #   spicetify-reapply.sh + pacman.d/hooks, apt/apt.conf.d: spicetify after Spotify updates, configure_spicetify)
   scripts/
     lib/
       common.sh      # path constants + sources lib/  (source this everywhere)
       distro.sh      # distro detection + package-manager abstraction (pkg_*, flatpak, snap, url, add_repo)
-      paths.sh       # resolvers for paths that differ between distros (polkit, portals, sddm, fish, python, console font)
+      paths.sh       # resolvers for paths that differ between distros (polkit, portals, sddm, fish, python, console font, zen, vscode)
       gum.sh         # gum bootstrap + UI wrappers
       helpers.sh     # universal menu(), execute_*, create_symlink, package engine, system_update
-    wrappers/        # tiny launchers called from WM configs (polkit agent, xdg portals)
+    wrappers/        # tiny launchers called from WM configs (polkit agent, xdg portals) or git (spicetify config filter)
     install/
       main.sh        # installer engine: sourcing + core steps + run_final_steps (no menus)
       packages.txt   # package inventory by category, one line per package for both distros
@@ -76,7 +77,9 @@ the same shell is a no-op.
   `has_polkit_mate` for menu guards), `find_portal_binary`, `sddm_confd_dir`,
   `sddm_themes_dir`, `fish_bin`, `ensure_login_shell` (adds the shell to
   `/etc/shells` before `chsh` — Ubuntu rejects it otherwise), `python_site_dir`,
-  `set_console_font`. Standalone like `distro.sh`.
+  `set_console_font`, `zen_profile_root`, `vscode_settings_path` (the native
+  package's or the flatpak's `settings.json`, used by `configure_vscode` and
+  `fonts`). Standalone like `distro.sh`.
 * **`gum.sh`** — UI wrappers around `gum` (`gum_choose_wrapper`, `confirm_action`,
   `confirm_step`,
   `print_success_message`, `print_error_message`, `print_styled_message`,
@@ -419,6 +422,19 @@ Wrappers source **`paths.sh` only, never `common.sh`**, so the gum bootstrap can
 never run during compositor startup, and they exit 0 when nothing is installed
 instead of failing the session's autostart.
 
+* `spicetify-config-filter.sh clean|smudge` — not for a WM: git runs it for
+  `spicetify/config-xpui.ini` (`.gitattributes`). spicetify writes this
+  machine's values into that file (`spotify_path`: `/opt/spotify` on Arch,
+  `/usr/share/spotify` on Ubuntu; `prefs_path` with the user name; the
+  `[Backup]` Spotify version). `clean` blanks them on commit and saves them in
+  `.git/spicetify-machine.ini`; `smudge` puts them back when a pull rewrites the
+  file — so one config serves both machines without conflicts. Git runs a
+  filter only where it is registered (`git config filter.spicetify-config.*`),
+  which `configure_spicetify` does per clone; an unregistered clone just gets the
+  blank values, which spicetify fills in on its first run. A size change alone
+  makes `git status` list the file with an empty diff: `git add` it (nothing is
+  staged; `spicetify-reapply` does it after a Spotify update).
+
 ## `functions/` (aliases + `asd` menu)
 
 One file per alias, named after the function it defines. Each file sources
@@ -455,6 +471,11 @@ Fish wrappers in `fish/functions/` just run the file and pass arguments:
 function that opens a submenu (it calls `menu` again). Having more than one entry
 point, its dispatcher is generic (`… && "$@"`) so the caller — a fish wrapper or
 the asd menu — names which function to run.
+
+Files the installer's config steps also source and call (`default_apps.sh`,
+`fonts.sh`, `gowall.sh`, `spicetify.sh`) end in `if [ "${BASH_SOURCE[0]}" = "$0" ];
+then "$@"; fi` instead: the `&&` form returns 1 when sourced, which breaks
+`. file && func`.
 
 **Adding an alias:** drop a `<name>.sh` file here (or a subfolder with one, if it
 needs its own assets) defining its function, then add a `"Label|<func>[|guard]"`
