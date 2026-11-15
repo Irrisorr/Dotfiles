@@ -51,7 +51,7 @@ CONFIG_STEPS=(
   "Rofi|configure_rofi|rofi"
   "Swayimg|configure_swayimg|swayimg"
   "VLC (DMS wallpaper colors)|configure_vlc|vlc"
-  "Spicetify|configure_spicetify|spicetify"
+  "Spicetify (DMS wallpaper colors)|configure_spicetify|spicetify"
   "Vesktop (DMS wallpaper theme)|configure_vesktop|vesktop"
   "VS Code (DMS wallpaper theme)|configure_vscode|code"
   "Thunar|configure_thunar|thunar"

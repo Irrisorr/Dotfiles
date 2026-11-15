@@ -30,3 +30,8 @@ niri/conf/sensitive_rules.kdl
 # DMS writes the matugen palette here on every wallpaper change
 qt5ct/colors/
 qt6ct/colors/
+
+# matugen writes the Spotify colors on every wallpaper change
+spicetify/Themes/dms-colors/color.ini
+# Installed by the official Marketplace installer (installer step, `spice`)
+spicetify/CustomApps/marketplace/

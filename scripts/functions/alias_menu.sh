@@ -26,4 +26,5 @@ menu "🚪 Exit" \
   "System packages|package_commands" \
   "Image tools (gowall)|gowall_commands|gowall" \
   "Default apps|default_apps|fzf" \
-  "Fonts|fonts|fzf"
+  "Fonts|fonts|fzf" \
+  "Spotify (spicetify)|spice|spicetify"

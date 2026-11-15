@@ -1,0 +1,11 @@
+# Own matugen templates. DMS runs them after its own on every wallpaper change
+# (Settings → Theme → Dynamic, runUserMatugenTemplates in dms/settings.json).
+
+[config]
+
+# Spotify: spicetify's "dms-colors" theme; refresh puts the colors into Spotify, its
+# dms-live extension repaints an open window.
+[templates.spicetify]
+input_path = '~/.config/matugen/templates/spicetify-color.ini'
+output_path = '~/.config/spicetify/Themes/dms-colors/color.ini'
+post_hook = 'spicetify refresh -s >/dev/null 2>&1'

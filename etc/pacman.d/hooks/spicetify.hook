@@ -1,0 +1,14 @@
+# An update of Spotify drops spicetify's patch; this puts it back for every
+# user who has a spicetify config, as that user (spicetify refuses root).
+# Installed by the installer's Spicetify step (scripts/install/apps/spicetify.sh).
+
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = spotify
+
+[Action]
+Description = Re-applying spicetify to the updated Spotify...
+When = PostTransaction
+Exec = /usr/bin/sh -c 'for d in /home/*/.config/spicetify; do [ -e "$d" ] || continue; u=$(stat -c %U "$d"); h=$(getent passwd "$u" | cut -d: -f6); runuser -u "$u" -- env HOME="$h" spicetify backup apply -n -q || echo "spicetify: run spicetify backup apply as $u"; done; true'
