@@ -9,8 +9,12 @@ user_pref("browser.startup.page", 3);                         // restore previou
 user_pref("browser.download.useDownloadDir", false);          // always ask where to save downloads
 
 // ─── Fonts ───────────────────────────────────────────────────────────────────
-user_pref("font.name.serif.x-cyrillic", "JetBrainsMono Nerd Font");
 user_pref("font.name.serif.x-western", "JetBrainsMono Nerd Font");
+user_pref("font.name.sans-serif.x-western", "JetBrainsMono Nerd Font");
+user_pref("font.name.monospace.x-western", "JetBrainsMono Nerd Font");
+user_pref("font.name.serif.x-cyrillic", "JetBrainsMono Nerd Font");
+user_pref("font.name.sans-serif.x-cyrillic", "JetBrainsMono Nerd Font");
+user_pref("font.name.monospace.x-cyrillic", "JetBrainsMono Nerd Font");
 user_pref("font.size.variable.x-cyrillic", 14);
 
 // ─── Zen UI / layout ─────────────────────────────────────────────────────────

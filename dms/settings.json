@@ -223,7 +223,7 @@
     }
   },
   "fontFamily": "JetBrainsMono Nerd Font",
-  "monoFontFamily": "Fira Code",
+  "monoFontFamily": "JetBrainsMono Nerd Font",
   "fontWeight": 400,
   "fontScale": 1,
   "notepadUseMonospace": true,

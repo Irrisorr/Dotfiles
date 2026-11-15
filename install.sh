@@ -40,6 +40,7 @@ CONFIG_STEPS=(
   "GTK (window control buttons)|configure_gtk"
   "Update user directories|update_user_dirs|xdg-user-dirs-update"
   "Default apps (defapps)|configure_default_apps"
+  "Fonts (fonts)|configure_fonts|fc-match"
   "Convert Russian XDG dirs to English|convert_xdg_dirs"
   "Fingerprint authentication|configure_fingerprint|fprintd-enroll"
   "Keyboard fixes (udev hwdb)|configure_hwdb|systemd-hwdb"

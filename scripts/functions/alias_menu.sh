@@ -25,4 +25,5 @@ menu "🚪 Exit" \
   "Sync to Dotfiles|sync_main" \
   "System packages|package_commands" \
   "Image tools (gowall)|gowall_commands|gowall" \
-  "Default apps|default_apps|fzf"
+  "Default apps|default_apps|fzf" \
+  "Fonts|fonts|fzf"
