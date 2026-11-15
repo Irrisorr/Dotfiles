@@ -32,6 +32,10 @@ window-rule {
 window-rule {
     match app-id=r#"firefox$"# title="^Santander"
     match app-id=r#"zen$"# title="^Santander"
+    match app-id=r#"google-chrome$"# title="^Santander"
+    match app-id=r#"zen$"# title="^Erste"
+    match app-id=r#"firefox$"# title="^Erste"
+    match app-id=r#"google-chrome$"# title="^Erste"
     match app-id=r#"obsidian$"# title="Быт"
     match app-id="clipse"
     block-out-from "screencast"
@@ -40,7 +44,9 @@ window-rule {
 // Picture in picture mode
 window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    match app-id=r#"google-chrome$"# title="^Picture-in-Picture$"
     match app-id=r#"firefox$"# title="^Картинка в картинке$"
+    match app-id=r#"google-chrome$"# title="^Картинка в картинке$"
     match app-id=r#"zen$"# title="^Picture-in-Picture$"
     match app-id=r#"zen$"# title="^Картинка в картинке$"
     open-floating true
@@ -54,9 +60,10 @@ window-rule {
     default-window-height { fixed 652; }
 }
 
-// Kitty (terminal)
+// kitty, Alacritty (terminal)
 window-rule {
     match app-id="kitty"
+    match app-id="Alacritty"
     default-column-width { proportion 0.5; }
 }
 
@@ -92,6 +99,7 @@ window-rule {
 // Apps that should open on the "browser" workspace
 window-rule {
   match app-id=r#"zen$"#
+  match app-id=r#"google-chrome$"#
   match app-id=r#"firefox$"#
 
   open-on-workspace "browser"

@@ -12,7 +12,7 @@ screenshot-path "~/Pictures/Screenshots/Screenshot_%Y-%m-%d %H:%M:%S.png"
 binds {
     // apps
     Mod+Return  hotkey-overlay-title="Terminal (kitty)"     { spawn "kitty"; }
-    Mod+B       hotkey-overlay-title="Browser (Zen Browser)" { spawn "zen-browser"; }
+    Mod+B       hotkey-overlay-title="Browser (Zen Browser)"   { spawn "zen-browser"; }
     Mod+C       hotkey-overlay-title="VSCode"      { spawn "code"; }
     Mod+N       hotkey-overlay-title="Obsidian"    { spawn "obsidian"; }
     Mod+M       hotkey-overlay-title="Spotify"     { spawn "spotify"; }
