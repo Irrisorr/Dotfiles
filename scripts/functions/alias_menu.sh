@@ -24,4 +24,5 @@ menu "🚪 Exit" \
   "Nvim launch|nvim_launch|nvim" \
   "Sync to Dotfiles|sync_main" \
   "System packages|package_commands" \
-  "Image tools (gowall)|gowall_commands|gowall"
+  "Image tools (gowall)|gowall_commands|gowall" \
+  "Default apps|default_apps|fzf"
