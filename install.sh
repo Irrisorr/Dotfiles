@@ -39,6 +39,7 @@ CONFIG_STEPS=(
   "Start MATE polkit agent|start_polkit_mate|test:has_polkit_mate"
   "GTK (window control buttons)|configure_gtk"
   "Update user directories|update_user_dirs|xdg-user-dirs-update"
+  "Default apps (defapps)|configure_default_apps"
   "Convert Russian XDG dirs to English|convert_xdg_dirs"
   "Fingerprint authentication|configure_fingerprint|fprintd-enroll"
   "Keyboard fixes (udev hwdb)|configure_hwdb|systemd-hwdb"

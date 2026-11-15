@@ -28,6 +28,7 @@ DA_RULES="$DA_CONFIG/niri/conf/rules.kdl"
 DA_MIME_DIR=/usr/share/mime
 DA_USER_MIME="${XDG_DATA_HOME:-$HOME/.local/share}/mime"
 DA_USER_PKG="$DA_USER_MIME/packages/defapps.xml"
+DA_DOTS="${DA_DOTS:-$HOME/Dotfiles/defapps}"
 DA_CUSTOM="Your extensions"
 . "$HOME/Dotfiles/scripts/lib/fzf.sh"
 
@@ -1147,9 +1148,13 @@ da_xml_escape() {
 # with a type add it back. Comment empty = attach to an existing type.
 da_custom_write() {
   local ext=$1 mime=$2 comment=$3 line
-  mkdir -p "$(dirname "$DA_USER_PKG")"
-  [ -f "$DA_USER_PKG" ] || printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' \
-    '<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">' '</mime-info>' >"$DA_USER_PKG"
+  # The file lives in the dotfiles, the mime dir links to it.
+  if [ ! -e "$DA_USER_PKG" ]; then
+    mkdir -p "$(dirname "$DA_USER_PKG")" "$DA_DOTS"
+    [ -f "$DA_DOTS/defapps.xml" ] || printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' \
+      '<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">' '</mime-info>' >"$DA_DOTS/defapps.xml"
+    ln -s "$DA_DOTS/defapps.xml" "$DA_USER_PKG"
+  fi
   grep -vF "pattern=\"*.$ext\"" "$DA_USER_PKG" >"$DA_USER_PKG.tmp"
   if [ -n "$mime" ]; then
     line="  <mime-type type=\"$mime\">${comment:+<comment>$(da_xml_escape "$comment")</comment>}<glob pattern=\"*.$ext\" weight=\"60\"/></mime-type>"
@@ -1281,16 +1286,82 @@ plain = chosen by you   "$'\e[90m'"(system: …)"$'\e[0m'" = nobody chose   "$'\
 }
 
 
+# ─── Dotfiles ─────────────────────────────────────────────────────────────────
+
+# Keep Dotfiles/defapps in step with this machine for the installer step:
+# [Default Applications] and the terminal list are copied there (entries for
+# apps not installed here, kept from another PC, stay), defapps.xml is linked.
+da_mirror() {
+  local tmp
+  mkdir -p "$DA_DOTS"
+  if [ -f "$DA_USER_PKG" ] && [ ! -L "$DA_USER_PKG" ] && [ ! -e "$DA_DOTS/defapps.xml" ]; then
+    mv "$DA_USER_PKG" "$DA_DOTS/defapps.xml" && ln -s "$DA_DOTS/defapps.xml" "$DA_USER_PKG"
+  fi
+  tmp=$(mktemp)
+  awk -F= -v appsf="$DA_STATE/apps.tsv" '
+    BEGIN { while ((getline l < appsf) > 0) { split(l, a, "\t"); inst[a[1]] = 1 } }
+    FILENAME == ARGV[1] { here[$1] = 1; out[++n] = $0; next }
+    !($1 in here) { split($2, ids, ";"); if (!(ids[1] in inst)) out[++n] = $0 }
+    END { print "[Default Applications]"; for (i = 1; i <= n; i++) print out[i] }
+  ' <(awk '/^\[/ { on = ($0 == "[Default Applications]"); next } on && index($0, "=")' "$DA_MIMEAPPS" 2>/dev/null) \
+    <(awk '/^\[/ { on = ($0 == "[Default Applications]"); next } on && index($0, "=")' "$DA_DOTS/mimeapps.list" 2>/dev/null) >"$tmp"
+  cmp -s "$tmp" "$DA_DOTS/mimeapps.list" || cat "$tmp" >"$DA_DOTS/mimeapps.list"
+  rm -f "$tmp"
+  [ -f "$DA_TERMINALS" ] && ! cmp -s "$DA_TERMINALS" "$DA_DOTS/xdg-terminals.list" && cp "$DA_TERMINALS" "$DA_DOTS/xdg-terminals.list"
+  return 0
+}
+
+# Installer side: put Dotfiles/defapps back on this machine.
+da_restore_types() {
+  [ -f "$DA_DOTS/defapps.xml" ] || { echo ":: No extensions saved yet ($DA_DOTS/defapps.xml)"; return 0; }
+  create_symlink "$DA_DOTS/defapps.xml" "$DA_USER_PKG" && update-mime-database "$DA_USER_MIME"
+}
+
+# The saved defaults go into mimeapps.list for the apps installed here; the
+# rest of the file stays. Lists what was skipped.
+da_restore_defaults() {
+  local src="$DA_DOTS/mimeapps.list" mime ids id i
+  local -A by_id=()
+  local -a skipped=()
+  [ -f "$src" ] || { echo ":: No defaults saved yet ($src)"; return 0; }
+  DA_STATE=$(mktemp -d)
+  da_build_apps
+  while IFS='=' read -r mime ids; do
+    [[ -z $mime || $mime == \[* || -z $ids ]] && continue
+    id=""
+    IFS=';' read -ra i <<<"$ids"
+    for id in "${i[@]}"; do grep -q "^${id}"$'\t' "$DA_STATE/apps.tsv" && break; id=""; done
+    if [ -n "$id" ]; then by_id[$id]+=" $mime"; else skipped+=("$mime → ${ids%;}"); fi
+  done <"$src"
+  for id in "${!by_id[@]}"; do
+    # shellcheck disable=SC2086  # a list of types
+    da_write "$id" ${by_id[$id]}
+    echo ":: $id:${by_id[$id]}"
+  done
+  [ ${#skipped[@]} -gt 0 ] && printf ':: Skipped, app not installed: %s\n' "${skipped[@]}"
+  rm -rf "$DA_STATE"
+}
+
+da_restore_terminal() {
+  [ -f "$DA_DOTS/xdg-terminals.list" ] || { echo ":: No terminal saved yet"; return 0; }
+  mkdir -p "$(dirname "$DA_TERMINALS")"
+  cat "$DA_DOTS/xdg-terminals.list" >"$DA_TERMINALS"
+  echo ":: Terminal order: $(paste -sd ' ' "$DA_TERMINALS")"
+}
+
+
 default_apps() {
   require_gum defapps || return 1
   fzf_ready || { echo ":: needs fzf >= $FZF_MIN_VERSION" >&2; return 1; }
   DA_STATE=$(mktemp -d)
   export DA_STATE
-  trap 'rm -rf "$DA_STATE"' EXIT
+  # On the way out (Esc in the menu exits too) the choices go to the dotfiles.
+  trap 'da_mirror; rm -rf "$DA_STATE"' EXIT
   : >"$DA_STATE/checked"
   : >"$DA_STATE/open"
   da_build
   da_sync_from_niri
+  da_mirror
   [ -s "$DA_STATE/synced" ] && sed 's/^/:: Taken from niri binds: /' "$DA_STATE/synced"
   menu "🚪 Exit" \
     "Default apps — terminal, browser, file manager, editor, viewers…|da_roles" \

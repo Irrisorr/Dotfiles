@@ -139,11 +139,11 @@ The generated files inside Dotfiles change with every wallpaper, so they are in 
 
 - **Corner radius** for all windows is 18
 - **Indicate screencasted windows** with red colors
-- Some apps that **blocked from screencasting** (u can add ur apps if u want)
+- Some apps that **blocked from screencasting** (u can add ur apps if u want): bank pages in zen/firefox/chrome by title (`santander|erste|centrum24` — the address counts too, it is the title while a page loads; title-based, so a frame can still slip through when the title changes late), the Obsidian note «Быт», clipse
 - Apps that should open on the **_media / browser / ide / notes** workspace
 - **Picture in picture** always floating
 - **Clipse** always opens floating and small size
-- **Kitty** always opens at 50% (0.5) window size proportion
+- **Terminal** (kitty, and whatever defapps added) always opens at 50% (0.5) window size proportion
 - **Obsidian** has scroll-factor 0.2
 - **Rofi** has blur effect
 - **Wallpaper** has place-within-backdrop rule (see in [niri wiki](https://niri-wm.github.io/niri/Overview.html#backdrop-customization))
@@ -290,6 +290,7 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
         - **File types** — categories (Your extensions, Images, Text & code, Video, Audio, PDF & books, Office, Archives, Web & links, Folders, Calendar, All types) fold open with Enter/Tab; each row is one MIME type with its extensions and what opens it now: plain = chosen by you, gray `(system: …)` = nobody chose, red `✗ missing` = the chosen app isn't installed, `via` = taken from the parent type (e.g. text/plain for .py)
         - Enter on a row picks its app; Space ticks rows (on a category: all of it) and Alt+Enter picks one app for the ticked ones, or for the whole category under the cursor. Ctrl-R resets to what the system picks
         - Extensions come from shared-mime-info (`/usr/share/mime`, updated by packages), read on every start — a package that adds a type shows up by itself. **Your extensions → + Add extension** handles the rest: an unknown extension gets its own type (`application/x-<ext>`) or opens like an existing one (`.conf` as text/plain); a known one can be split off into its own type. Stored in `~/.local/share/mime/packages/defapps.xml` (then `update-mime-database`); Ctrl-D removes one
+        - **Dotfiles:** on exit `defapps` saves this machine's choices to `defapps/` — `mimeapps.list` (only `[Default Applications]`; entries of apps not installed here, kept from another PC, stay) and `xdg-terminals.list`; `defapps.xml` lives there and the mime dir links to it. Changes made in DMS get saved on the next `defapps` run. The installer step **Default apps (defapps)** puts them back: links the extensions (+ `update-mime-database`), merges the saved defaults into `~/.config/mimeapps.list` for the apps installed (lists the skipped ones, the rest of the file stays) and writes the terminal order
 
 #### Syncing live configs back (`scripts/functions/sync/`)
 

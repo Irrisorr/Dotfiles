@@ -30,12 +30,10 @@ window-rule {
 
 // Blocked apps from screencasting
 window-rule {
-    match app-id=r#"(?i)firefox"# title=r#"(?i)santander"#
-    match app-id=r#"(?i)zen"# title=r#"(?i)santander"#
-    match app-id=r#"(?i)chrome"# title=r#"(?i)santander"#
-    match app-id=r#"(?i)zen"# title=r#"(?i)erste"#
-    match app-id=r#"(?i)firefox"# title=r#"(?i)erste"#
-    match app-id=r#"(?i)chrome"# title=r#"(?i)erste"#
+    // Bank pages; while one loads its title can be just the address (centrum24.pl)
+    match app-id=r#"(?i)zen"# title=r#"(?i)(santander|erste|centrum24)"#
+    match app-id=r#"(?i)firefox"# title=r#"(?i)(santander|erste|centrum24)"#
+    match app-id=r#"(?i)chrome"# title=r#"(?i)(santander|erste|centrum24)"#
     match app-id=r#"(?i)obsidian"# title=r#"(?i)быт"#
     match app-id=r#"(?i)^clipse$"#
     block-out-from "screencast"
