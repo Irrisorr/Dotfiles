@@ -21,7 +21,6 @@ FT_QT=("$FT_DOTS/qt5ct/qt5ct.conf" "$FT_DOTS/qt6ct/qt6ct.conf")
 FT_DMS="$FT_DOTS/dms/settings.json"
 FT_ZEN="$FT_DOTS/zen-browser/user.js"
 FT_KITTY="$FT_DOTS/kitty/kitty.conf"
-FT_VSCODE="$HOME/.config/Code/User/settings.json"
 FT_GTK_INI=("$HOME/.config/gtk-3.0/settings.ini" "$HOME/.config/gtk-4.0/settings.ini")
 FT_SAMPLE=$'The quick brown fox jumps over the lazy dog\nСъешь же ещё этих мягких французских булок\n0123456789 ->  => != <= {}[]() #include\n   󰈹'
 
@@ -47,6 +46,8 @@ if [ "$1" = --sample ]; then
 fi
 
 . "$HOME/Dotfiles/scripts/lib/common.sh"
+
+FT_VSCODE=$(vscode_settings_path)
 
 # ─── Current choice ───────────────────────────────────────────────────────────
 

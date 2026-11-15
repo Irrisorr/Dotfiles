@@ -16,10 +16,8 @@ configure_vscode() {
 
   code --install-extension "$VSCODE_DMS_EXTENSION" || return 2
 
-  # The flatpak (Ubuntu) keeps its config under ~/.var/app.
-  local settings="$HOME/.config/Code/User/settings.json"
-  [ -d "$HOME/.var/app/com.visualstudio.code" ] &&
-    settings="$HOME/.var/app/com.visualstudio.code/config/Code/User/settings.json"
+  local settings
+  settings=$(vscode_settings_path)
   mkdir -p "$(dirname "$settings")"
   [ -s "$settings" ] || echo '{}' > "$settings"
 

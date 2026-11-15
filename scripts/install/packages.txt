@@ -34,8 +34,8 @@ slack
 iMe (fork of telegram with some features | DONT INSTALL HERE WILL BE LATER IF U WANT)
 vesktop-bin            ubuntu:flatpak=dev.vencord.Vesktop
 discord                ubuntu:flatpak=com.discordapp.Discord
-spotify                ubuntu:flatpak=com.spotify.Client
-spicetify-cli          ubuntu:skip (spotify extensions manager | Ubuntu: install script only)
+spotify                ubuntu:source=spotify (Ubuntu: Spotify's apt repo, spicetify can't patch the flatpak)
+spicetify-cli          ubuntu:source=spicetify (spotify extensions manager | Ubuntu: upstream release in /opt/spicetify-cli)
 - unzip                 (Listening Stats' installer, `spice` → Update apps)
 zoom                   ubuntu:flatpak=us.zoom.Zoom
 
@@ -147,7 +147,8 @@ claude-desktop
 # Additional Packages
 sqlite                 ubuntu:apt=sqlite3 (needs for sync private dotfiles)
 jq (needs for sync private dotfiles)
-gowall                 ubuntu:skip (image converter | Ubuntu: no .deb, tarball only)
+gowall                 ubuntu:source=gowall (image converter | Ubuntu: upstream release binary)
+- librsvg              ubuntu:apt=librsvg2-bin (rsvg-convert: SVG icons in gw)
 - tesseract            ubuntu:apt=tesseract-ocr (local OCR in gw)
 - tesseract-data-eng   ubuntu:apt=tesseract-ocr-eng (its English)
 - tesseract-data-rus   ubuntu:apt=tesseract-ocr-rus (its Russian)

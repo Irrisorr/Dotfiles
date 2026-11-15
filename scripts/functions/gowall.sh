@@ -140,10 +140,13 @@ gw_batch_arg() {
   printf '%s' "$out"
 }
 
-# gw_need <command> <package> [what for] — says what to install when it's missing.
+# gw_need <command> <packages> [what for] — says what to install when it's
+# missing. Packages are Arch names; packages.txt has this distro's.
 gw_need() {
   command -v "$1" &>/dev/null && return 0
-  print_error_message "$1 isn't installed${3:+ ($3)}: sudo pacman -S $2"
+  local p names=()
+  for p in $2; do names+=("$(resolve_package "$p" | cut -d$'\x1f' -f2)"); done
+  print_error_message "$1 isn't installed${3:+ ($3)}: $(pkg_install_hint "${names[*]}")"
   return 2
 }
 
@@ -829,7 +832,7 @@ gw_ocr_ready() {
       gw_need tesseract "tesseract tesseract-data-eng tesseract-data-rus" || return 2
       for lang in ${2//+/ }; do
         tesseract --list-langs 2>/dev/null | grep -qx "$lang" ||
-          { print_error_message "tesseract has no '$lang': sudo pacman -S tesseract-data-$lang"; return 2; }
+          { print_error_message "tesseract has no '$lang': $(pkg_install_hint "$(is_debian && echo tesseract-ocr || echo tesseract-data)-$lang")"; return 2; }
       done ;;
     docling)
       url=$(gw_env DOCLING_BASE_URL); url=${url:-http://localhost:5001}
@@ -838,7 +841,7 @@ gw_ocr_ready() {
     ollama)
       url=$(gw_env OLLAMA_HOST); url=${url:-http://127.0.0.1:11434}
       curl -sf -m 3 "${url%/}/api/tags" >/dev/null ||
-        { print_error_message "No ollama at $url: sudo pacman -S ollama && systemctl enable --now ollama, then ollama pull <model>"; return 2; } ;;
+        { print_error_message "No ollama at $url: $(is_debian && echo 'curl -fsSL https://ollama.com/install.sh | sh' || echo 'sudo pacman -S ollama && systemctl enable --now ollama'), then ollama pull <model>"; return 2; } ;;
     vllm)
       curl -sf -m 3 http://localhost:8000/v1/models >/dev/null ||
         { print_error_message "No vllm server at localhost:8000 — start it first"; return 2; } ;;
@@ -1141,6 +1144,8 @@ gowall_commands() {
 # gw [image] — straight to editing that image, or the menu.
 gw() {
   require_gum gw || return 1
+  command -v gowall &>/dev/null ||
+    { print_error_message "gowall isn't installed — the installer's package step has it (Additional Packages)"; return 1; }
   gw_need magick imagemagick "sizes, resize, icons — the rest works" || :
   if [ -n "$1" ]; then
     [ -f "$1" ] || { print_error_message "No such file: $1"; return 1; }

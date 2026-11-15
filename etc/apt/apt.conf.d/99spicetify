@@ -1,0 +1,4 @@
+// An update of spotify-client drops spicetify's patch; this puts it back
+// (/usr/local/bin/spicetify-reapply, from etc/spicetify-reapply.sh: does
+// nothing unless Spotify is stock). Installed by the installer's Spicetify step.
+DPkg::Post-Invoke { "[ -x /usr/local/bin/spicetify-reapply ] && /usr/local/bin/spicetify-reapply; true"; };

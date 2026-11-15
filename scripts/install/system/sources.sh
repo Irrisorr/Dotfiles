@@ -358,6 +358,83 @@ install_source_swayimg() {
 }
 
 
+# gowall — no Debian package; upstream's release is one static binary (what the
+# AUR package installs), put into /usr/local/bin. Re-running the step upgrades it.
+install_source_gowall() {
+  local tag tmp rc=0
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "gowall: no Linux build for $(uname -m)"; return 1; }
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tag=$(_github_latest_tag Achno/gowall) || { print_error_message "gowall: could not find the latest release"; return 1; }
+
+  tmp=$(mktemp -d)
+  curl -fsSL "https://github.com/Achno/gowall/releases/download/$tag/gowall-amd64-linux.tar.gz" \
+    | tar -xz -C "$tmp" \
+    && sudo install -m 755 "$tmp/gowall" /usr/local/bin/gowall \
+    || rc=1
+  rm -rf "$tmp"
+
+  [ $rc -eq 0 ] && echo ":: gowall $tag installed to /usr/local/bin/gowall"
+  return $rc
+}
+
+
+# Spotify — from Spotify's own apt repository instead of the flatpak: spicetify
+# has to patch its files, which the flatpak keeps read-only and replaces on
+# every update. The repository's key changes now and then; the current one is
+# read off the download page (the key the instructions there use), with the
+# one known to sign the repository as a fallback.
+install_source_spotify() {
+  local keyring="/etc/apt/keyrings/spotify.gpg"
+  local list="/etc/apt/sources.list.d/spotify.list"
+  local key
+
+  is_debian || { print_error_message "spotify: Debian-family only"; return 1; }
+  pkg_install gnupg ca-certificates curl || return 1
+
+  key=$(curl -fsSL https://www.spotify.com/us/download/linux/ 2>/dev/null \
+        | grep -oE 'pubkey_[A-F0-9]+\.(asc|gpg)' | head -n 1)
+  key="https://download.spotify.com/debian/${key:-pubkey_5384CE82BA52C83A.asc}"
+
+  sudo mkdir -p /etc/apt/keyrings || return 1
+  curl -fsSL "$key" | sudo gpg --dearmor --yes -o "$keyring" || return 1
+  sudo chmod 0644 "$keyring"
+  echo "deb [signed-by=$keyring] https://repository.spotify.com stable non-free" \
+    | sudo tee "$list" >/dev/null || return 1
+
+  pkg_sync || return 1
+  pkg_install spotify-client
+}
+
+
+# spicetify — no Ubuntu package. Upstream's release tarball (the binary next to
+# its jsHelper, Extensions, Themes, CustomApps) goes into /opt/spicetify-cli,
+# where Arch's spicetify-cli keeps it, linked into /usr/local/bin. Its own
+# installer would put it in ~/.spicetify instead, which then has to be on every
+# PATH (DMS's matugen hook runs it too). Re-running the step upgrades it.
+install_source_spicetify() {
+  local tag tmp rc=0
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "spicetify: no Linux build for $(uname -m)"; return 1; }
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tag=$(_github_latest_tag spicetify/cli) || { print_error_message "spicetify: could not find the latest release"; return 1; }
+
+  tmp=$(mktemp -d)
+  echo ":: Downloading spicetify $tag"
+  if curl -fsSL "https://github.com/spicetify/cli/releases/download/$tag/spicetify-${tag#v}-linux-amd64.tar.gz" \
+       | tar -xz -C "$tmp"; then
+    sudo rm -rf /opt/spicetify-cli \
+      && sudo cp -a "$tmp" /opt/spicetify-cli \
+      && sudo chmod -R a+rX /opt/spicetify-cli \
+      && sudo ln -sf /opt/spicetify-cli/spicetify /usr/local/bin/spicetify \
+      || rc=1
+  else
+    print_error_message "spicetify: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return $rc
+}
+
+
 # ─── Installed checks for the package picker (see the contract above) ─────────
 
 installed_source_clipse()         { command -v clipse &>/dev/null; }
@@ -374,3 +451,6 @@ installed_source_antigravity()     { [ -x /opt/Antigravity/antigravity ]; }
 installed_source_kitty()           { [ -x /opt/kitty.app/bin/kitty ]; }
 installed_source_swayimg()         { [ -x /usr/local/bin/swayimg ]; }
 installed_source_zen()             { [ -x "$ZEN_TARBALL_DIR/zen-bin" ]; }
+installed_source_gowall()          { [ -x /usr/local/bin/gowall ]; }
+installed_source_spotify()         { pkg_installed spotify-client; }
+installed_source_spicetify()       { [ -x /opt/spicetify-cli/spicetify ]; }

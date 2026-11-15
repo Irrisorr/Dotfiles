@@ -334,10 +334,15 @@ fi
 
 . "$HOME/Dotfiles/scripts/lib/common.sh"
 
-# XDG data dirs, user first (flatpak exports are in XDG_DATA_DIRS in a session).
+# XDG data dirs, user first. Flatpak's exports join XDG_DATA_DIRS only at the
+# next login, so apps the installer just put in as flatpaks (Ubuntu) are looked
+# up there too; a dir listed twice changes nothing (the first copy of an id wins).
 da_data_dirs() {
-  local IFS=:
+  local IFS=: d
   printf '%s\n' "${XDG_DATA_HOME:-$HOME/.local/share}" ${XDG_DATA_DIRS:-/usr/local/share:/usr/share}
+  for d in "$HOME/.local/share/flatpak/exports/share" /var/lib/flatpak/exports/share; do
+    [ -d "$d" ] && echo "$d"
+  done
 }
 
 da_desktops() {
@@ -1322,6 +1327,20 @@ da_restore_types() {
   create_symlink "$DA_DOTS/defapps.xml" "$DA_USER_PKG" && update-mime-database "$DA_USER_MIME"
 }
 
+# One app under its Arch package's and its Ubuntu flatpak's desktop id, so a
+# default saved on one machine finds the app on the other.
+declare -A DA_SAME_APP=()
+for _pair in \
+  "vesktop.desktop dev.vencord.Vesktop.desktop" \
+  "com.microsoft.VSCode.desktop com.visualstudio.code.desktop" \
+  "obsidian.desktop md.obsidian.Obsidian.desktop" \
+  "google-chrome.desktop com.google.Chrome.desktop" \
+  "jetbrains-idea.desktop com.jetbrains.IntelliJ-IDEA-Ultimate.desktop"; do
+  read -r _a _b <<<"$_pair"
+  DA_SAME_APP[$_a]=$_b DA_SAME_APP[$_b]=$_a
+done
+unset _pair _a _b
+
 # The saved defaults go into mimeapps.list for the apps installed here; the
 # rest of the file stays. Lists what was skipped.
 da_restore_defaults() {
@@ -1335,7 +1354,12 @@ da_restore_defaults() {
     [[ -z $mime || $mime == \[* || -z $ids ]] && continue
     id=""
     IFS=';' read -ra i <<<"$ids"
-    for id in "${i[@]}"; do grep -q "^${id}"$'\t' "$DA_STATE/apps.tsv" && break; id=""; done
+    for id in "${i[@]}"; do
+      grep -q "^${id}"$'\t' "$DA_STATE/apps.tsv" && break
+      id=${DA_SAME_APP[$id]:-}
+      [ -n "$id" ] && grep -q "^${id}"$'\t' "$DA_STATE/apps.tsv" && break
+      id=""
+    done
     if [ -n "$id" ]; then by_id[$id]+=" $mime"; else skipped+=("$mime → ${ids%;}"); fi
   done <"$src"
   for id in "${!by_id[@]}"; do

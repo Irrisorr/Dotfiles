@@ -69,9 +69,14 @@ sp_apps_update() {
 }
 
 # xpui.spa is there only while Spotify is stock (fresh install or update): then
-# back it up first, else just apply the config again.
+# back it up first, else just apply the config again. /opt/spotify on Arch,
+# /usr/share/spotify from Spotify's apt repo.
 sp_repair() {
-  if [ -f /opt/spotify/Apps/xpui.spa ]; then sp_run backup apply; else sp_run apply; fi
+  if [ -f /opt/spotify/Apps/xpui.spa ] || [ -f /usr/share/spotify/Apps/xpui.spa ]; then
+    sp_run backup apply
+  else
+    sp_run apply
+  fi
 }
 
 spice() {
