@@ -811,10 +811,11 @@ da_app_id() {
 
 # da_sync_rules <category> <desktop id> — window rules cover the role's app
 # too: next to every match line of another app of the same kind (another
-# terminal, browser) goes a copy with this app's app-id — anchors, r#""# and
-# the rest of the line kept — unless the rule has that line already, so
-# switching back and forth adds nothing. The comment above the rule gets the
-# name added. Prints what was added.
+# terminal, browser) goes a copy with this app's app-id — (?i), anchors,
+# r#""# and the rest of the line kept. Nothing is added where a line with the
+# same rest already matches this app (r#"(?i)chrome"# covers google-chrome),
+# so switching back and forth adds nothing. The comment above the rule gets
+# the name added. Prints what was added.
 da_sync_rules() {
   local cat=$1 id=$2 new name others tmp file
   # The DMS chooser opens no window of its own, rules have nothing to match.
@@ -824,46 +825,61 @@ da_sync_rules() {
   name=$(awk -F'\t' -v id="$id" '$1 == id { print $2 }' "$DA_STATE/apps.tsv")
   name=${name% (${id%.desktop})}
   others=$(awk -F'\t' -v cat="$cat" -v id="$id" '
-    $1 != id && $1 != "dms-open.desktop" && index(";" $7 ";", ";" cat ";") { n = $2; sub(/ \(.*\)$/, "", n); print ($8 != "" ? $8 : substr($1, 1, length($1) - 8)) "\t" n }
-  ' "$DA_STATE/apps.tsv")
+    $1 != id && $1 != "dms-open.desktop" && index(";" $7 ";", ";" cat ";") {
+      n = $2; sub(/ \(.*\)$/, "", n); a = $8 != "" ? $8 : substr($1, 1, length($1) - 8)
+      print $3 "\t" length(a) "\t" a "\t" n
+    }
+  ' "$DA_STATE/apps.tsv" | sort -t$'\t' -k1,1n -k2,2n | cut -f3-)  # shown apps, short ids first: kitty before kitty-open
   tmp=$(mktemp)
   awk -v new="$new" -v newname="$name" -v others="$others" '
-    function core(l,    m) {
-      if (!match(l, /app-id=(r#)?"\^?[^"$]*\$?"/)) return ""
-      m = substr(l, RSTART, RLENGTH); sub(/^app-id=(r#)?"\^?/, "", m); sub(/\$?"$/, "", m)
-      return m
+    # Split a match line: P_ci (?i), P_s ^, P_e $, P_core the app-id text,
+    # P_pos/P_len where the core sits, P_rest the line without the app-id.
+    function parse(l,    t, a) {
+      if (!match(l, /app-id=(r#)?"[^"]*"(#)?/)) return 0
+      a = RSTART; t = substr(l, RSTART, RLENGTH)
+      P_rest = substr(l, 1, a - 1) substr(l, a + RLENGTH)
+      sub(/^app-id=(r#)?"/, "", t); sub(/"(#)?$/, "", t)
+      P_pos = a + index(substr(l, a), "\"")
+      P_ci = sub(/^\(\?i\)/, "", t); if (P_ci) P_pos += 4
+      P_s = sub(/^\^/, "", t); if (P_s) P_pos++
+      P_e = sub(/\$$/, "", t)
+      P_core = t; P_len = length(t)
+      return 1
     }
-    function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
-    # Add ", new" after the first case-insensitive "from" in s.
+    # Does the parsed pattern match app-id x? (Escaped dots taken literally.)
+    function hits(x,    p, i) {
+      p = P_core; gsub(/\\\./, ".", p)
+      if (P_ci) { p = tolower(p); x = tolower(x) }
+      if (P_s && P_e) return x == p
+      if (P_s) return index(x, p) == 1
+      if (P_e) return (i = length(x) - length(p) + 1) > 0 && substr(x, i) == p
+      return index(x, p) > 0
+    }
     function ci_append(s, from, add,    i) {
       i = index(tolower(s), tolower(from))
       return i ? substr(s, 1, i - 1 + length(from)) ", " add substr(s, i + length(from)) : s
     }
     BEGIN {
       n = split(others, o, "\n")
-      for (i = 1; i <= n; i++) { split(o[i], f, "\t"); if (f[1] != "" && f[1] != new) other[f[1]] = f[2] }
+      for (i = 1; i <= n; i++) { split(o[i], f, "\t"); if (f[1] != "" && f[1] != new) { oid[++no] = f[1]; oname[no] = f[2] } }
     }
     { line[NR] = $0 }
     END {
       for (i = 1; i <= NR; i++) {
         if (line[i] !~ /^[ \t]*window-rule[ \t]*\{/) continue
         for (j = i + 1; j <= NR && line[j] !~ /^[ \t]*\}/; j++) ;
-        delete have
-        for (k = i + 1; k < j; k++) have[trim(line[k])] = 1
+        delete covered
+        for (k = i + 1; k < j; k++) if (line[k] ~ /^[ \t]*match/ && parse(line[k]) && hits(new)) covered[P_rest] = 1
         added = 0
         for (k = i + 1; k < j; k++) {
-          c = core(line[k])
-          if (line[k] !~ /match/ || !(c in other)) continue
-          a = index(line[k], "app-id=")
-          p = a + index(substr(line[k], a), c) - 1
-          copy = substr(line[k], 1, p - 1) new substr(line[k], p + length(c))
-          if (trim(copy) in have) continue
-          have[trim(copy)] = 1
-          after[k] = after[k] "\n" copy
+          if (line[k] !~ /^[ \t]*match/ || !parse(line[k]) || (P_rest in covered)) continue
+          for (m = 1; m <= no && !hits(oid[m]); m++) ;
+          if (m > no) continue
+          covered[P_rest] = 1
+          after[k] = after[k] "\n" substr(line[k], 1, P_pos - 1) new substr(line[k], P_pos + P_len)
           added = 1
-          next_to[c] = 1
-          oldname = other[c]
-          oldid = c
+          next_to[oid[m]] = 1
+          oldname = oname[m]; oldid = oid[m]
         }
         # Only a comment that names the other app ("// Kitty (terminal)").
         cm = i > 1 ? tolower(line[i - 1]) : ""

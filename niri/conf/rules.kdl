@@ -30,31 +30,31 @@ window-rule {
 
 // Blocked apps from screencasting
 window-rule {
-    match app-id=r#"firefox$"# title="^Santander"
-    match app-id=r#"zen$"# title="^Santander"
-    match app-id=r#"google-chrome$"# title="^Santander"
-    match app-id=r#"zen$"# title="^Erste"
-    match app-id=r#"firefox$"# title="^Erste"
-    match app-id=r#"google-chrome$"# title="^Erste"
-    match app-id=r#"(?i)obsidian"# title="Быт"
-    match app-id="clipse"
+    match app-id=r#"(?i)firefox"# title=r#"(?i)santander"#
+    match app-id=r#"(?i)zen"# title=r#"(?i)santander"#
+    match app-id=r#"(?i)chrome"# title=r#"(?i)santander"#
+    match app-id=r#"(?i)zen"# title=r#"(?i)erste"#
+    match app-id=r#"(?i)firefox"# title=r#"(?i)erste"#
+    match app-id=r#"(?i)chrome"# title=r#"(?i)erste"#
+    match app-id=r#"(?i)obsidian"# title=r#"(?i)быт"#
+    match app-id=r#"(?i)^clipse$"#
     block-out-from "screencast"
 }
 
 // Picture in picture mode
 window-rule {
-    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
-    match app-id=r#"google-chrome$"# title="^Picture-in-Picture$"
-    match app-id=r#"firefox$"# title="^Картинка в картинке$"
-    match app-id=r#"google-chrome$"# title="^Картинка в картинке$"
-    match app-id=r#"zen$"# title="^Picture-in-Picture$"
-    match app-id=r#"zen$"# title="^Картинка в картинке$"
+    match app-id=r#"(?i)firefox"# title=r#"(?i)picture-in-picture"#
+    match app-id=r#"(?i)chrome"# title=r#"(?i)picture-in-picture"#
+    match app-id=r#"(?i)firefox"# title=r#"(?i)картинка в картинке"#
+    match app-id=r#"(?i)chrome"# title=r#"(?i)картинка в картинке"#
+    match app-id=r#"(?i)zen"# title=r#"(?i)picture-in-picture"#
+    match app-id=r#"(?i)zen"# title=r#"(?i)картинка в картинке"#
     open-floating true
 }
 
 // Clipse
 window-rule {
-    match app-id="clipse"
+    match app-id=r#"(?i)^clipse$"#
     open-floating true
     default-column-width { fixed 622; }
     default-window-height { fixed 652; }
@@ -62,8 +62,8 @@ window-rule {
 
 // kitty, Alacritty (terminal)
 window-rule {
-    match app-id="kitty"
-    match app-id="Alacritty"
+    match app-id=r#"(?i)kitty"#
+    match app-id=r#"(?i)alacritty"#
     default-column-width { proportion 0.5; }
 }
 
@@ -86,30 +86,30 @@ layer-rule {
 
 // Apps that should open on the "_media" workspace
 window-rule {
-    match app-id=r#"^org\.telegram\.desktop$"#
-    match app-id=r#"^org\.ime\.desktop"#
-    match app-id=r#"Spotify$"#
-    match app-id=r#"vesktop$"#
-    match app-id=r#"discord$"#
-    exclude app-id=r#"^org\.telegram\.desktop$"# title="Просмотр медиа"
+    match app-id=r#"(?i)telegram"#
+    match app-id=r#"(?i)org\.ime\.desktop"#
+    match app-id=r#"(?i)spotify"#
+    match app-id=r#"(?i)vesktop"#
+    match app-id=r#"(?i)discord"#
+    exclude app-id=r#"(?i)telegram"# title=r#"(?i)просмотр медиа"#
     
     open-on-workspace "_media"
 }
 
 // Apps that should open on the "browser" workspace
 window-rule {
-  match app-id=r#"zen$"#
-  match app-id=r#"google-chrome$"#
-  match app-id=r#"firefox$"#
+  match app-id=r#"(?i)zen"#
+  match app-id=r#"(?i)chrome"#
+  match app-id=r#"(?i)firefox"#
 
   open-on-workspace "browser"
 }
 
 // Apps that should open on the "ide" workspace
 window-rule {
-    match app-id=r#"Code$"#
-    match app-id=r#"jetbrains-idea$"#
-    match app-id=r#"antigravity$"#
+    match app-id=r#"(?i)code"#
+    match app-id=r#"(?i)jetbrains-idea"#
+    match app-id=r#"(?i)antigravity"#
 
     open-on-workspace "ide"
 }
