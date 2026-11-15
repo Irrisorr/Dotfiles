@@ -139,7 +139,7 @@ The generated files inside Dotfiles change with every wallpaper, so they are in 
 
 - **Corner radius** for all windows is 18
 - **Indicate screencasted windows** with red colors
-- Some apps that **blocked from screencasting** (u can add ur apps if u want): bank pages in zen/firefox/chrome by title (`santander|erste|centrum24` — the address counts too, it is the title while a page loads; title-based, so a frame can still slip through when the title changes late), the Obsidian note «Быт», clipse
+- Some apps that **blocked from screencasting** (u can add ur apps if u want): bank pages in zen/firefox/chrome by title (`santander|erste|centrum24|logowanie`), plus Zen while a page loads — its title is the bare `Zen Browser` for 15-335 ms between pages, so every page load in Zen is black for that moment in a screencast, the Obsidian note «Быт», clipse
 - Apps that should open on the **_media / browser / ide / notes** workspace
 - **Picture in picture** always floating
 - **Clipse** always opens floating and small size

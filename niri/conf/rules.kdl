@@ -30,10 +30,12 @@ window-rule {
 
 // Blocked apps from screencasting
 window-rule {
-    // Bank pages; while one loads its title can be just the address (centrum24.pl)
-    match app-id=r#"(?i)zen"# title=r#"(?i)(santander|erste|centrum24)"#
-    match app-id=r#"(?i)firefox"# title=r#"(?i)(santander|erste|centrum24)"#
-    match app-id=r#"(?i)chrome"# title=r#"(?i)(santander|erste|centrum24)"#
+    // Bank pages, the bank login page included
+    match app-id=r#"(?i)zen"# title=r#"(?i)(santander|erste|centrum24|logowanie)"#
+    match app-id=r#"(?i)firefox"# title=r#"(?i)(santander|erste|centrum24|logowanie)"#
+    match app-id=r#"(?i)chrome"# title=r#"(?i)(santander|erste|centrum24|logowanie)"#
+    // …and the bare "Zen Browser" a page has until its own title loads (15-335 ms)
+    match app-id=r#"(?i)zen"# title=r#"^Zen Browser$"#
     match app-id=r#"(?i)obsidian"# title=r#"(?i)быт"#
     match app-id=r#"(?i)^clipse$"#
     block-out-from "screencast"
