@@ -798,11 +798,12 @@ da_app_id() {
   echo "${wm:-${id%.desktop}}"
 }
 
-# da_sync_rules <category> <desktop id> — window rules follow the role's app:
-# in a window-rule whose matches name another app of the same kind (another
-# terminal), that app-id becomes this one's, anchors and r#""# kept, and the
-# comment above the rule gets the new name. A rule that already matches this
-# app is left alone (e.g. one listing both zen and firefox). Prints what changed.
+# da_sync_rules <category> <desktop id> — window rules cover the role's app
+# too: next to every match line of another app of the same kind (another
+# terminal, browser) goes a copy with this app's app-id — anchors, r#""# and
+# the rest of the line kept — unless the rule has that line already, so
+# switching back and forth adds nothing. The comment above the rule gets the
+# name added. Prints what was added.
 da_sync_rules() {
   local cat=$1 id=$2 new name others tmp file
   file=$(readlink -f "$DA_RULES" 2>/dev/null) && [ -f "$file" ] || return 0
@@ -819,43 +820,52 @@ da_sync_rules() {
       m = substr(l, RSTART, RLENGTH); sub(/^app-id=(r#)?"\^?/, "", m); sub(/\$?"$/, "", m)
       return m
     }
-    function ci_replace(s, from, to,    i) {
+    function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
+    # Add ", new" after the first case-insensitive "from" in s.
+    function ci_append(s, from, add,    i) {
       i = index(tolower(s), tolower(from))
-      return i ? substr(s, 1, i - 1) to substr(s, i + length(from)) : s
+      return i ? substr(s, 1, i - 1 + length(from)) ", " add substr(s, i + length(from)) : s
     }
     BEGIN {
       n = split(others, o, "\n")
-      for (i = 1; i <= n; i++) { split(o[i], f, "\t"); if (f[1] != "" && f[1] != new) { other[f[1]] = f[2] } }
+      for (i = 1; i <= n; i++) { split(o[i], f, "\t"); if (f[1] != "" && f[1] != new) other[f[1]] = f[2] }
     }
     { line[NR] = $0 }
     END {
       for (i = 1; i <= NR; i++) {
         if (line[i] !~ /^[ \t]*window-rule[ \t]*\{/) continue
         for (j = i + 1; j <= NR && line[j] !~ /^[ \t]*\}/; j++) ;
-        has = 0
-        for (k = i + 1; k < j; k++) if (line[k] ~ /match/ && core(line[k]) == new) has = 1
-        if (has) continue
+        delete have
+        for (k = i + 1; k < j; k++) have[trim(line[k])] = 1
+        added = 0
         for (k = i + 1; k < j; k++) {
           c = core(line[k])
           if (line[k] !~ /match/ || !(c in other)) continue
-          oldname = other[c]
           a = index(line[k], "app-id=")
           p = a + index(substr(line[k], a), c) - 1
-          line[k] = substr(line[k], 1, p - 1) new substr(line[k], p + length(c))
-          changed[c] = 1
-          if (i > 1 && line[i - 1] ~ /^[ \t]*\/\//) {
-            line[i - 1] = ci_replace(line[i - 1], oldname, newname)
-            if (tolower(oldname) != tolower(c)) line[i - 1] = ci_replace(line[i - 1], c, newname)
-          }
+          copy = substr(line[k], 1, p - 1) new substr(line[k], p + length(c))
+          if (trim(copy) in have) continue
+          have[trim(copy)] = 1
+          after[k] = after[k] "\n" copy
+          added = 1
+          next_to[c] = 1
+          oldname = other[c]
+          oldid = c
+        }
+        # Only a comment that names the other app ("// Kitty (terminal)").
+        cm = i > 1 ? tolower(line[i - 1]) : ""
+        if (added && cm ~ /^[ \t]*\/\// && !index(cm, tolower(newname))) {
+          if (oldname != "" && index(cm, tolower(oldname))) line[i - 1] = ci_append(line[i - 1], oldname, newname)
+          else if (index(cm, tolower(oldid))) line[i - 1] = ci_append(line[i - 1], oldid, newname)
         }
         i = j
       }
-      for (i = 1; i <= NR; i++) print line[i]
-      for (c in changed) print c > "/dev/stderr"
+      for (i = 1; i <= NR; i++) printf "%s%s\n", line[i], after[i]
+      for (c in next_to) print c > "/dev/stderr"
     }
   ' "$file" >"$tmp" 2>"$tmp.changed"
   if da_niri_replace "$file" "$tmp"; then
-    sed "s|.*|window rules: & → $new|" "$tmp.changed"
+    sed "s|.*|window rules: + $new next to &|" "$tmp.changed"
   else
     echo "window rules: niri didn't accept the change, kept the old ones"
   fi
