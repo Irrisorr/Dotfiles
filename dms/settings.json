@@ -232,7 +232,7 @@
   "notepadShowLineNumbers": false,
   "notepadTransparencyOverride": -1,
   "notepadLastCustomTransparency": 0.7,
-  "soundsEnabled": false,
+  "soundsEnabled": true,
   "useSystemSoundTheme": false,
   "soundNewNotification": true,
   "soundVolumeChanged": true,
@@ -1336,5 +1336,7 @@
   "matugenContrast": 0,
   "terminalPalette": "medium",
   "greeterFollowLockScreen": false,
-  "batteryCriticalAnimation": true
+  "batteryCriticalAnimation": true,
+  "soundLogin": false,
+  "muteSoundsWhenMediaPlaying": false
 }
