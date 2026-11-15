@@ -627,8 +627,19 @@ da_bind_action() {
   ' "$DA_BINDS" 2>/dev/null
 }
 
+# How a bind should call an absolute binary: by name when PATH finds it, else
+# by the package's launcher in /usr/bin (/opt/zen-browser-bin/zen-bin →
+# zen-browser), else as is.
+da_path_command() {
+  local bin=$1 pkg cmd
+  [ "$(command -v "${bin##*/}")" = "$bin" ] && { echo "${bin##*/}"; return; }
+  pkg=$(da_owner_pkg "$bin")
+  cmd=$([ -n "$pkg" ] && da_pkg_files "$pkg" | grep -m1 -E '^/usr/bin/[^/]+$')
+  if [ -n "$cmd" ] && [ "$(command -v "${cmd##*/}")" = "$cmd" ]; then echo "${cmd##*/}"; else echo "$bin"; fi
+}
+
 # A desktop entry's Exec as a niri action: spawn "a" "b", or spawn-sh when it
-# needs a shell. A binary that is also on PATH is written by its name.
+# needs a shell. Absolute binaries go through da_path_command.
 da_niri_action() {
   local exec w out="" first=1
   local -a words
@@ -642,7 +653,7 @@ da_niri_action() {
   fi
   read -ra words <<<"$exec"
   for w in "${words[@]}"; do
-    [ $first = 1 ] && [[ $w == /* ]] && [ "$(command -v "${w##*/}")" = "$w" ] && w=${w##*/}
+    [ $first = 1 ] && [[ $w == /* ]] && w=$(da_path_command "$w")
     first=0
     out+=" \"$w\""
   done
