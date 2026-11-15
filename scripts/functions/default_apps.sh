@@ -596,6 +596,8 @@ da_pick_app() {
   [ $term = 1 ] && n=1
   awk -F'\t' -v list="$*" -v n="$n" -v term="$term" '
     BEGIN { split(list, m, " ") }
+    # The DMS chooser asks which app opens a file; it is no terminal.
+    term && $1 == "dms-open.desktop" { next }
     {
       s = 0
       if (term) s = index(";" $7 ";", ";TerminalEmulator;") > 0
