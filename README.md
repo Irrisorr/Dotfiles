@@ -278,6 +278,12 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
     - 'System packages' - update / upgrade on both distros:
         - `update` - sync package lists (`yay -Sy` / `apt update`)
         - `upgrade` - install all updates: `yay -Syu` / `apt full-upgrade`, plus `flatpak update` (asks before installing, like running them by hand)
+    - 'Image tools (gowall)' (`scripts/functions/gowall.sh`, if `gowall` is installed) - every gowall feature with a description before each one:
+        - `gw` - the menu; `gw <image>` - straight to editing that image
+        - Edit an image: recolor to a theme, replace a color, invert, format, brightness/contrast/gamma/saturation, grayscale, flip/mirror, 3D tilt, pixel art, border/grid/round corners, resize, compress, AI upscale, remove background. Every change opens in `swayimg` first: keep it, retry with other settings or drop it; changes stack, Undo goes back one. History lists every version of the session (dropped tries too) with what was done and an image preview in fzf; any of them can be opened, saved or continued from. Nothing reaches `~/Pictures/gowall` until Finish → Save (or Save and set as wallpaper through DMS, or copy to clipboard)
+        - Also: the same change on many images (previewed on the first), stack images / make a GIF, OCR (image or PDF; providers and keys: [gowall docs](https://achno.github.io/gowall-docs/ocr/introduction)), palette of an image, themes and their colors, color tools (blend, lighten/darken, variants, color wheel, gradient image), recolor an SVG/ICO icon, wallpaper of the day (the top r/wallpaper post of the day, read from the RSS feed like gowall's master does: `gowall -w` in 0.2.4 gets 403 from Reddit)
+        - Images come from the current wallpaper, the clipboard (a niri screenshot lands there), fzf over `~/Pictures` (with a preview in kitty) or a typed path
+        - Edits go through gowall's stdout; compress, upscale, stack, gif and bg write a temp file instead (they can't use stdout, or ask to download a model on the first run)
 
 #### Syncing live configs back (`scripts/functions/sync/`)
 

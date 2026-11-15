@@ -23,4 +23,5 @@ menu "🚪 Exit" \
   "Rain animation (floating)|terminal_rain_float|terminal-rain" \
   "Nvim launch|nvim_launch|nvim" \
   "Sync to Dotfiles|sync_main" \
-  "System packages|package_commands"
+  "System packages|package_commands" \
+  "Image tools (gowall)|gowall_commands|gowall"
