@@ -140,6 +140,18 @@ gw_batch_arg() {
   printf '%s' "$out"
 }
 
+# gw_need <command> <package> [what for] — says what to install when it's missing.
+gw_need() {
+  command -v "$1" &>/dev/null && return 0
+  print_error_message "$1 isn't installed${3:+ ($3)}: sudo pacman -S $2"
+  return 2
+}
+
+# gw_err <stderr file> — gowall's own "Error: …" line (a spinner hides it).
+gw_err() {
+  sed 's/\x1b\[[0-9;]*m//g' "$1" 2>/dev/null | sed -n 's/^ *Error: *//p' | head -1
+}
+
 # ─── Results ──────────────────────────────────────────────────────────────────
 
 gw_show() {
@@ -203,7 +215,7 @@ gw_finish() {
     case $act in
       Save) saved=$(gw_save "$f" "$name") ;;
       "Save and set as wallpaper") saved=$(gw_save "$f" "$name") && gw_set_wallpaper "$saved" ;;
-      "Copy to clipboard") wl-copy -t "$(file -b --mime-type "$f")" <"$f" && print_success_message "Copied" ;;
+      "Copy to clipboard") gw_need wl-copy wl-clipboard && wl-copy -t "$(file -b --mime-type "$f")" <"$f" && print_success_message "Copied" ;;
       "Preview again") gw_show "$f" ;;
       Done) return 0 ;;
     esac
@@ -566,7 +578,8 @@ gw_apply() {
   if [ "$OP_STDOUT" = 1 ]; then
     out+=".${in##*.}"
     gum spin --title "gowall ${OP_SUB[*]}..." -- \
-      bash -c 'gowall "$@" > "$0"' "$out" "${OP_SUB[@]}" "$in" - "${OP_FLAGS[@]}" --preview false || return 2
+      bash -c 'gowall "$@" > "$0" 2> "$0.err"' "$out" "${OP_SUB[@]}" "$in" - "${OP_FLAGS[@]}" --preview false ||
+      { echo ":: $(gw_err "$out.err")" >&2; return 2; }
   else
     out+=".${OP_EXT:-${in##*.}}"
     # No spinner: upscale and bg may ask to download things first.
@@ -797,12 +810,54 @@ gw_gif() {
   gw_finish "$res" "anim"
 }
 
+# gw_env NAME — from the environment, else from the .env that EnvFilePath in
+# gowall's config.yml names (gowall reads only these two).
+gw_env() {
+  local f
+  [ -n "${!1}" ] && { echo "${!1}"; return; }
+  f=$(sed -n 's/^EnvFilePath: *"\{0,1\}\([^"]*\)"\{0,1\} *$/\1/p' "$CONFIG_DIR/gowall/config.yml" 2>/dev/null)
+  f=${f/#\~/$HOME}
+  [ -f "$f" ] && sed -n "s/^$1= *\"\{0,1\}\([^\"]*\)\"\{0,1\} *$/\1/p" "$f" | tail -1
+}
+
+# gw_ocr_ready <provider> <language> — what the provider needs is there; says
+# what's missing otherwise.
+gw_ocr_ready() {
+  local url key lang
+  case $1 in
+    tesseract)
+      gw_need tesseract "tesseract tesseract-data-eng tesseract-data-rus" || return 2
+      for lang in ${2//+/ }; do
+        tesseract --list-langs 2>/dev/null | grep -qx "$lang" ||
+          { print_error_message "tesseract has no '$lang': sudo pacman -S tesseract-data-$lang"; return 2; }
+      done ;;
+    docling)
+      url=$(gw_env DOCLING_BASE_URL); url=${url:-http://localhost:5001}
+      curl -sf -m 3 "${url%/}/health" >/dev/null ||
+        { print_error_message "No docling server at $url — start docling-serve (or set DOCLING_BASE_URL)"; return 2; } ;;
+    ollama)
+      url=$(gw_env OLLAMA_HOST); url=${url:-http://127.0.0.1:11434}
+      curl -sf -m 3 "${url%/}/api/tags" >/dev/null ||
+        { print_error_message "No ollama at $url: sudo pacman -S ollama && systemctl enable --now ollama, then ollama pull <model>"; return 2; } ;;
+    vllm)
+      curl -sf -m 3 http://localhost:8000/v1/models >/dev/null ||
+        { print_error_message "No vllm server at localhost:8000 — start it first"; return 2; } ;;
+    oc)
+      [ -n "$(gw_env OPENAI_BASE_URL)" ] ||
+        { print_error_message "Set OPENAI_BASE_URL (and OPENAI_API_COMPATIBLE_SERVICE_API_KEY) — see the note above"; return 2; } ;;
+    openai | openrouter | gemini | mistral)
+      key="${1^^}_API_KEY"
+      [ -n "$(gw_env "$key")" ] || { print_error_message "Set $key — see the note above"; return 2; } ;;
+  esac
+}
+
 gw_ocr() {
   gw_about "Text from an image or PDF (OCR)" "" \
     "Sends the file to an OCR provider and returns the text as markdown or plain" \
     "text. Local: tesseract, docling, ollama, vllm, oc (any OpenAI-compatible" \
-    "server). Cloud: openai, openrouter, gemini, mistral — their API keys go in" \
-    "~/.gowall/.env (OPENROUTER_API_KEY=..., GEMINI_API_KEY=...)." \
+    "server). Cloud: openai, openrouter, gemini, mistral — their API keys" \
+    "(OPENROUTER_API_KEY=..., GEMINI_API_KEY=...) go in the environment or in a" \
+    ".env file named by EnvFilePath: in ~/.config/gowall/config.yml." \
     "Schemas = saved provider settings in ~/.config/gowall/schema.yml." \
     "Tip: take a niri screenshot (it lands in the clipboard), then pick Clipboard."
   local f how s p m fmt l d txt act schemas=()
@@ -830,11 +885,14 @@ gw_ocr() {
       "gemini — cloud" \
       "mistral — cloud" || return 1
     gw_ask m "Model (empty for tesseract)" "" || return 1
+    # gowall wants -m from every provider; tesseract doesn't use it.
+    [ "$p" = tesseract ] && [ -z "$m" ] && m=tesseract
     args+=(-p "$p")
     [ -n "$m" ] && args+=(-m "$m")
   fi
   gw_choose fmt "Output" "md — markdown, keeps headings and tables" "txt — plain text" || return 1
   gw_ask l "Language (empty = provider default; tesseract: eng, rus · docling: en, ru)" "" || return 1
+  [ "$how" = manual ] && { gw_ocr_ready "$p" "$l" || return 2; }
   args+=(-f "$fmt")
   [ -n "$l" ] && args+=(-l "$l")
   if [ "${f##*.}" = pdf ]; then
@@ -843,8 +901,11 @@ gw_ocr() {
   fi
   gw_tmpdir
   txt="$GW_TMP/ocr.$fmt"
-  gum spin --title "OCR..." -- bash -c 'gowall ocr "$@" > "$0"' "$txt" "$f" - "${args[@]}" &&
-    [ -s "$txt" ] || { print_error_message "OCR failed"; return 2; }
+  gum spin --title "OCR..." -- bash -c 'gowall ocr "$@" > "$0" 2> "$0.err"' "$txt" "$f" - "${args[@]}" &&
+    [ -s "$txt" ] || {
+      print_error_message "OCR failed: $(gw_err "$txt.err")"
+      return 2
+    }
   gum pager <"$txt" </dev/tty
   while true; do
     gw_choose act "Text: $(wc -w <"$txt") words" \
@@ -853,7 +914,7 @@ gw_ocr() {
       "Read again" \
       "Done" || return 0
     case $act in
-      Copy) wl-copy <"$txt" && print_success_message "Copied" ;;
+      Copy) gw_need wl-copy wl-clipboard && wl-copy <"$txt" && print_success_message "Copied" ;;
       Save) gw_save "$txt" "ocr/$(basename "${f%.*}")" >/dev/null ;;
       "Read again") gum pager <"$txt" </dev/tty ;;
       Done) return 0 ;;
@@ -885,7 +946,7 @@ gw_palette() {
     "Open in browser — gowall's hex preview site" \
     "Done" || return 0
   case $act in
-    Copy) wl-copy <<<"$pal" && print_success_message "Copied" ;;
+    Copy) gw_need wl-copy wl-clipboard && wl-copy <<<"$pal" && print_success_message "Copied" ;;
     "Open in browser") gowall extract "$f" -c "$c" -p >/dev/null ;;
   esac
 }
@@ -902,7 +963,7 @@ gw_themes() {
     "Open in browser — gowall's hex preview site" \
     "Done" || return 0
   case $act in
-    Copy) gowall list -t "$t" | wl-copy && print_success_message "Copied" ;;
+    Copy) gw_need wl-copy wl-clipboard && gowall list -t "$t" | wl-copy && print_success_message "Copied" ;;
     "Open in browser") gowall list -t "$t" -p >/dev/null ;;
   esac
 }
@@ -990,6 +1051,8 @@ gw_icon() {
     "  ico — back to an .ico with the usual sizes (16-256)"
   local f t size out res fmt opts
   gw_pick_file f icon svg ico || return 1
+  if [ "${f##*.}" = svg ]; then gw_need rsvg-convert librsvg "renders the SVG" || return 2; fi
+  gw_need magick imagemagick "reads ICO, sizes" || return 2
   gw_pick_theme t || return 1
   gw_tmpdir
   res="$GW_TMP/icon.png"
@@ -1003,10 +1066,10 @@ gw_icon() {
   fi
   [ -s "$res" ] || { print_error_message "gowall failed"; return 2; }
   gw_show "$res"
-  opts=("png — recolored PNG" "svg — SVG wrapper around the PNG")
-  command -v inkscape &>/dev/null && opts+=("traced svg — real vector via inkscape")
-  opts+=("ico — Windows icon, 16-256 px")
+  opts=("png — recolored PNG" "svg — SVG wrapper around the PNG"
+    "traced svg — real vector via inkscape" "ico — Windows icon, 16-256 px")
   gw_choose fmt "Save as" "${opts[@]}" || return 1
+  if [ "$fmt" = "traced svg" ]; then gw_need inkscape inkscape "traces the vector" || return 2; fi
   out="$GW_TMP/icon-out"
   case $fmt in
     png) out=$res ;;
@@ -1071,13 +1134,14 @@ gowall_commands() {
     "Palette of an image — its main colors as hex|gw_palette" \
     "Themes — list them and see their colors|gw_themes" \
     "Color tools — blend, lighten, shades, color wheel, gradient image|gw_colors" \
-    "Recolor an icon — SVG or ICO to a theme|gw_icon|rsvg-convert+magick" \
+    "Recolor an icon — SVG or ICO to a theme|gw_icon" \
     "Wallpaper of the day — community-voted, new every day|gw_daily"
 }
 
 # gw [image] — straight to editing that image, or the menu.
 gw() {
   require_gum gw || return 1
+  gw_need magick imagemagick "sizes, resize, icons — the rest works" || :
   if [ -n "$1" ]; then
     [ -f "$1" ] || { print_error_message "No such file: $1"; return 1; }
     gw_edit "$(realpath "$1")"
