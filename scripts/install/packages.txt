@@ -82,6 +82,8 @@ swayimg                ubuntu:source=swayimg (view images | Ubuntu: built from s
 - imagemagick (saving rotation of other formats)
 - exiv2 (resetting EXIF orientation after rotation)
 vlc (view videos)
+- qt5ct (VLC in the DMS wallpaper colors)
+- qt6ct (the same for Qt6 apps)
 wlogout (logout app for wayland)
 clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)
 - wl-clipboard (wayland clipboard)

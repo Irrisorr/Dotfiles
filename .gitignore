@@ -26,3 +26,7 @@ niri/dms/*
 
 # Sensitive rules
 niri/conf/sensitive_rules.kdl
+
+# DMS writes the matugen palette here on every wallpaper change
+qt5ct/colors/
+qt6ct/colors/

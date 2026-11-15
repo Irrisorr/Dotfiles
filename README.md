@@ -115,6 +115,7 @@ With Settings → Theme → **Dynamic**, DMS runs [matugen](https://github.com/I
 | Zen browser | `dms/zen.css` | local Sine mod `zen-browser/chrome/sine-mods/dms-colors`: its script loads the file and reloads it within ~2 s of every change (no Zen restart; needs `sine.allow-unsafe-js` from `user.js`), its CSS lets folders take the color too. Fills the window background, so Zen's workspace gradients don't show |
 | Vesktop | `~/.config/vesktop/themes/dank-discord.css` | `configure_vesktop` enables it in Vencord's settings (native install only — the flatpak can't read it) |
 | VS Code | the `DankLinux.dms-theme` extension's theme files | `configure_vscode` installs the extension and sets `workbench.colorTheme` (settings.json stays untracked) |
+| VLC (Qt5) | `qt5ct/colors/matugen.conf` (also `qt6ct/` for Qt6 apps) | `configure_vlc`: links `qt5ct/` and `qt6ct/` (Fusion style, the matugen palette, Adwaita icons and fonts) and starts VLC with `QT_QPA_PLATFORMTHEME=qt5ct` through a copy of `vlc.desktop` in `~/.local/share/applications`; the rest of Qt keeps `gtk3`, whose Qt5 side gives no colors. VLC takes the colors when it starts |
 | dgop (`dgop top`) | `~/.config/dgop/colors.json` | nothing to do: dgop reads it itself (`keybinds.json` next to it is dgop's own default, not tracked) |
 | Dux greeter | — | reads DMS's `dms-colors.json` through `/var/cache/dms-greeter/colors.json`, see [Dux greeter](#dux-greeter-login-screen) |
 
@@ -146,6 +147,8 @@ The generated files inside Dotfiles change with every wallpaper, so they are in 
 - **Clipse** always opens floating and small size
 - **Terminal** (kitty, and whatever defapps added) always opens at 50% (0.5) window size proportion
 - **Obsidian** has scroll-factor 0.2
+- **Telegram**: a new Telegram window takes focus, so an incoming call comes up in front (its window has only the contact's name as title, so every new Telegram window does, except at login)
+- **VLC** isn't sized by a rule: it resized its window to the video (wider than the column for 1080p) — `configure_vlc` turns that off in `vlcrc`
 - **Rofi** has blur effect
 - **Wallpaper** has place-within-backdrop rule (see in [niri wiki](https://niri-wm.github.io/niri/Overview.html#backdrop-customization))
 - **All apps** that use Wayland protocol have blur effect
