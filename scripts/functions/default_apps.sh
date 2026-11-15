@@ -817,12 +817,14 @@ da_app_id() {
 # name added. Prints what was added.
 da_sync_rules() {
   local cat=$1 id=$2 new name others tmp file
+  # The DMS chooser opens no window of its own, rules have nothing to match.
+  [ "$id" = dms-open.desktop ] && return 0
   file=$(readlink -f "$DA_RULES" 2>/dev/null) && [ -f "$file" ] || return 0
   new=$(da_app_id "$id")
   name=$(awk -F'\t' -v id="$id" '$1 == id { print $2 }' "$DA_STATE/apps.tsv")
   name=${name% (${id%.desktop})}
   others=$(awk -F'\t' -v cat="$cat" -v id="$id" '
-    $1 != id && index(";" $7 ";", ";" cat ";") { n = $2; sub(/ \(.*\)$/, "", n); print ($8 != "" ? $8 : substr($1, 1, length($1) - 8)) "\t" n }
+    $1 != id && $1 != "dms-open.desktop" && index(";" $7 ";", ";" cat ";") { n = $2; sub(/ \(.*\)$/, "", n); print ($8 != "" ? $8 : substr($1, 1, length($1) - 8)) "\t" n }
   ' "$DA_STATE/apps.tsv")
   tmp=$(mktemp)
   awk -v new="$new" -v newname="$name" -v others="$others" '
