@@ -1,17 +1,24 @@
 #!/bin/bash
 #
 # spice: spicetify in one menu — theme (DMS wallpaper colors or the one picked
-# in Marketplace), Marketplace update and backup, extensions, apply / repair /
-# restore. The config is Dotfiles/spicetify (~/.config/spicetify links to it),
+# in Marketplace), custom app updates, Marketplace backup, extensions, apply /
+# repair / restore. The config is Dotfiles/spicetify (~/.config/spicetify links to it),
 # so the picked theme and extensions are remembered there.
 
 . "$HOME/Dotfiles/scripts/lib/common.sh"
 
 SP_DIR="$HOME/Dotfiles/spicetify"
 SP_MARKET_BACKUP="$SP_DIR/marketplace-backup.json"
-SP_MARKET_INSTALL="https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh"
 
-sp_get() { spicetify config "$1" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g'; }
+# Custom apps, each installed and updated by its own official installer:
+# name|CustomApps dir|GitHub repo|installer URL|shell it runs in
+SP_APPS=(
+  "Marketplace|marketplace|spicetify/marketplace|https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh|sh"
+  "Listening Stats|listening-stats|Xndr2/listening-stats|https://raw.githubusercontent.com/Xndr2/listening-stats/main/install.sh|bash"
+)
+
+# Lists (extensions, custom_apps) come one per line.
+sp_get() { spicetify config "$1" 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' | paste -sd' '; }
 
 sp_theme_name() {
   case $(sp_get current_theme) in
@@ -22,14 +29,26 @@ sp_theme_name() {
   esac
 }
 
-sp_market_version() {
-  grep -o -m1 'Initializing Spicetify Marketplace v[0-9.]*' "$SP_DIR/CustomApps/marketplace/extension.js" 2>/dev/null | sed 's/.* v//'
+# The version is only in the bundled JS (manifest.json has none).
+sp_app_version() {
+  local d="$SP_DIR/CustomApps/$1"
+  case $1 in
+    marketplace) grep -o -m1 'Initializing Spicetify Marketplace v[0-9.]*' "$d/extension.js" 2>/dev/null | sed 's/.* v//' ;;
+    listening-stats) grep -o -m1 'APP_VERSION="[^"]*"' "$d/extension.js" 2>/dev/null | cut -d'"' -f2 ;;
+  esac
 }
 
-# The release's tag, as the install script reads it.
-sp_market_latest() {
-  curl -fsSL -m 10 https://api.github.com/repos/spicetify/marketplace/releases/latest 2>/dev/null |
+# The release's tag, as the install scripts read it.
+sp_app_latest() {
+  curl -fsSL -m 10 "https://api.github.com/repos/$1/releases/latest" 2>/dev/null |
     jq -r '.tag_name // empty' | sed 's/^v//'
+}
+
+sp_app_install() {
+  local name=$1 url=$2 shell=$3
+  # Listening Stats' installer would install spicetify to ~/.spicetify if it found none.
+  curl -fsSL "$url" | LISTENING_STATS_SKIP_SPICETIFY_INSTALL=1 "$shell" ||
+    { print_error_message "$name install failed"; return 2; }
 }
 
 # spicetify writes into Spotify's files; apply restarts Spotify.
@@ -61,14 +80,27 @@ sp_theme() {
   print_success_message "Theme: $(sp_theme_name)"
 }
 
-# The official installer (wiki: Installation): downloads the latest release
-# into CustomApps/marketplace and applies. The picked theme stays.
-sp_market_update() {
-  local have latest
-  have=$(sp_market_version) latest=$(sp_market_latest)
-  gum confirm "Marketplace: installed ${have:-none}, latest ${latest:-?}. Install the latest?" </dev/tty || return 0
-  curl -fsSL "$SP_MARKET_INSTALL" | sh || { print_error_message "Marketplace install failed"; return 2; }
-  print_success_message "Marketplace $(sp_market_version)"
+# Installed vs latest release for each app; outdated or missing ones come
+# preselected. The installers download into CustomApps/ and apply; the picked
+# theme stays. (Marketplace's own themes and extensions load from GitHub on
+# every Spotify start, so they update by themselves.)
+sp_apps_update() {
+  local app name dir repo url shell have latest rows=() sel=() picked=() p
+  for app in "${SP_APPS[@]}"; do
+    IFS='|' read -r name dir repo url shell <<<"$app"
+    have=$(sp_app_version "$dir") latest=$(sp_app_latest "$repo")
+    rows+=("$name: ${have:-not installed} → ${latest:-?}")
+    [ -n "$latest" ] && [ "$have" = "$latest" ] || sel+=("${rows[-1]}")
+  done
+  mapfile -t picked < <(gum choose --no-limit --header "Install the latest (Space: pick, Enter: install)" \
+    --selected "$(IFS=,; echo "${sel[*]}")" "${rows[@]}" </dev/tty) || return 0
+  for p in "${picked[@]}"; do
+    for app in "${SP_APPS[@]}"; do
+      IFS='|' read -r name dir repo url shell <<<"$app"
+      [[ $p == "$name:"* ]] || continue
+      sp_app_install "$name" "$url" "$shell" && print_success_message "$name $(sp_app_version "$dir")"
+    done
+  done
 }
 
 # Marketplace keeps installed themes, extensions and snippets in Spotify's own
@@ -100,7 +132,40 @@ sp_market_backup() {
   esac
 }
 
-# Files in Extensions/ (yours, dms-live); Marketplace ones are managed there.
+# Spicy Lyrics keeps its settings only inside Spotify (localStorage
+# "SL:settings"): this reads them from Spotify's storage on disk and writes them
+# into lyrics-settings.js, which gives them back to a Spotify that hasn't had them.
+SP_LYRICS="$SP_DIR/Extensions/lyrics-settings.js"
+
+sp_lyrics_saved() {
+  awk '/^  const SAVED = \{/,/^  \};/' "$SP_LYRICS" | sed '1s/.*/{/; $s/.*/}/'
+}
+
+sp_lyrics_settings() {
+  [[ " $(sp_get extensions) " == *" lyrics-settings.js "* ]] || {
+    sp_run config extensions lyrics-settings.js >/dev/null && sp_run apply
+    print_success_message "lyrics-settings.js is on — Spotify restarted"
+  }
+  local json changed
+  json=$(python3 -I "$HOME/Dotfiles/scripts/lib/spotify_storage.py" SL:settings 2>/dev/null | jq 'select(type == "object")' 2>/dev/null)
+  [ -n "$json" ] || { print_error_message "No Spicy Lyrics settings in Spotify yet — change one in its settings first"; return 2; }
+  changed=$(jq -rn --argjson new "$json" --argjson old "$(sp_lyrics_saved | jq -c . 2>/dev/null || echo '{}')" '
+    $new | to_entries[] | select($old[.key] != .value) | "  \(.key): \($old[.key] // "—") → \(.value)"')
+  [ -n "$changed" ] || { print_success_message "Spicy Lyrics settings are already saved"; return 0; }
+  echo "$changed"
+  local tmp
+  tmp=$(mktemp)
+  awk -v json="$json" '
+    /^  \/\/ end of saved settings/ { skip = 0 }
+    !skip { print }
+    /^  \/\/ spice writes the saved settings/ { gsub(/\n/, "\n  ", json); print "  const SAVED = " json ";"; skip = 1 }
+  ' "$SP_LYRICS" >"$tmp" && cat "$tmp" >"$SP_LYRICS"
+  rm -f "$tmp"
+  sp_run refresh -e
+  print_success_message "Saved into $SP_LYRICS"
+}
+
+# Files in Extensions/ (yours: dms-live, lyrics-settings); Marketplace ones are managed there.
 sp_extensions() {
   local on all=() picked=() f
   on=" $(sp_get extensions | tr '|' ' ') "
@@ -116,15 +181,17 @@ sp_extensions() {
 }
 
 spice() {
-  require_gum spice || return 1
   command -v spicetify &>/dev/null || { print_error_message "spicetify isn't installed: sudo pacman -S spicetify-cli"; return 1; }
+  [ "$1" = lyrics ] && { sp_lyrics_settings; return; }
+  require_gum spice || return 1
   local act
   while true; do
-    echo ":: Theme: $(sp_theme_name) · Marketplace $(sp_market_version) · extensions: $(sp_get extensions)"
+    echo ":: Theme: $(sp_theme_name) · apps: $(sp_get custom_apps) · extensions: $(sp_get extensions)"
     act=$(gum choose --header "Spotify (spicetify)" \
       "Theme — DMS wallpaper colors or the Marketplace one" \
-      "Update Marketplace — latest release, official installer" \
+      "Update apps — Marketplace, Listening Stats: latest releases" \
       "Marketplace backup — save / restore its themes, extensions, snippets" \
+      "Lyrics settings — save Spicy Lyrics' current settings into the dotfiles" \
       "Extensions — turn your own on / off" \
       "Apply again — after changing the config by hand" \
       "Repair after a Spotify update — back up the new Spotify, apply" \
@@ -133,8 +200,9 @@ spice() {
       "🚪 Exit" </dev/tty) || return 0
     case $act in
       Theme*) sp_theme ;;
-      "Update Marketplace"*) sp_market_update ;;
+      "Update apps"*) sp_apps_update ;;
       "Marketplace backup"*) sp_market_backup ;;
+      "Lyrics settings"*) sp_lyrics_settings ;;
       Extensions*) sp_extensions ;;
       Apply*) sp_run apply ;;
       Repair*) sp_run backup apply ;;

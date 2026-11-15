@@ -33,5 +33,6 @@ qt6ct/colors/
 
 # matugen writes the Spotify colors on every wallpaper change
 spicetify/Themes/dms-colors/color.ini
-# Installed by the official Marketplace installer (installer step, `spice`)
+# Installed by their official installers (installer step, `spice`)
 spicetify/CustomApps/marketplace/
+spicetify/CustomApps/listening-stats/

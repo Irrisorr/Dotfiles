@@ -1,3 +1,3 @@
-function spice --description 'Spotify theming and Marketplace (spicetify menu)'
-    bash $HOME/Dotfiles/scripts/functions/spicetify.sh spice
+function spice --description 'Spotify (spicetify): theme, apps, backups, lyrics settings'
+    bash $HOME/Dotfiles/scripts/functions/spicetify.sh spice $argv
 end

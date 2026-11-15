@@ -16,6 +16,7 @@ configure_spicetify_steps=(
   "Re-apply after Spotify updates (pacman hook)|_spicetify_hook|pacman"
   "Apply (theme dms-colors)|_spicetify_apply"
   "Marketplace (latest release)|_spicetify_marketplace|curl"
+  "Listening Stats (latest release)|_spicetify_listening_stats|curl"
 )
 
 configure_spicetify() {
@@ -51,7 +52,12 @@ _spicetify_apply() {
     print_success_message "Spotify takes the wallpaper colors after DMS sets a wallpaper (change it once)"
 }
 
-# The official installer (Marketplace wiki: Installation); it applies too.
+# The official installers (each repo's README); they apply too.
 _spicetify_marketplace() {
   execute_command "Install Marketplace" "curl -fsSL https://raw.githubusercontent.com/spicetify/marketplace/main/resources/install.sh | sh"
+}
+
+_spicetify_listening_stats() {
+  execute_command "Install Listening Stats" \
+    "curl -fsSL https://raw.githubusercontent.com/Xndr2/listening-stats/main/install.sh | LISTENING_STATS_SKIP_SPICETIFY_INSTALL=1 bash"
 }

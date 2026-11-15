@@ -36,6 +36,9 @@ vesktop-bin            ubuntu:flatpak=dev.vencord.Vesktop
 discord                ubuntu:flatpak=com.discordapp.Discord
 spotify                ubuntu:flatpak=com.spotify.Client
 spicetify-cli          ubuntu:skip (spotify extensions manager | Ubuntu: install script only)
+- unzip                 (Listening Stats' installer, `spice` → Update apps)
+- python                ubuntu:apt=python3 (`spice lyrics` reads Spotify's storage)
+- wl-clipboard          (`spice` → Marketplace backup)
 zoom                   ubuntu:flatpak=us.zoom.Zoom
 
 # Notes and Offices
