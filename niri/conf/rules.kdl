@@ -36,7 +36,7 @@ window-rule {
     match app-id=r#"zen$"# title="^Erste"
     match app-id=r#"firefox$"# title="^Erste"
     match app-id=r#"google-chrome$"# title="^Erste"
-    match app-id=r#"obsidian$"# title="Быт"
+    match app-id=r#"(?i)obsidian"# title="Быт"
     match app-id="clipse"
     block-out-from "screencast"
 }
@@ -69,7 +69,7 @@ window-rule {
 
 // Obsidian
 window-rule {
-    match app-id="obsidian"
+    match app-id=r#"(?i)obsidian"#
     scroll-factor 0.2
 }
 
@@ -116,7 +116,7 @@ window-rule {
 
 // Apps that should open on the "notes" workspace
 window-rule {
-    match app-id=r#"obsidian$"#
+    match app-id=r#"(?i)obsidian"#
     
     open-on-workspace "notes"
 }
