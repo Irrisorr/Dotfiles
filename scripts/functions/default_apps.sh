@@ -24,7 +24,8 @@ DA_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
 DA_MIMEAPPS="$DA_CONFIG/mimeapps.list"
 DA_TERMINALS="$DA_CONFIG/xdg-terminals.list"
 DA_BINDS="$DA_CONFIG/niri/conf/binds.kdl"
-DA_RULES="$DA_CONFIG/niri/conf/rules.kdl"
+# sensitive_rules.kdl: this PC's own rules, not in git, may be missing
+DA_RULES=("$DA_CONFIG/niri/conf/rules.kdl" "$DA_CONFIG/niri/conf/sensitive_rules.kdl")
 DA_MIME_DIR=/usr/share/mime
 DA_USER_MIME="${XDG_DATA_HOME:-$HOME/.local/share}/mime"
 DA_USER_PKG="$DA_USER_MIME/packages/defapps.xml"
@@ -818,12 +819,11 @@ da_app_id() {
 # r#""# and the rest of the line kept. Nothing is added where a line with the
 # same rest already matches this app (r#"(?i)chrome"# covers google-chrome),
 # so switching back and forth adds nothing. The comment above the rule gets
-# the name added. Prints what was added.
+# the name added. Every file of DA_RULES that exists. Prints what was added.
 da_sync_rules() {
-  local cat=$1 id=$2 new name others tmp file
+  local cat=$1 id=$2 new name others tmp file rules
   # The DMS chooser opens no window of its own, rules have nothing to match.
   [ "$id" = dms-open.desktop ] && return 0
-  file=$(readlink -f "$DA_RULES" 2>/dev/null) && [ -f "$file" ] || return 0
   new=$(da_app_id "$id")
   name=$(awk -F'\t' -v id="$id" '$1 == id { print $2 }' "$DA_STATE/apps.tsv")
   name=${name% (${id%.desktop})}
@@ -833,75 +833,78 @@ da_sync_rules() {
       print $3 "\t" length(a) "\t" a "\t" n
     }
   ' "$DA_STATE/apps.tsv" | sort -t$'\t' -k1,1n -k2,2n | cut -f3-)  # shown apps, short ids first: kitty before kitty-open
-  tmp=$(mktemp)
-  awk -v new="$new" -v newname="$name" -v others="$others" '
-    # Split a match line: P_ci (?i), P_s ^, P_e $, P_core the app-id text,
-    # P_pos/P_len where the core sits, P_rest the line without the app-id.
-    function parse(l,    t, a) {
-      if (!match(l, /app-id=(r#)?"[^"]*"(#)?/)) return 0
-      a = RSTART; t = substr(l, RSTART, RLENGTH)
-      P_rest = substr(l, 1, a - 1) substr(l, a + RLENGTH)
-      sub(/^app-id=(r#)?"/, "", t); sub(/"(#)?$/, "", t)
-      P_pos = a + index(substr(l, a), "\"")
-      P_ci = sub(/^\(\?i\)/, "", t); if (P_ci) P_pos += 4
-      P_s = sub(/^\^/, "", t); if (P_s) P_pos++
-      P_e = sub(/\$$/, "", t)
-      P_core = t; P_len = length(t)
-      return 1
-    }
-    # Does the parsed pattern match app-id x? (Escaped dots taken literally.)
-    function hits(x,    p, i) {
-      p = P_core; gsub(/\\\./, ".", p)
-      if (P_ci) { p = tolower(p); x = tolower(x) }
-      if (P_s && P_e) return x == p
-      if (P_s) return index(x, p) == 1
-      if (P_e) return (i = length(x) - length(p) + 1) > 0 && substr(x, i) == p
-      return index(x, p) > 0
-    }
-    function ci_append(s, from, add,    i) {
-      i = index(tolower(s), tolower(from))
-      return i ? substr(s, 1, i - 1 + length(from)) ", " add substr(s, i + length(from)) : s
-    }
-    BEGIN {
-      n = split(others, o, "\n")
-      for (i = 1; i <= n; i++) { split(o[i], f, "\t"); if (f[1] != "" && f[1] != new) { oid[++no] = f[1]; oname[no] = f[2] } }
-    }
-    { line[NR] = $0 }
-    END {
-      for (i = 1; i <= NR; i++) {
-        if (line[i] !~ /^[ \t]*window-rule[ \t]*\{/) continue
-        for (j = i + 1; j <= NR && line[j] !~ /^[ \t]*\}/; j++) ;
-        delete covered
-        for (k = i + 1; k < j; k++) if (line[k] ~ /^[ \t]*match/ && parse(line[k]) && hits(new)) covered[P_rest] = 1
-        added = 0
-        for (k = i + 1; k < j; k++) {
-          if (line[k] !~ /^[ \t]*match/ || !parse(line[k]) || (P_rest in covered)) continue
-          for (m = 1; m <= no && !hits(oid[m]); m++) ;
-          if (m > no) continue
-          covered[P_rest] = 1
-          after[k] = after[k] "\n" substr(line[k], 1, P_pos - 1) new substr(line[k], P_pos + P_len)
-          added = 1
-          next_to[oid[m]] = 1
-          oldname = oname[m]; oldid = oid[m]
-        }
-        # Only a comment that names the other app ("// Kitty (terminal)").
-        cm = i > 1 ? tolower(line[i - 1]) : ""
-        if (added && cm ~ /^[ \t]*\/\// && !index(cm, tolower(newname))) {
-          if (oldname != "" && index(cm, tolower(oldname))) line[i - 1] = ci_append(line[i - 1], oldname, newname)
-          else if (index(cm, tolower(oldid))) line[i - 1] = ci_append(line[i - 1], oldid, newname)
-        }
-        i = j
+  for rules in "${DA_RULES[@]}"; do
+    file=$(readlink -f "$rules" 2>/dev/null) && [ -f "$file" ] || continue
+    tmp=$(mktemp)
+    awk -v new="$new" -v newname="$name" -v others="$others" '
+      # Split a match line: P_ci (?i), P_s ^, P_e $, P_core the app-id text,
+      # P_pos/P_len where the core sits, P_rest the line without the app-id.
+      function parse(l,    t, a) {
+        if (!match(l, /app-id=(r#)?"[^"]*"(#)?/)) return 0
+        a = RSTART; t = substr(l, RSTART, RLENGTH)
+        P_rest = substr(l, 1, a - 1) substr(l, a + RLENGTH)
+        sub(/^app-id=(r#)?"/, "", t); sub(/"(#)?$/, "", t)
+        P_pos = a + index(substr(l, a), "\"")
+        P_ci = sub(/^\(\?i\)/, "", t); if (P_ci) P_pos += 4
+        P_s = sub(/^\^/, "", t); if (P_s) P_pos++
+        P_e = sub(/\$$/, "", t)
+        P_core = t; P_len = length(t)
+        return 1
       }
-      for (i = 1; i <= NR; i++) printf "%s%s\n", line[i], after[i]
-      for (c in next_to) print c > "/dev/stderr"
-    }
-  ' "$file" >"$tmp" 2>"$tmp.changed"
-  if da_niri_replace "$file" "$tmp"; then
-    sed "s|.*|window rules: + $new next to &|" "$tmp.changed"
-  else
-    echo "window rules: niri didn't accept the change, kept the old ones"
-  fi
-  rm -f "$tmp" "$tmp.changed"
+      # Does the parsed pattern match app-id x? (Escaped dots taken literally.)
+      function hits(x,    p, i) {
+        p = P_core; gsub(/\\\./, ".", p)
+        if (P_ci) { p = tolower(p); x = tolower(x) }
+        if (P_s && P_e) return x == p
+        if (P_s) return index(x, p) == 1
+        if (P_e) return (i = length(x) - length(p) + 1) > 0 && substr(x, i) == p
+        return index(x, p) > 0
+      }
+      function ci_append(s, from, add,    i) {
+        i = index(tolower(s), tolower(from))
+        return i ? substr(s, 1, i - 1 + length(from)) ", " add substr(s, i + length(from)) : s
+      }
+      BEGIN {
+        n = split(others, o, "\n")
+        for (i = 1; i <= n; i++) { split(o[i], f, "\t"); if (f[1] != "" && f[1] != new) { oid[++no] = f[1]; oname[no] = f[2] } }
+      }
+      { line[NR] = $0 }
+      END {
+        for (i = 1; i <= NR; i++) {
+          if (line[i] !~ /^[ \t]*window-rule[ \t]*\{/) continue
+          for (j = i + 1; j <= NR && line[j] !~ /^[ \t]*\}/; j++) ;
+          delete covered
+          for (k = i + 1; k < j; k++) if (line[k] ~ /^[ \t]*match/ && parse(line[k]) && hits(new)) covered[P_rest] = 1
+          added = 0
+          for (k = i + 1; k < j; k++) {
+            if (line[k] !~ /^[ \t]*match/ || !parse(line[k]) || (P_rest in covered)) continue
+            for (m = 1; m <= no && !hits(oid[m]); m++) ;
+            if (m > no) continue
+            covered[P_rest] = 1
+            after[k] = after[k] "\n" substr(line[k], 1, P_pos - 1) new substr(line[k], P_pos + P_len)
+            added = 1
+            next_to[oid[m]] = 1
+            oldname = oname[m]; oldid = oid[m]
+          }
+          # Only a comment that names the other app ("// Kitty (terminal)").
+          cm = i > 1 ? tolower(line[i - 1]) : ""
+          if (added && cm ~ /^[ \t]*\/\// && !index(cm, tolower(newname))) {
+            if (oldname != "" && index(cm, tolower(oldname))) line[i - 1] = ci_append(line[i - 1], oldname, newname)
+            else if (index(cm, tolower(oldid))) line[i - 1] = ci_append(line[i - 1], oldid, newname)
+          }
+          i = j
+        }
+        for (i = 1; i <= NR; i++) printf "%s%s\n", line[i], after[i]
+        for (c in next_to) print c > "/dev/stderr"
+      }
+    ' "$file" >"$tmp" 2>"$tmp.changed"
+    if da_niri_replace "$file" "$tmp"; then
+      sed "s|.*|${rules##*/}: + $new next to &|" "$tmp.changed"
+    else
+      echo "${rules##*/}: niri didn't accept the change, kept the old ones"
+    fi
+    rm -f "$tmp" "$tmp.changed"
+  done
 }
 
 # da_set_bind <key> <title> <action> — rewrite that bind's line in place

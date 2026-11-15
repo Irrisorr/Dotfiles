@@ -6,7 +6,6 @@
 // ██║░░██║╚██████╔╝███████╗███████╗██████╔╝
 // ╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝╚═════╝░
 
-
 // Wallpaper (swaybg / DMS)
 layer-rule {
     match namespace="^wallpaper$"
@@ -36,7 +35,6 @@ window-rule {
     match app-id=r#"(?i)chrome"# title=r#"(?i)(santander|erste|centrum24|logowanie)"#
     // …and the bare "Zen Browser" a page has until its own title loads (15-335 ms)
     match app-id=r#"(?i)zen"# title=r#"^Zen Browser$"#
-    match app-id=r#"(?i)obsidian"# title=r#"(?i)быт"#
     match app-id=r#"(?i)^clipse$"#
     block-out-from "screencast"
 }

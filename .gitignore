@@ -23,3 +23,6 @@ dms/firefox.css
 # DMS writes all of niri/dms/; only the files niri/config.kdl includes are kept
 niri/dms/*
 !niri/dms/binds.kdl
+
+# Sensitive rules
+niri/conf/sensitive_rules.kdl
