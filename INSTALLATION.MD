@@ -23,7 +23,7 @@ Dotfiles/
       paths.sh       # resolvers for paths that differ between distros (polkit, portals, sddm, fish, python, console font, zen, vscode)
       gum.sh         # gum bootstrap + UI wrappers
       helpers.sh     # universal menu(), execute_*, create_symlink, package engine, system_update
-    wrappers/        # tiny launchers called from WM configs (polkit agent, xdg portals) or git (spicetify config filter)
+    wrappers/        # tiny launchers called from WM configs (polkit agent, xdg portals), git (spicetify config filter) or matugen (VS Code and Telegram theme hooks)
     install/
       main.sh        # installer engine: sourcing + core steps + run_final_steps (no menus)
       packages.txt   # package inventory by category, one line per package for both distros
@@ -434,6 +434,31 @@ instead of failing the session's autostart.
   blank values, which spicetify fills in on its first run. A size change alone
   makes `git status` list the file with an empty diff: `git add` it (nothing is
   staged; `spicetify-reapply` does it after a Spotify update).
+* `vscode-soften.sh <roles.json>` — not for a WM either: the `post_hook` of
+  `matugen/templates/vscode-soften.json` (`matugen/config.toml`). The template
+  renders a few matugen roles (editor / side / raised / popup backgrounds,
+  text, comment); the script sets them on fixed keys of DMS's "Dark" and
+  default VS Code theme files (`~/.vscode{,-oss}/extensions/danklinux.dms-theme-*/themes`),
+  replaces `on_surface` text with `on_surface_variant` lightened a little
+  (`lighten: 8`) and sets the comment color. Its output is marked
+  (`"dotfilesSoftened": true`), DMS's isn't. DMS writes those files in the
+  same matugen run, before or after the hook, so the script patches a file as
+  soon as it is unmarked (DMS has written it; within 0.1 s) and after 10 s
+  anyway (DMS's VS Code template turned off). The hook runs it detached
+  (`setsid -f`) so matugen doesn't wait. VS Code still shows DMS's colors for
+  that moment, then ours. The files are JSONC: whole-line `//` comments are
+  dropped before `jq`. Every patch starts from DMS's own version, kept in
+  `~/.cache/matugen`, so a rerun with other colors doesn't stack on the last
+  patch.
+* `telegram-theme.sh <colors> <out.tdesktop-theme>` — the `post_hook` of
+  `matugen/templates/telegram-colors.tdesktop-theme`. A Telegram palette can't
+  carry the chat background, a `.tdesktop-theme` can: it is a zip of
+  `colors.tdesktop-theme` and `background.png`. The script draws the background
+  (an ImageMagick gradient between the two colors on the template's
+  `// chat-background:` line), zips both with `python3 -m zipfile` (no `zip`
+  needed on Ubuntu) and moves the zip over `~/.local/share/matugen/dms.tdesktop-theme`
+  in one rename — Telegram watches the applied file and reloads it on change,
+  so it never sees half a zip. Without `magick` the theme has no background.
 
 ## `functions/` (aliases + `asd` menu)
 

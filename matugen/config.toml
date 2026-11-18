@@ -1,5 +1,6 @@
-# Own matugen templates. DMS runs them after its own on every wallpaper change
-# (Settings → Theme → Dynamic, runUserMatugenTemplates in dms/settings.json).
+# Own matugen templates. DMS runs them with its own, in the same matugen run (no
+# set order), on every wallpaper change (Settings → Theme → Dynamic,
+# runUserMatugenTemplates in dms/settings.json).
 
 [config]
 
@@ -9,3 +10,21 @@
 input_path = '~/.config/matugen/templates/spicetify-color.ini'
 output_path = '~/.config/spicetify/Themes/dms-colors/color.ini'
 post_hook = 'spicetify refresh -s >/dev/null 2>&1'
+
+# VS Code: DMS's own theme files (the DankLinux.dms-theme extension) with softer
+# contrast — backgrounds a step up from near-black, dimmer text, readable
+# comments. The hook waits for DMS to write them in this same run, so it runs
+# detached.
+[templates.vscode-soften]
+input_path = '~/.config/matugen/templates/vscode-soften.json'
+output_path = '~/.cache/matugen/vscode-soften.json'
+post_hook = 'setsid -f bash ~/Dotfiles/scripts/wrappers/vscode-soften.sh ~/.cache/matugen/vscode-soften.json >/dev/null 2>&1'
+
+# Telegram, iMe, AyuGram: one theme for all of them, the colors plus a chat
+# background (the hook packs both into the .tdesktop-theme). Apply it once in each
+# (Settings → Chat Settings → Choose from file); they watch the file and repaint
+# on every change.
+[templates.telegram]
+input_path = '~/.config/matugen/templates/telegram-colors.tdesktop-theme'
+output_path = '~/.cache/matugen/telegram-colors.tdesktop-theme'
+post_hook = 'bash ~/Dotfiles/scripts/wrappers/telegram-theme.sh ~/.cache/matugen/telegram-colors.tdesktop-theme ~/.local/share/matugen/dms.tdesktop-theme'

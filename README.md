@@ -114,9 +114,10 @@ With Settings → Theme → **Dynamic**, DMS runs [matugen](https://github.com/I
 | kitty | `kitty/dank-theme.conf` | `globinclude` in `kitty/kitty.conf` (the old static palette is kept commented) |
 | Zen browser | `dms/zen.css` | local Sine mod `zen-browser/chrome/sine-mods/dms-colors`: its script loads the file and reloads it within ~2 s of every change (no Zen restart; needs `sine.allow-unsafe-js` from `user.js`), its CSS lets folders take the color too. Fills the window background, so Zen's workspace gradients don't show |
 | Vesktop | `~/.config/vesktop/themes/dank-discord.css` | `configure_vesktop` enables it in Vencord's settings (native install only — the flatpak can't read it) |
-| VS Code | the `DankLinux.dms-theme` extension's theme files | `configure_vscode` installs the extension and sets `workbench.colorTheme` (settings.json stays untracked) |
+| VS Code | the `DankLinux.dms-theme` extension's theme files | `configure_vscode` installs the extension and sets `workbench.colorTheme` (settings.json stays untracked). Our template `matugen/templates/vscode-soften.json` softens the "Dark" and default variants: its `post_hook` (`scripts/wrappers/vscode-soften.sh`) waits for DMS to write them, then moves the backgrounds a step up from near-black (`surface_container_high` for the editor, `surface_container` for the side bar and panel), dims the text to `on_surface_variant` lightened a little and makes comments `outline`. "Light" stays as DMS writes it |
+| Telegram, iMe, AyuGram | `~/.local/share/matugen/dms.tdesktop-theme`: our template `matugen/templates/telegram-colors.tdesktop-theme` (Telegram's night theme with its blue-grey surfaces, text and blue accent swapped for the matugen colors; other hues stay) packed by its `post_hook` (`scripts/wrappers/telegram-theme.sh`) with a chat background — a gradient `surface` → `surface_container_low` made by ImageMagick, a step below the incoming bubbles (`msgInBg`: `surface_container_high`) | once per client: Settings → Chat Settings → **Choose from file** → that file → Apply. The client watches the applied file and repaints, chat background included, on every change (no restart) |
 | VLC (Qt5) | `qt5ct/colors/matugen.conf` (also `qt6ct/` for Qt6 apps) | `configure_vlc`: links `qt5ct/` and `qt6ct/` (Fusion style, the matugen palette, Adwaita icons and fonts) and starts VLC with `QT_QPA_PLATFORMTHEME=qt5ct` through a copy of `vlc.desktop` in `~/.local/share/applications`; the rest of Qt keeps `gtk3`, whose Qt5 side gives no colors. VLC takes the colors when it starts |
-| Spotify (spicetify) | `spicetify/Themes/dms-colors/color.ini` from our own template `matugen/templates/spicetify-color.ini` (`matugen/config.toml` → `~/.config/matugen`; DMS runs user templates after its own) | `configure_spicetify`: theme `dms-colors` in `spicetify/config-xpui.ini`; the template's `post_hook` runs `spicetify refresh -s`, the `dms-live.js` extension swaps the colors in an open Spotify within ~2 s (no restart). A pacman / apt hook (`etc/pacman.d/hooks/spicetify.hook`, `etc/apt/apt.conf.d/99spicetify`) re-applies spicetify after every Spotify update. More: [Spotify](#spotify-spicetify) |
+| Spotify (spicetify) | `spicetify/Themes/dms-colors/color.ini` from our own template `matugen/templates/spicetify-color.ini` (`matugen/config.toml` → `~/.config/matugen`; DMS runs user templates in the same matugen run as its own, in no set order) | `configure_spicetify`: theme `dms-colors` in `spicetify/config-xpui.ini`; the template's `post_hook` runs `spicetify refresh -s`, the `dms-live.js` extension swaps the colors in an open Spotify within ~2 s (no restart). A pacman / apt hook (`etc/pacman.d/hooks/spicetify.hook`, `etc/apt/apt.conf.d/99spicetify`) re-applies spicetify after every Spotify update. More: [Spotify](#spotify-spicetify) |
 | dgop (`dgop top`) | `~/.config/dgop/colors.json` | nothing to do: dgop reads it itself (`keybinds.json` next to it is dgop's own default, not tracked) |
 | Dux greeter | — | reads DMS's `dms-colors.json` through `/var/cache/dms-greeter/colors.json`, see [Dux greeter](#dux-greeter-login-screen) |
 
@@ -236,7 +237,7 @@ wallpaper change ─► DMS runs matugen ─► spicetify/Themes/dms-colors/colo
   spicetify, the installers or `spice` write lands here, so a plugin update
   never breaks the link; it only shows up as a change in `git status`.
 - `~/.config/matugen` is a symlink to `Dotfiles/matugen`: our own matugen
-  template, which DMS runs after its own (`runUserMatugenTemplates`).
+  templates, which DMS runs together with its own (`runUserMatugenTemplates`).
 - spicetify patches Spotify's files: `/opt/spotify` on Arch, `/usr/share/spotify`
   on Ubuntu (Spotify's apt repo — the flatpak can't be patched). A Spotify update
   undoes the patch; the pacman / apt hook puts it back (`spicetify backup apply`).
@@ -349,7 +350,7 @@ Dotfiles/
       gum.sh         # gum bootstrap + UI wrappers
       helpers.sh     # universal menu(), execute_*, create_symlink, package engine, system_update
       fzf.sh         # shared parts of the fzf pickers (modes, keys, footer) + fzf bootstrap
-    wrappers/        # launchers called from WM configs, resolve distro-specific paths (polkit, portals); git's filter for spicetify/config-xpui.ini
+    wrappers/        # launchers called from WM configs, resolve distro-specific paths (polkit, portals); git's filter for spicetify/config-xpui.ini; matugen's hooks (VS Code theme, Telegram theme)
     install/
       main.sh        # installer ENGINE: sourcing + core-step functions + run_final_steps (no menus)
       packages.txt   # one line per package, works for both distros
