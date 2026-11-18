@@ -15,7 +15,8 @@ Dotfiles/
   install.sh         # installer entry point  (./install.sh)
   post_install.sh    # runs once after reboot  (./post_install.sh)
   etc/               # system files the config steps copy into /etc (udev/hwdb.d: keyboard fixes, configure_hwdb;
-                     #   spicetify-reapply.sh + pacman.d/hooks, apt/apt.conf.d: spicetify after Spotify updates, configure_spicetify)
+                     #   spicetify-reapply.sh + pacman.d/hooks, apt/apt.conf.d: spicetify after Spotify updates, configure_spicetify;
+                     #   apparmor.d/postman: user namespaces for Postman's tarball on Ubuntu, install_source_postman)
   scripts/
     lib/
       common.sh      # path constants + sources lib/  (source this everywhere)
@@ -323,12 +324,19 @@ notes always go inside the parentheses.
   * `bin=<command>` — the shim's name when that default is wrong
     (`ubuntu:bin=code` for a VS Code flatpak, whose canonical name
     `visual-studio-code-bin` would give `visual-studio-code`)
-  * `snap=<name>`
+  * `snap=<name>` — `<name>:classic` installs it without confinement
+    (`--classic`), for IDEs and other tools that need the host
   * `url=<link>` — a `.deb` / `.pkg.tar.zst` installed with the native manager
   * `ppa=<owner/repo>` — a **modifier**, not a method: adds the repo, then the
     package installs natively. Pair it with `apt=` when the name differs too
   * `source=<name>` — the escape hatch for anything needing a clone, a build or
-    a vendor repo: runs `install_source_<name>` from `install/system/sources.sh`
+    a vendor repo: runs `install_source_<name>` from `install/system/sources.sh`.
+    Helpers there: `_deb_install <name> <url>` (a vendor `.deb` through apt, so
+    dependencies resolve; Chrome's and VS Code's set up their apt repo
+    themselves), `_from_flatpak <app id> <shim> [<path> <native path>]...`
+    (moves an older Ubuntu flatpak install over to the native one: copies its
+    data from `~/.var/app/<app id>/<path>` without overwriting anything,
+    removes its `/usr/local/bin` shim, prints the `flatpak uninstall` line)
     (return 0/non-zero). Reach for it last — every other backend needs no code.
     An optional `installed_source_<name>` (returns 0 when installed) lets the
     picker mark it ✓

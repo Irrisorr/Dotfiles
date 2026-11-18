@@ -2,7 +2,7 @@
 zen-browser-bin        ubuntu:source=zen (based on firefox | Ubuntu: upstream tarball, updates itself)
 firefox
 vivaldi                ubuntu:flatpak=com.vivaldi.Vivaldi (based on chromium)
-google-chrome          ubuntu:flatpak=com.google.Chrome
+google-chrome          ubuntu:source=chrome (Ubuntu: Google's .deb, then its apt repo — the flatpak is a community repack)
 
 # Terminals and shells
 kitty                  ubuntu:source=kitty
@@ -22,14 +22,14 @@ syncthing (sync service (f.e. for obsidian sync between devices))
 # IDE's
 neovim
 visual-studio-code-bin ubuntu:source=vscode (Ubuntu: Microsoft's .deb, then its apt repo — the flatpak hides the host's SDKs and docker)
-intellij-idea-ultimate-edition ubuntu:flatpak=com.jetbrains.IntelliJ-IDEA-Ultimate
+intellij-idea-ultimate-edition ubuntu:source=idea (Ubuntu: JetBrains' snap, classic — no sandbox between it and the JDKs, docker, terminal)
 antigravity            ubuntu:source=antigravity (Google's agentic IDE)
-postman-bin            ubuntu:flatpak=com.getpostman.Postman
+postman-bin            ubuntu:source=postman (Ubuntu: postman.com's tarball, updates itself)
 podman-desktop-bin     ubuntu:flatpak=io.podman_desktop.PodmanDesktop
 podman
 
 # Media
-telegram-desktop       ubuntu:flatpak=org.telegram.desktop (Ubuntu: dropped from the archive)
+telegram-desktop       ubuntu:source=telegram (Ubuntu: telegram.org's tarball, updates itself — the flatpak can't follow the wallpaper theme)
 slack
 iMe (fork of telegram with some features | DONT INSTALL HERE WILL BE LATER IF U WANT)
 vesktop-bin            ubuntu:flatpak=dev.vencord.Vesktop
@@ -37,7 +37,7 @@ discord                ubuntu:flatpak=com.discordapp.Discord
 spotify                ubuntu:source=spotify (Ubuntu: Spotify's apt repo, spicetify can't patch the flatpak)
 spicetify-cli          ubuntu:source=spicetify (spotify extensions manager | Ubuntu: upstream release in /opt/spicetify-cli)
 - unzip                 (Listening Stats' installer, `spice` → Update apps)
-zoom                   ubuntu:flatpak=us.zoom.Zoom
+zoom                   ubuntu:source=zoom (Ubuntu: zoom.us's .deb, re-run the package step to update)
 
 # Notes and Offices
 obsidian               ubuntu:flatpak=md.obsidian.Obsidian
@@ -130,6 +130,9 @@ dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
 - evtest (Bongo Cat plugin: a single keyboard)
 - cliphist (clipboard history)
 - wl-clipboard (wayland clipboard)
+- jq (matugen hook: softens DMS's VS Code theme)
+- imagemagick (matugen hook: draws the Telegram theme's chat background)
+- python               ubuntu:apt=python3 (matugen hook: zips the Telegram theme)
 dux-greeter-bin        ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-greeter (DMS login screen, replaces SDDM | Ubuntu: 26.04+)
 dux-calendar-bin       ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-calendar (dcal: Google/CalDAV calendar and tasks, DMS calendar backend | Ubuntu: 26.04+)
 dux-files-bin          ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-files (dfiles: file manager, also serves open/save dialogs | Ubuntu: 26.04+)

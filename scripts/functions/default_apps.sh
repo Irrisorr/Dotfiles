@@ -1335,7 +1335,7 @@ for _pair in \
   "com.microsoft.VSCode.desktop code.desktop" \
   "obsidian.desktop md.obsidian.Obsidian.desktop" \
   "google-chrome.desktop com.google.Chrome.desktop" \
-  "jetbrains-idea.desktop com.jetbrains.IntelliJ-IDEA-Ultimate.desktop"; do
+  "jetbrains-idea.desktop intellij-idea-ultimate_intellij-idea-ultimate.desktop"; do
   read -r _a _b <<<"$_pair"
   DA_SAME_APP[$_a]=$_b DA_SAME_APP[$_b]=$_a
 done

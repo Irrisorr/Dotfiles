@@ -406,46 +406,166 @@ install_source_spotify() {
 }
 
 
+# _from_flatpak <app id> <shim> [<path under ~/.var/app/<id>> <native path>]...
+# Carries an older flatpak install over to the native one: copies its data
+# where the native app looks (a folder's contents, or a file; nothing that is
+# there already gets overwritten) and removes the /usr/local/bin shim that
+# would shadow the native command. The flatpak itself is left to uninstall.
+_from_flatpak() {
+  local id=$1 shim=$2 dir="$HOME/.var/app/$1"
+  shift 2
+  grep -qs -- "flatpak run $id" "/usr/local/bin/$shim" && sudo rm -f "/usr/local/bin/$shim"
+  [ -d "$dir" ] || return 0
+  while [ $# -ge 2 ]; do
+    if [ -d "$dir/$1" ]; then
+      mkdir -p "$2" && cp -an "$dir/$1/." "$2/"
+    elif [ -f "$dir/$1" ]; then
+      mkdir -p "$(dirname "$2")" && cp -n "$dir/$1" "$2"
+    fi
+    shift 2
+  done
+  echo ":: Carried over from the flatpak; remove it with: flatpak uninstall $id"
+}
+
+
+# _deb_install <name> <url> — a vendor's .deb through apt, so its dependencies
+# resolve. apt reads the file as _apt, hence world-readable.
+_deb_install() {
+  local tmp rc=0
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tmp=$(mktemp -d)
+  echo ":: Downloading $1"
+  if curl -fsSL -o "$tmp/$1.deb" "$2"; then
+    chmod a+rx "$tmp" && chmod a+r "$tmp/$1.deb"
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$tmp/$1.deb" || rc=1
+  else
+    print_error_message "$1: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return $rc
+}
+
+
 # VS Code — Microsoft's .deb instead of the flatpak, whose sandbox hides the
 # host's SDKs, docker and git setup from the editor and its terminal, and which
 # DMS's theme never reaches. The package's postinst adds Microsoft's apt
 # repository (and its key) when debconf says so, so apt updates it from then on;
 # its own repo file avoids clashing Signed-By entries with a hand-made one.
-# A flatpak install from before is carried over: settings and extensions are
-# copied where the native one looks (nothing is overwritten), the shim that
-# would shadow /usr/bin/code goes; the flatpak itself is left to uninstall.
 install_source_vscode() {
-  local arch tmp rc=0 fp="$HOME/.var/app/com.visualstudio.code"
+  local arch
   is_debian || { print_error_message "vscode: Debian-family only"; return 1; }
   case $(uname -m) in
     x86_64) arch=x64 ;;
     aarch64) arch=arm64 ;;
     *) print_error_message "vscode: no .deb for $(uname -m)"; return 1 ;;
   esac
-  command -v curl &>/dev/null || pkg_install curl || return 1
-
   echo "code code/add-microsoft-repo boolean true" | sudo debconf-set-selections || return 1
+  _deb_install code "https://update.code.visualstudio.com/latest/linux-deb-$arch/stable" || return 1
+  _from_flatpak com.visualstudio.code code \
+    config/Code/User "$HOME/.config/Code/User" \
+    data/vscode/extensions "$HOME/.vscode/extensions"
+}
+
+
+# IntelliJ IDEA Ultimate — JetBrains' own snap, in classic confinement: no
+# sandbox, so JDKs, Maven/Gradle, docker and the terminal see the host (the
+# Flathub build is unofficial and sandboxed). snap keeps it updated. Same
+# window class (jetbrains-idea) and config dir (~/.config/JetBrains) as Arch's.
+install_source_idea() {
+  is_debian || { print_error_message "idea: Debian-family only"; return 1; }
+  snap_install intellij-idea-ultimate:classic || return 1
+  _from_flatpak com.jetbrains.IntelliJ-IDEA-Ultimate intellij-idea-ultimate-edition \
+    config/JetBrains "$HOME/.config/JetBrains" \
+    data/JetBrains "$HOME/.local/share/JetBrains"
+}
+
+
+# Google Chrome — Google's .deb (the flatpak is a community repack that breaks
+# password-manager extensions and security keys). Its postinst adds Google's
+# apt repository, so apt updates it from then on.
+install_source_chrome() {
+  is_debian || { print_error_message "chrome: Debian-family only"; return 1; }
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "chrome: no Linux build for $(uname -m)"; return 1; }
+  _deb_install google-chrome "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" || return 1
+  _from_flatpak com.google.Chrome google-chrome \
+    config/google-chrome "$HOME/.config/google-chrome"
+}
+
+
+# Telegram — telegram.org's tarball into ~/.local/share/telegram (it is owned
+# by you, so Telegram updates itself, like Zen), linked as telegram-desktop,
+# Arch's command. The flatpak reaches files only through the portal, so it
+# would not see the wallpaper theme (~/.local/share/matugen) change. Telegram
+# writes its own launcher entry on the first start. The session (tdata) of a
+# flatpak install is carried over.
+install_source_telegram() {
+  local tmp dir="$HOME/.local/share/telegram" rc=0
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "telegram: no Linux build for $(uname -m)"; return 1; }
+  command -v curl &>/dev/null || pkg_install curl || return 1
   tmp=$(mktemp -d)
-  echo ":: Downloading VS Code"
-  if curl -fsSL -o "$tmp/code.deb" "https://update.code.visualstudio.com/latest/linux-deb-$arch/stable"; then
-    sudo chmod a+r "$tmp/code.deb"
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$tmp/code.deb" || rc=1
+  echo ":: Downloading Telegram"
+  if curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJ -C "$tmp"; then
+    rm -rf "$dir" \
+      && mv "$tmp/Telegram" "$dir" \
+      && sudo ln -sf "$dir/Telegram" /usr/local/bin/telegram-desktop \
+      || rc=1
   else
+    print_error_message "telegram: download failed"
     rc=1
   fi
   rm -rf "$tmp"
   [ $rc -eq 0 ] || return 1
+  _from_flatpak org.telegram.desktop telegram-desktop \
+    data/TelegramDesktop "$HOME/.local/share/TelegramDesktop"
+}
 
-  if grep -qs 'com.visualstudio.code' /usr/local/bin/code; then
-    sudo rm -f /usr/local/bin/code
+
+# Zoom — zoom.us's .deb (screen sharing on Wayland goes through the portal
+# either way, but the flatpak adds its own quirks). No apt repository: re-run
+# the package step to update. configure_zoom then edits ~/.config/zoomus.conf.
+install_source_zoom() {
+  is_debian || { print_error_message "zoom: Debian-family only"; return 1; }
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "zoom: no Linux build for $(uname -m)"; return 1; }
+  _deb_install zoom "https://zoom.us/client/latest/zoom_amd64.deb" || return 1
+  _from_flatpak us.zoom.Zoom zoom \
+    config/zoomus.conf "$HOME/.config/zoomus.conf"
+}
+
+
+# Postman — postman.com's tarball into ~/.local/share/postman (owned by you, so
+# it updates itself), linked as postman like the AUR package, with a launcher
+# entry. Its Electron sandbox needs user namespaces, which Ubuntu's AppArmor
+# only allows to apps with a profile saying so: etc/apparmor.d/postman.
+install_source_postman() {
+  local tmp dir="$HOME/.local/share/postman" rc=0
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "postman: no Linux build for $(uname -m)"; return 1; }
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tmp=$(mktemp -d)
+  echo ":: Downloading Postman"
+  if curl -fsSL https://dl.pstmn.io/download/latest/linux_64 | tar -xz -C "$tmp"; then
+    rm -rf "$dir" \
+      && mkdir -p "$(dirname "$dir")" "$HOME/.local/share/applications" \
+      && mv "$tmp/Postman" "$dir" \
+      && sudo ln -sf "$dir/Postman" /usr/local/bin/postman \
+      && printf '%s\n' "[Desktop Entry]" "Name=Postman" "Comment=API platform" \
+           "Exec=/usr/local/bin/postman %U" "Icon=$dir/app/resources/app/assets/icon.png" \
+           "Type=Application" "StartupWMClass=Postman" "Categories=Development;" \
+           "MimeType=x-scheme-handler/postman;" \
+         > "$HOME/.local/share/applications/postman.desktop" \
+      || rc=1
+  else
+    print_error_message "postman: download failed"
+    rc=1
   fi
-  if [ -d "$fp" ]; then
-    [ -d "$fp/config/Code/User" ] && mkdir -p "$HOME/.config/Code" &&
-      cp -an "$fp/config/Code/User" "$HOME/.config/Code/"
-    [ -d "$fp/data/vscode/extensions" ] && mkdir -p "$HOME/.vscode" &&
-      cp -an "$fp/data/vscode/extensions" "$HOME/.vscode/"
-    echo ":: Settings and extensions copied from the flatpak; remove it with: flatpak uninstall com.visualstudio.code"
+  rm -rf "$tmp"
+  [ $rc -eq 0 ] || return 1
+  if [ -d /etc/apparmor.d ]; then
+    sudo install -Dm644 "$HOME/Dotfiles/etc/apparmor.d/postman" /etc/apparmor.d/postman \
+      && sudo apparmor_parser -r /etc/apparmor.d/postman || return 1
   fi
+  _from_flatpak com.getpostman.Postman postman \
+    config/Postman "$HOME/.config/Postman"
 }
 
 
@@ -498,3 +618,8 @@ installed_source_gowall()          { [ -x /usr/local/bin/gowall ]; }
 installed_source_spotify()         { pkg_installed spotify-client; }
 installed_source_spicetify()       { [ -x /opt/spicetify-cli/spicetify ]; }
 installed_source_vscode()          { pkg_installed code; }
+installed_source_idea()            { snap list intellij-idea-ultimate &>/dev/null; }
+installed_source_chrome()          { pkg_installed google-chrome-stable; }
+installed_source_telegram()        { [ -x "$HOME/.local/share/telegram/Telegram" ]; }
+installed_source_zoom()            { pkg_installed zoom; }
+installed_source_postman()         { [ -x "$HOME/.local/share/postman/Postman" ]; }

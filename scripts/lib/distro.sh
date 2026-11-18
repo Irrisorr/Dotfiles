@@ -242,10 +242,18 @@ flatpak_shim() {
 
 # ─── Other install backends ───────────────────────────────────────────────────
 
+# A name ending in ":classic" installs without confinement (--classic), as
+# IDEs and other tools that need the host do.
 snap_install() {
   [ $# -eq 0 ] && return 0
   command -v snap &>/dev/null || pkg_install snapd || return 1
-  sudo snap install "$@"
+  local s
+  for s in "$@"; do
+    case $s in
+      *:classic) sudo snap install "${s%:classic}" --classic ;;
+      *) sudo snap install "$s" ;;
+    esac || return 1
+  done
 }
 
 
