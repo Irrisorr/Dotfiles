@@ -31,27 +31,18 @@ window-rule {
 
 // Blocked apps from screencasting
 window-rule {
-    // Bank pages, the bank login page included
-    match app-id=r#"(?i)zen"# title=r#"(?i)(santander|erste|centrum24|logowanie)"#
-    match app-id=r#"(?i)firefox"# title=r#"(?i)(santander|erste|centrum24|logowanie)"#
-    match app-id=r#"(?i)chrome"# title=r#"(?i)(santander|erste|centrum24|logowanie)"#
+    match title=r#"(?i)(santander|erste|centrum24|logowanie)"#
     // …and the bare "Zen Browser" a page has until its own title loads (15-335 ms)
-    match app-id=r#"(?i)zen"# title=r#"^Zen Browser$"#
-    match app-id=r#"(?i)zen"# title=r#"(?i)пароли — "#
-    match app-id=r#"(?i)zen"# title=r#"(?i)passwords — "#
+    match title=r#"^Zen Browser$"#
+    match title=r#"(?i)(пароли|passwords) — "#
+    match title=r#"(?i)избранное"#
     match app-id=r#"(?i)^clipse$"#
-    match app-id=r#"(?i)telegram"# title=r#"(?i)избранное"#
     block-out-from "screencast"
 }
 
-// Picture in picture mode
+// Picture in picture mode (any browser)
 window-rule {
-    match app-id=r#"(?i)firefox"# title=r#"(?i)picture-in-picture"#
-    match app-id=r#"(?i)chrome"# title=r#"(?i)picture-in-picture"#
-    match app-id=r#"(?i)firefox"# title=r#"(?i)картинка в картинке"#
-    match app-id=r#"(?i)chrome"# title=r#"(?i)картинка в картинке"#
-    match app-id=r#"(?i)zen"# title=r#"(?i)picture-in-picture"#
-    match app-id=r#"(?i)zen"# title=r#"(?i)картинка в картинке"#
+    match title=r#"(?i)(picture.in.picture|картинка в картинке)"#
     open-floating true
 }
 
@@ -87,11 +78,12 @@ layer-rule {
     }
 }
 
-// Telegram call: a new Telegram window takes focus (the call window has the
-// contact's name as its title, nothing else tells it apart). Not at login,
+// Telegram / iMe call: a new window of theirs takes focus (the call window has
+// the contact's name as its title, nothing else tells it apart). Not at login,
 // where the main window opens too.
 window-rule {
     match app-id=r#"(?i)telegram"#
+    match app-id=r#"(?i)org\.ime\.desktop"#
     exclude at-startup=true
     open-focused true
 }
@@ -103,7 +95,7 @@ window-rule {
     match app-id=r#"(?i)spotify"#
     match app-id=r#"(?i)vesktop"#
     match app-id=r#"(?i)discord"#
-    exclude app-id=r#"(?i)telegram"# title=r#"(?i)просмотр медиа"#
+    exclude title=r#"(?i)просмотр медиа"#
     
     open-on-workspace "_media"
 }

@@ -821,7 +821,9 @@ da_app_id() {
 # da_sync_rules <category> <desktop id> — window rules cover the role's app
 # too: next to every match line of another app of the same kind (another
 # terminal, browser) goes a copy with this app's app-id — (?i), anchors,
-# r#""# and the rest of the line kept. Nothing is added where a line with the
+# r#""# and the rest of the line kept. Only lines that match by app-id alone:
+# one with a title is about a title that app shows (a page, a dialog) — those
+# match by title alone where any app can show it, so there's nothing to copy. Nothing is added where a line with the
 # same rest already matches this app (r#"(?i)chrome"# covers google-chrome),
 # so switching back and forth adds nothing. The comment above the rule gets
 # the name added. Every file of DA_RULES that exists. Prints what was added.
@@ -882,7 +884,7 @@ da_sync_rules() {
           for (k = i + 1; k < j; k++) if (line[k] ~ /^[ \t]*match/ && parse(line[k]) && hits(new)) covered[P_rest] = 1
           added = 0
           for (k = i + 1; k < j; k++) {
-            if (line[k] !~ /^[ \t]*match/ || !parse(line[k]) || (P_rest in covered)) continue
+            if (line[k] !~ /^[ \t]*match/ || line[k] ~ /title=/ || !parse(line[k]) || (P_rest in covered)) continue
             for (m = 1; m <= no && !hits(oid[m]); m++) ;
             if (m > no) continue
             covered[P_rest] = 1
