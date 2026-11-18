@@ -219,12 +219,14 @@ is_zen_flatpak() {
 
 # ─── VS Code ──────────────────────────────────────────────────────────────────
 
-# User settings: the native package (Arch), or the flatpak's config under
-# ~/.var/app (Ubuntu). Printed even when the file doesn't exist yet.
+# User settings: the native package's (Arch's, Microsoft's .deb on Ubuntu), or
+# an older flatpak install's under ~/.var/app while there is no native config.
+# Printed even when the file doesn't exist yet.
 vscode_settings_path() {
-  if [ -d "$HOME/.var/app/com.visualstudio.code" ]; then
-    echo "$HOME/.var/app/com.visualstudio.code/config/Code/User/settings.json"
+  local native="$HOME/.config/Code" flatpak="$HOME/.var/app/com.visualstudio.code/config/Code"
+  if [ ! -d "$native" ] && [ -d "$flatpak" ]; then
+    echo "$flatpak/User/settings.json"
   else
-    echo "$HOME/.config/Code/User/settings.json"
+    echo "$native/User/settings.json"
   fi
 }

@@ -25,9 +25,9 @@ cd Dotfiles
 
 - Same steps, same menus — nothing to choose by hand. Differences the installer handles by itself:
     - **niri**, `xwayland-satellite` and the **Dux shell** (formerly DankMaterialShell; the Ubuntu package is still called `dms`) come from the author's PPAs (`ppa:duxlabs/dux-repo`, `ppa:duxlabs/dms`) — they are not in the Ubuntu repos
-    - apps that are only in the AUR (VS Code, Obsidian, Discord, Spotify, ...) are installed from **Flathub** — and get a command with the usual name in `/usr/local/bin` (`code`, `spotify`, ...), so niri keybinds and the config menu work the same as on Arch
+    - apps that are only in the AUR (Obsidian, Discord, ...) are installed from **Flathub** — and get a command with the usual name in `/usr/local/bin` (`obsidian`, `discord`, ...), so niri keybinds and the config menu work the same as on Arch
     - **Zen** is upstream's tarball in `~/.local/share/zen` (linked as `/usr/local/bin/zen-browser`), not the flatpak: the flatpak's read-only app dir can't take the Sine bootloader. It is owned by you, so Zen updates itself from inside the browser
-    - `clipse` (release binary), JetBrains Mono Nerd Font (official nerd-fonts release), **kitty** (upstream build into `/opt/kitty.app` — apt's 0.45 is too old for this `kitty.conf`; it brings its own `slangc` for custom shaders), Antigravity (Google's tarball, into `/opt/Antigravity`), **spicetify** (upstream release into `/opt/spicetify-cli`, like Arch's package), **gowall** (release binary), **Spotify** (Spotify's own apt repo, not the flatpak: spicetify patches its files), **swayimg** (built from the release tag into `/usr/local` — apt's 4.7 predates the Lua config) and FreeOffice (SoftMaker's apt repo) have their own installers in `scripts/install/system/sources.sh`; re-run the package step to update clipse, kitty, the font, Antigravity, spicetify, gowall and swayimg (Zen updates itself)
+    - `clipse` (release binary), JetBrains Mono Nerd Font (official nerd-fonts release), **kitty** (upstream build into `/opt/kitty.app` — apt's 0.45 is too old for this `kitty.conf`; it brings its own `slangc` for custom shaders), Antigravity (Google's tarball, into `/opt/Antigravity`), **spicetify** (upstream release into `/opt/spicetify-cli`, like Arch's package), **gowall** (release binary), **Spotify** (Spotify's own apt repo, not the flatpak: spicetify patches its files), **VS Code** (Microsoft's `.deb`, whose install adds Microsoft's apt repo, so apt updates it; not the flatpak, whose sandbox hides the host's SDKs, docker and git setup from the editor and its terminal, and which DMS's theme never reaches. A flatpak install from before is carried over: settings and extensions copied to `~/.config/Code` and `~/.vscode`, its `/usr/local/bin/code` shim removed; uninstall the flatpak yourself), **swayimg** (built from the release tag into `/usr/local` — apt's 4.7 predates the Lua config) and FreeOffice (SoftMaker's apt repo) have their own installers in `scripts/install/system/sources.sh`; re-run the package step to update clipse, kitty, the font, Antigravity, spicetify, gowall and swayimg (Zen updates itself)
     - SDDM replaces GDM as the login screen (the **SDDM** config step switches it; it prints the command to switch back)
     - the **Dux greeter** needs Ubuntu 26.04+ (that's the oldest release `ppa:duxlabs/dux-repo` builds it for)
 - Known differences:
@@ -106,7 +106,7 @@ Bongo Cat reads the keyboard through `evtest` / `libinput` (`libinput-tools`), s
 
 ### Wallpaper colors (matugen)
 
-With Settings → Theme → **Dynamic**, DMS runs [matugen](https://github.com/InioX/matugen) on every wallpaper change: it builds a Material You palette from the wallpaper and fills DMS's templates with it. The scheme (`matugenScheme`) and the per-app templates (`matugenTemplate*`) are in `dms/settings.json`.
+With Settings → Theme → **Dynamic**, DMS runs [matugen](https://github.com/InioX/matugen) on every wallpaper change: it builds a Material You palette from the wallpaper and fills DMS's templates with it. The scheme (`matugenScheme`) and the per-app templates (`matugenTemplate*`) are in `dms/settings.json`. Our own templates (Spotify, VS Code, Telegram) are in `matugen/`: **Niri ecosystem → Dux shell config** links it to `~/.config/matugen`, and DMS runs them together with its own (`runUserMatugenTemplates`), so their files appear with the first wallpaper DMS sets.
 
 | App | Generated file | Hooked up in |
 | :--- | :--- | :--- |
@@ -236,8 +236,9 @@ wallpaper change ─► DMS runs matugen ─► spicetify/Themes/dms-colors/colo
 - `~/.config/spicetify` is a symlink to `Dotfiles/spicetify`, as a whole. Whatever
   spicetify, the installers or `spice` write lands here, so a plugin update
   never breaks the link; it only shows up as a change in `git status`.
-- `~/.config/matugen` is a symlink to `Dotfiles/matugen`: our own matugen
-  templates, which DMS runs together with its own (`runUserMatugenTemplates`).
+- `~/.config/matugen` is a symlink to `Dotfiles/matugen` (Niri ecosystem → Dux
+  shell config): our own matugen templates, which DMS runs together with its own
+  (`runUserMatugenTemplates`).
 - spicetify patches Spotify's files: `/opt/spotify` on Arch, `/usr/share/spotify`
   on Ubuntu (Spotify's apt repo — the flatpak can't be patched). A Spotify update
   undoes the patch; the pacman / apt hook puts it back (`spicetify backup apply`).
@@ -298,7 +299,7 @@ The menu: update Marketplace / Listening Stats, Repair, Restore stock — see [S
    (remove the flatpak `com.spotify.Client` if it's there), spicetify from its
    GitHub release.
 2. Installer → Spicetify step:
-   - links `~/.config/spicetify` and `~/.config/matugen`;
+   - links `~/.config/spicetify` (`~/.config/matugen` comes with Niri ecosystem → Dux shell config);
    - registers the git filter for `config-xpui.ini` in this clone;
    - makes Spotify's folder writable for spicetify (sudo);
    - installs `spicetify-reapply` and the pacman (Arch) or apt (Ubuntu) hook (sudo);
@@ -404,10 +405,10 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
         - Enter on a row picks its app; Space ticks rows (on a category: all of it) and Alt+Enter picks one app for the ticked ones, or for the whole category under the cursor. Ctrl-R resets to what the system picks
         - Extensions come from shared-mime-info (`/usr/share/mime`, updated by packages), read on every start — a package that adds a type shows up by itself. **Your extensions → + Add extension** handles the rest: an unknown extension gets its own type (`application/x-<ext>`) or opens like an existing one (`.conf` as text/plain); a known one can be split off into its own type. Stored in `~/.local/share/mime/packages/defapps.xml` (then `update-mime-database`); Ctrl-D removes one
         - **Dotfiles:** on exit `defapps` saves this machine's choices to `defapps/` — `mimeapps.list` (only `[Default Applications]`; entries of apps not installed here, kept from another PC, stay) and `xdg-terminals.list`; `defapps.xml` lives there and the mime dir links to it. Changes made in DMS get saved on the next `defapps` run. The installer step **Default apps (defapps)** puts them back: links the extensions (+ `update-mime-database`), merges the saved defaults into `~/.config/mimeapps.list` for the apps installed (lists the skipped ones, the rest of the file stays) and writes the terminal order
-        - Ubuntu: flatpak apps are found right after the installer put them in (before the next login adds them to `XDG_DATA_DIRS`), and a default saved under an app's Arch id finds its flatpak (`vesktop.desktop` ↔ `dev.vencord.Vesktop.desktop`, also VS Code, Obsidian, Chrome, IntelliJ — the `DA_SAME_APP` table) and back
+        - Ubuntu: flatpak apps are found right after the installer put them in (before the next login adds them to `XDG_DATA_DIRS`), and a default saved under an app's Arch id finds its Ubuntu package or flatpak (`vesktop.desktop` ↔ `dev.vencord.Vesktop.desktop`, also Obsidian, Chrome, IntelliJ, and VS Code: `com.microsoft.VSCode.desktop` ↔ `code.desktop` of Microsoft's `.deb` — the `DA_SAME_APP` table) and back
     - `fonts` - 'Fonts' (`scripts/functions/fonts.sh`): one interface font, one monospace font and the interface size, written to every place that keeps its own; the menu shows each place and ✓ / ✗ against the choice. Fonts are picked in fzf with a sample drawn in the font itself (kitty)
         - **fontconfig** (`fontconfig/fonts.conf` → `~/.config/fontconfig`): what `sans-serif`, `serif`, `system-ui` and `monospace` mean — Electron apps, niri's hotkey overlay, alacritty, web pages and everything else that asks for a generic family
-        - **GTK** (gsettings `font-name` / `document-font-name` / `monospace-font-name`, `gtk-font-name` in `settings.ini`), **Qt** (`qt5ct/`, `qt6ct/` — VLC), **DMS** (`fontFamily`, `monoFontFamily` in `dms/settings.json`; it was "Fira Code", which isn't installed), **Zen** (`font.name.*` in `zen-browser/user.js`, on Zen's next start), **kitty** (`font_family`, reloaded at once), **VS Code** (editor and terminal font; the flatpak's settings under `~/.var/app` on Ubuntu)
+        - **GTK** (gsettings `font-name` / `document-font-name` / `monospace-font-name`, `gtk-font-name` in `settings.ini`), **Qt** (`qt5ct/`, `qt6ct/` — VLC), **DMS** (`fontFamily`, `monoFontFamily` in `dms/settings.json`; it was "Fira Code", which isn't installed), **Zen** (`font.name.*` in `zen-browser/user.js`, on Zen's next start), **kitty** (`font_family`, reloaded at once), **VS Code** (editor and terminal font; an old flatpak install's settings under `~/.var/app` while there is no `~/.config/Code`)
         - The choice lives in the dotfiles (families in `fontconfig/fonts.conf`, size in `qt5ct.conf`); the installer's Fonts step links `fontconfig/` and writes GTK and VS Code from them. Telegram and Obsidian (Appearance → Font) keep their own, set them there
     - `spice` - 'Spotify (spicetify)' (`scripts/functions/spicetify.sh`), the whole setup: [Spotify](#spotify-spicetify)
         - Update apps — Marketplace and Listening Stats: installed → latest version, outdated ones preselected; runs each repo's official installer

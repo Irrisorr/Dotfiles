@@ -21,7 +21,7 @@ syncthing (sync service (f.e. for obsidian sync between devices))
 
 # IDE's
 neovim
-visual-studio-code-bin ubuntu:flatpak=com.visualstudio.code ubuntu:bin=code
+visual-studio-code-bin ubuntu:source=vscode (Ubuntu: Microsoft's .deb, then its apt repo — the flatpak hides the host's SDKs and docker)
 intellij-idea-ultimate-edition ubuntu:flatpak=com.jetbrains.IntelliJ-IDEA-Ultimate
 antigravity            ubuntu:source=antigravity (Google's agentic IDE)
 postman-bin            ubuntu:flatpak=com.getpostman.Postman

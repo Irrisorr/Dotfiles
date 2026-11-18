@@ -9,7 +9,7 @@
 # open Spotify.
 
 configure_spicetify_steps=(
-  "Link configs (spicetify, matugen templates)|_spicetify_link"
+  "Link config|_spicetify_link"
   "Keep this machine's Spotify paths out of git|_spicetify_git_filter|git"
   "Let spicetify write into Spotify|_spicetify_perms"
   "Re-apply after Spotify updates (pacman hook)|_spicetify_hook|pacman"
@@ -30,7 +30,6 @@ configure_spicetify() {
 
 _spicetify_link() {
   execute_command "Link spicetify" "create_symlink $HOME/Dotfiles/spicetify $HOME/.config/spicetify"
-  execute_command "Link matugen templates" "create_symlink $HOME/Dotfiles/matugen $HOME/.config/matugen"
 }
 
 # spicetify writes this machine's Spotify and prefs paths and its [Backup]

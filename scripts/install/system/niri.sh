@@ -7,7 +7,7 @@
 # run only the ticked ones (run_substeps in lib/helpers.sh).
 configure_niri_steps=(
   "niri config|_niri_link_config"
-  "Dux shell config (panel bar)|_niri_link_dux"
+  "Dux shell config (panel bar, own matugen templates)|_niri_link_dux"
   "Dux shell plugins|_niri_restore_dux_plugins|dms"
   "Add user to the input group (Bongo Cat)|_niri_input_group|test:_niri_not_in_input_group"
   "Dux greeter (login screen, replaces SDDM/GDM)|_niri_dux_greeter|dms-greeter"
@@ -27,8 +27,11 @@ _niri_link_config() {
   execute_command "Configure niri directory" "create_symlink $HOME/Dotfiles/niri $HOME/.config/niri"
 }
 
+# ~/.config/matugen holds our templates (Spotify, VS Code, Telegram), which DMS
+# runs with its own on every wallpaper change (runUserMatugenTemplates).
 _niri_link_dux() {
   execute_command "Configure Dux shell (panel-bar)" "create_symlink $HOME/Dotfiles/dms $HOME/.config/dms"
+  execute_command "Link matugen templates" "create_symlink $HOME/Dotfiles/matugen $HOME/.config/matugen"
 }
 
 # Plugin code isn't tracked (dms/plugins/ is ignored): the lockfile pins each

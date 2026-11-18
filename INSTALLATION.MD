@@ -78,8 +78,8 @@ the same shell is a no-op.
   `sddm_themes_dir`, `fish_bin`, `ensure_login_shell` (adds the shell to
   `/etc/shells` before `chsh` — Ubuntu rejects it otherwise), `python_site_dir`,
   `set_console_font`, `zen_profile_root`, `vscode_settings_path` (the native
-  package's or the flatpak's `settings.json`, used by `configure_vscode` and
-  `fonts`). Standalone like `distro.sh`.
+  package's `settings.json`, or an old flatpak install's while there is no
+  `~/.config/Code`; used by `configure_vscode` and `fonts`). Standalone like `distro.sh`.
 * **`gum.sh`** — UI wrappers around `gum` (`gum_choose_wrapper`, `confirm_action`,
   `confirm_step`,
   `print_success_message`, `print_error_message`, `print_styled_message`,
@@ -321,7 +321,8 @@ notes always go inside the parentheses.
     name minus `-bin` (`postman-bin` → `postman`), so WM keybinds, menu
     guards and scripts call it the same way on both distros
   * `bin=<command>` — the shim's name when that default is wrong
-    (`visual-studio-code-bin ubuntu:flatpak=com.visualstudio.code ubuntu:bin=code`)
+    (`ubuntu:bin=code` for a VS Code flatpak, whose canonical name
+    `visual-studio-code-bin` would give `visual-studio-code`)
   * `snap=<name>`
   * `url=<link>` — a `.deb` / `.pkg.tar.zst` installed with the native manager
   * `ppa=<owner/repo>` — a **modifier**, not a method: adds the repo, then the

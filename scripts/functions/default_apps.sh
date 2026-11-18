@@ -1327,12 +1327,12 @@ da_restore_types() {
   create_symlink "$DA_DOTS/defapps.xml" "$DA_USER_PKG" && update-mime-database "$DA_USER_MIME"
 }
 
-# One app under its Arch package's and its Ubuntu flatpak's desktop id, so a
-# default saved on one machine finds the app on the other.
+# One app under its Arch package's and its Ubuntu package's or flatpak's desktop
+# id, so a default saved on one machine finds the app on the other.
 declare -A DA_SAME_APP=()
 for _pair in \
   "vesktop.desktop dev.vencord.Vesktop.desktop" \
-  "com.microsoft.VSCode.desktop com.visualstudio.code.desktop" \
+  "com.microsoft.VSCode.desktop code.desktop" \
   "obsidian.desktop md.obsidian.Obsidian.desktop" \
   "google-chrome.desktop com.google.Chrome.desktop" \
   "jetbrains-idea.desktop com.jetbrains.IntelliJ-IDEA-Ultimate.desktop"; do

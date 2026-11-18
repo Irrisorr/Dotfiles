@@ -406,6 +406,49 @@ install_source_spotify() {
 }
 
 
+# VS Code — Microsoft's .deb instead of the flatpak, whose sandbox hides the
+# host's SDKs, docker and git setup from the editor and its terminal, and which
+# DMS's theme never reaches. The package's postinst adds Microsoft's apt
+# repository (and its key) when debconf says so, so apt updates it from then on;
+# its own repo file avoids clashing Signed-By entries with a hand-made one.
+# A flatpak install from before is carried over: settings and extensions are
+# copied where the native one looks (nothing is overwritten), the shim that
+# would shadow /usr/bin/code goes; the flatpak itself is left to uninstall.
+install_source_vscode() {
+  local arch tmp rc=0 fp="$HOME/.var/app/com.visualstudio.code"
+  is_debian || { print_error_message "vscode: Debian-family only"; return 1; }
+  case $(uname -m) in
+    x86_64) arch=x64 ;;
+    aarch64) arch=arm64 ;;
+    *) print_error_message "vscode: no .deb for $(uname -m)"; return 1 ;;
+  esac
+  command -v curl &>/dev/null || pkg_install curl || return 1
+
+  echo "code code/add-microsoft-repo boolean true" | sudo debconf-set-selections || return 1
+  tmp=$(mktemp -d)
+  echo ":: Downloading VS Code"
+  if curl -fsSL -o "$tmp/code.deb" "https://update.code.visualstudio.com/latest/linux-deb-$arch/stable"; then
+    sudo chmod a+r "$tmp/code.deb"
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$tmp/code.deb" || rc=1
+  else
+    rc=1
+  fi
+  rm -rf "$tmp"
+  [ $rc -eq 0 ] || return 1
+
+  if grep -qs 'com.visualstudio.code' /usr/local/bin/code; then
+    sudo rm -f /usr/local/bin/code
+  fi
+  if [ -d "$fp" ]; then
+    [ -d "$fp/config/Code/User" ] && mkdir -p "$HOME/.config/Code" &&
+      cp -an "$fp/config/Code/User" "$HOME/.config/Code/"
+    [ -d "$fp/data/vscode/extensions" ] && mkdir -p "$HOME/.vscode" &&
+      cp -an "$fp/data/vscode/extensions" "$HOME/.vscode/"
+    echo ":: Settings and extensions copied from the flatpak; remove it with: flatpak uninstall com.visualstudio.code"
+  fi
+}
+
+
 # spicetify — no Ubuntu package. Upstream's release tarball (the binary next to
 # its jsHelper, Extensions, Themes, CustomApps) goes into /opt/spicetify-cli,
 # where Arch's spicetify-cli keeps it, linked into /usr/local/bin. Its own
@@ -454,3 +497,4 @@ installed_source_zen()             { [ -x "$ZEN_TARBALL_DIR/zen-bin" ]; }
 installed_source_gowall()          { [ -x /usr/local/bin/gowall ]; }
 installed_source_spotify()         { pkg_installed spotify-client; }
 installed_source_spicetify()       { [ -x /opt/spicetify-cli/spicetify ]; }
+installed_source_vscode()          { pkg_installed code; }
