@@ -8,6 +8,7 @@
 configure_niri_steps=(
   "niri config|_niri_link_config"
   "Dux shell config (panel bar, own matugen templates)|_niri_link_dux"
+  "Qt apps: wallpaper colors (qt5ct / qt6ct)|_niri_qtct|qt5ct"
   "Dux shell plugins|_niri_restore_dux_plugins|dms"
   "Add user to the input group (Bongo Cat)|_niri_input_group|test:_niri_not_in_input_group"
   "Dux greeter (login screen, replaces SDDM/GDM)|_niri_dux_greeter|dms-greeter"
@@ -32,6 +33,27 @@ _niri_link_config() {
 _niri_link_dux() {
   execute_command "Configure Dux shell (panel-bar)" "create_symlink $HOME/Dotfiles/dms $HOME/.config/dms"
   execute_command "Link matugen templates" "create_symlink $HOME/Dotfiles/matugen $HOME/.config/matugen"
+}
+
+# Qt apps run with QT_QPA_PLATFORMTHEME=qt5ct (niri/conf/envs.kdl; qt6ct's plugin
+# answers to that name too): Fusion, open/save dialogs through the portal, and
+# the palette DMS writes into colors/ on every wallpaper change. DMS may have
+# written one before the link exists; it goes into the linked dir, not the .bak.
+_niri_link_qtct() {
+  local v=$1 dir="$HOME/.config/qt${1}ct"
+  if [ -d "$dir/colors" ] && [ ! -L "$dir" ]; then
+    mkdir -p "$HOME/Dotfiles/qt${v}ct/colors"
+    cp -n "$dir/colors/"* "$HOME/Dotfiles/qt${v}ct/colors/" 2>/dev/null
+  fi
+  create_symlink "$HOME/Dotfiles/qt${v}ct" "$dir"
+}
+
+_niri_qtct() {
+  execute_command "Link qt5ct" ". $HOME/Dotfiles/scripts/install/system/niri.sh && _niri_link_qtct 5"
+  command -v qt6ct &>/dev/null &&
+    execute_command "Link qt6ct" ". $HOME/Dotfiles/scripts/install/system/niri.sh && _niri_link_qtct 6"
+  [ -f "$HOME/.config/qt5ct/colors/matugen.conf" ] ||
+    print_success_message "The colors appear once DMS sets a wallpaper (change it once)"
 }
 
 # Plugin code isn't tracked (dms/plugins/ is ignored): the lockfile pins each

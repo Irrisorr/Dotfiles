@@ -36,3 +36,19 @@ post_hook = 'bash ~/Dotfiles/scripts/wrappers/telegram-theme.sh ~/.cache/matugen
 input_path = '~/.config/matugen/templates/obsidian-colors.css'
 output_path = '~/.cache/matugen/obsidian-colors.css'
 post_hook = 'bash ~/Dotfiles/scripts/wrappers/obsidian-snippet.sh ~/.cache/matugen/obsidian-colors.css'
+
+# fish and fzf: syntax colors (fish/conf.d/dms-colors.fish sources them at the
+# next prompt of every open shell) and fzf's default --color (FZF_DEFAULT_OPTS_FILE).
+[templates.fish]
+input_path = '~/.config/matugen/templates/fish-colors.fish'
+output_path = '~/.cache/matugen/fish-colors.fish'
+
+[templates.fzf]
+input_path = '~/.config/matugen/templates/fzf-colors'
+output_path = '~/.cache/matugen/fzf-colors'
+
+# clipse (Mod+V): its custom theme, read on every start. JSON has no comments,
+# so the template is plain; clipse/config.json points at this file (themeFile).
+[templates.clipse]
+input_path = '~/.config/matugen/templates/clipse-theme.json'
+output_path = '~/.config/clipse/custom_theme.json'
