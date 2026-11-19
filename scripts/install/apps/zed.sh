@@ -4,10 +4,12 @@
 # Menu guard: zed
 #
 # DMS writes Zed's wallpaper theme itself (~/.config/zed/themes/dank-zed-theme.json,
-# matugenTemplateZed); Zed only has to pick it. settings.json stays untracked.
+# matugenTemplateZed); our matugen hook builds "DankShell Soft" from its dark one
+# (scripts/wrappers/zed-soften.sh). Zed only has to pick them: Soft when the
+# system is dark, DMS's DankShell Light when light. settings.json stays untracked.
 
 configure_zed_steps=(
-  "Theme from the wallpaper (DankShell)|_zed_dms_theme"
+  "Theme from the wallpaper (DankShell Soft / Light)|_zed_dms_theme"
 )
 
 configure_zed() {
@@ -27,13 +29,13 @@ _zed_dms_theme() {
     awk '
       /"theme"[[:space:]]*:[[:space:]]*\{/ { inside = 1 }
       inside && /"light"[[:space:]]*:/ { sub(/"light"[[:space:]]*:[[:space:]]*"[^"]*"/, "\"light\": \"DankShell Light\"") }
-      inside && /"dark"[[:space:]]*:/  { sub(/"dark"[[:space:]]*:[[:space:]]*"[^"]*"/, "\"dark\": \"DankShell Dark\"") }
+      inside && /"dark"[[:space:]]*:/  { sub(/"dark"[[:space:]]*:[[:space:]]*"[^"]*"/, "\"dark\": \"DankShell Soft\"") }
       inside && /\}/ { inside = 0 }
       { print }
     ' "$settings" >"$tmp"
   else
-    awk 'NR == 1 && sub(/\{/, "{\n  \"theme\": { \"mode\": \"system\", \"light\": \"DankShell Light\", \"dark\": \"DankShell Dark\" },") { print; next } { print }' "$settings" >"$tmp"
+    awk 'NR == 1 && sub(/\{/, "{\n  \"theme\": { \"mode\": \"system\", \"light\": \"DankShell Light\", \"dark\": \"DankShell Soft\" },") { print; next } { print }' "$settings" >"$tmp"
   fi
   cat "$tmp" >"$settings" && rm -f "$tmp"
-  check_success "Zed uses the DankShell theme (light / dark with the system)"
+  check_success "Zed uses DankShell Soft / DankShell Light (with the system)"
 }

@@ -1,0 +1,17 @@
+{
+  "editor": "{{colors.surface_container_high.dark.hex}}",
+  "side": "{{colors.surface_container.dark.hex}}",
+  "raised": "{{colors.surface_container_highest.dark.hex}}",
+  "popup": "{{colors.surface_bright.dark.hex}}",
+  "text": "{{colors.on_surface_variant.dark.hex | lighten: 8}}",
+  "muted": "{{colors.on_surface_variant.dark.hex}}",
+  "comment": "{{colors.outline.dark.hex}}",
+  "punct": "{{colors.outline.dark.hex | lighten: 12}}",
+  "primary": "{{colors.primary.dark.hex}}",
+  "primary_fixed": "{{colors.primary_fixed.dark.hex}}",
+  "secondary": "{{colors.secondary.dark.hex}}",
+  "secondary_fixed": "{{colors.secondary_fixed.dark.hex}}",
+  "tertiary": "{{colors.tertiary.dark.hex}}",
+  "tertiary_fixed": "{{colors.tertiary_fixed.dark.hex}}",
+  "error": "{{colors.error.dark.hex}}"
+}

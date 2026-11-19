@@ -52,3 +52,17 @@ output_path = '~/.cache/matugen/fzf-colors'
 [templates.clipse]
 input_path = '~/.config/matugen/templates/clipse-theme.json'
 output_path = '~/.config/clipse/custom_theme.json'
+
+# Zed: "DankShell Soft", built from DMS's own Zed theme with softer surfaces and
+# the syntax in the wallpaper's colors. The hook waits for DMS's theme from this
+# same run, so it runs detached.
+[templates.zed-soften]
+input_path = '~/.config/matugen/templates/zed-soften.json'
+output_path = '~/.cache/matugen/zed-soften.json'
+post_hook = 'setsid -f bash ~/Dotfiles/scripts/wrappers/zed-soften.sh ~/.cache/matugen/zed-soften.json >/dev/null 2>&1'
+
+# Google Chrome: the wallpaper's seed color; scripts/wrappers/chrome-theme.sh puts
+# it into Chrome's settings at every Chrome start, Chrome builds its theme from it.
+[templates.chrome]
+input_path = '~/.config/matugen/templates/chrome-color'
+output_path = '~/.cache/matugen/chrome-color'

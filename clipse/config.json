@@ -31,8 +31,8 @@
     },
     "imageDisplay": {
         "type": "kitty",
-        "scaleX": 20,
-        "scaleY": 20,
+        "scaleX": 10,
+        "scaleY": 22,
         "heightCut": 2
     }
 }

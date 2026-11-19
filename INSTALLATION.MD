@@ -24,7 +24,7 @@ Dotfiles/
       paths.sh       # resolvers for paths that differ between distros (polkit, portals, sddm, fish, python, console font, zen, vscode)
       gum.sh         # gum bootstrap + UI wrappers
       helpers.sh     # universal menu(), execute_*, create_symlink, package engine, system_update
-    wrappers/        # tiny launchers called from WM configs (polkit agent, xdg portals), git (spicetify config filter) or matugen (VS Code, Telegram, Obsidian theme hooks)
+    wrappers/        # tiny launchers called from WM configs (polkit agent, xdg portals), git (spicetify config filter) or matugen (VS Code, Telegram, Obsidian, Zed theme hooks), plus Chrome's launcher
     install/
       main.sh        # installer engine: sourcing + core steps + run_final_steps (no menus)
       packages.txt   # package inventory by category, one line per package for both distros
@@ -476,6 +476,24 @@ instead of failing the session's autostart.
   `.obsidian/snippets/dms-colors.css` of every vault `obsidian_vaults` lists.
   Obsidian watches that folder and reloads the snippet; turning it on is
   `configure_obsidian`'s job, so the hook never fights a user who turned it off.
+
+* `zed-soften.sh <roles.json>` — the `post_hook` of
+  `matugen/templates/zed-soften.json`: builds `~/.config/zed/themes/dank-soft.json`
+  ("DankShell Soft") from DMS's "DankShell Dark" with `jq` — fixed surface and
+  text keys set from the roles, every syntax color picked by its key's prefix
+  (keyword → primary, string → tertiary, ...). A separate file, so DMS's stays as
+  it is; DMS writes its file in the same run, before or after the hook, so the
+  script waits up to 10 s for one written within 5 s of the roles file (run
+  detached). Written to a temp file next to it and moved over, so Zed never
+  reads half a theme.
+* `chrome-theme.sh [args]` — not a hook: the launcher entry `configure_chrome`
+  makes (a copy of `google-chrome.desktop` in `~/.local/share/applications`)
+  starts Chrome through it. While no Chrome runs (Chrome writes its settings
+  back on exit) it writes the wallpaper's seed color (`~/.cache/matugen/chrome-color`)
+  into every profile's `Preferences`: `browser.theme.user_color2` (ARGB as a
+  signed 32-bit int), `color_variant2` 1 (tonal spot, as DMS's scheme), no
+  GTK mode (`extensions.theme.system_theme` 0); then execs
+  `/usr/bin/google-chrome-stable`.
 
 ## `functions/` (aliases + `asd` menu)
 

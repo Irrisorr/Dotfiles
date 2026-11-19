@@ -5,7 +5,7 @@ set --global fish_color_autosuggestion {{colors.outline.default.hex_stripped}}
 set --global fish_color_cancel --reverse
 set --global fish_color_command {{colors.primary.default.hex_stripped}}
 set --global fish_color_comment {{colors.outline.default.hex_stripped}}
-set --global fish_color_cwd {{colors.tertiary.default.hex_stripped}}
+set --global fish_color_cwd {{colors.on_primary_container.default.hex_stripped}} --background={{colors.primary_container.default.hex_stripped}} --bold
 set --global fish_color_cwd_root {{colors.error.default.hex_stripped}}
 set --global fish_color_end {{colors.secondary.default.hex_stripped}}
 set --global fish_color_error {{colors.error.default.hex_stripped}}
