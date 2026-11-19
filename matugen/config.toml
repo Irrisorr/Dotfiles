@@ -28,3 +28,11 @@ post_hook = 'setsid -f bash ~/Dotfiles/scripts/wrappers/vscode-soften.sh ~/.cach
 input_path = '~/.config/matugen/templates/telegram-colors.tdesktop-theme'
 output_path = '~/.cache/matugen/telegram-colors.tdesktop-theme'
 post_hook = 'bash ~/Dotfiles/scripts/wrappers/telegram-theme.sh ~/.cache/matugen/telegram-colors.tdesktop-theme ~/.local/share/matugen/dms.tdesktop-theme'
+
+# Obsidian: a CSS snippet for the AnuPpuccin theme, copied into every vault.
+# Turned on once per vault by the installer (Obsidian step) or by hand
+# (Settings → Appearance → CSS snippets); Obsidian reloads it on every change.
+[templates.obsidian]
+input_path = '~/.config/matugen/templates/obsidian-colors.css'
+output_path = '~/.cache/matugen/obsidian-colors.css'
+post_hook = 'bash ~/Dotfiles/scripts/wrappers/obsidian-snippet.sh ~/.cache/matugen/obsidian-colors.css'

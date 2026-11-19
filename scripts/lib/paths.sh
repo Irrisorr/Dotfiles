@@ -230,3 +230,18 @@ vscode_settings_path() {
     echo "$native/User/settings.json"
   fi
 }
+
+
+# ─── Obsidian ─────────────────────────────────────────────────────────────────
+
+# The vaults Obsidian knows (its obsidian.json: the native app's, or the
+# flatpak's on Ubuntu), one path per line — only those that are still there.
+obsidian_vaults() {
+  local list
+  list=$(_first_existing "$HOME/.config/obsidian/obsidian.json" \
+           "$HOME/.var/app/md.obsidian.Obsidian/config/obsidian/obsidian.json") || return 0
+  command -v jq &>/dev/null || return 0
+  jq -r '.vaults[]?.path' "$list" 2>/dev/null | while IFS= read -r v; do
+    [ -d "$v/.obsidian" ] && echo "$v"
+  done
+}

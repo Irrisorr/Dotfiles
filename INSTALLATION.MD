@@ -24,7 +24,7 @@ Dotfiles/
       paths.sh       # resolvers for paths that differ between distros (polkit, portals, sddm, fish, python, console font, zen, vscode)
       gum.sh         # gum bootstrap + UI wrappers
       helpers.sh     # universal menu(), execute_*, create_symlink, package engine, system_update
-    wrappers/        # tiny launchers called from WM configs (polkit agent, xdg portals), git (spicetify config filter) or matugen (VS Code and Telegram theme hooks)
+    wrappers/        # tiny launchers called from WM configs (polkit agent, xdg portals), git (spicetify config filter) or matugen (VS Code, Telegram, Obsidian theme hooks)
     install/
       main.sh        # installer engine: sourcing + core steps + run_final_steps (no menus)
       packages.txt   # package inventory by category, one line per package for both distros
@@ -80,7 +80,9 @@ the same shell is a no-op.
   `/etc/shells` before `chsh` — Ubuntu rejects it otherwise), `python_site_dir`,
   `set_console_font`, `zen_profile_root`, `vscode_settings_path` (the native
   package's `settings.json`, or an old flatpak install's while there is no
-  `~/.config/Code`; used by `configure_vscode` and `fonts`). Standalone like `distro.sh`.
+  `~/.config/Code`; used by `configure_vscode` and `fonts`), `obsidian_vaults`
+  (the vaults in Obsidian's `obsidian.json`, native or flatpak, that still
+  exist; used by `configure_obsidian` and the snippet hook). Standalone like `distro.sh`.
 * **`gum.sh`** — UI wrappers around `gum` (`gum_choose_wrapper`, `confirm_action`,
   `confirm_step`,
   `print_success_message`, `print_error_message`, `print_styled_message`,
@@ -468,6 +470,12 @@ instead of failing the session's autostart.
   needed on Ubuntu) and moves the zip over `~/.local/share/matugen/dms.tdesktop-theme`
   in one rename — Telegram watches the applied file and reloads it on change,
   so it never sees half a zip. Without `magick` the theme has no background.
+
+* `obsidian-snippet.sh <colors.css>` — the `post_hook` of
+  `matugen/templates/obsidian-colors.css`: copies it into
+  `.obsidian/snippets/dms-colors.css` of every vault `obsidian_vaults` lists.
+  Obsidian watches that folder and reloads the snippet; turning it on is
+  `configure_obsidian`'s job, so the hook never fights a user who turned it off.
 
 ## `functions/` (aliases + `asd` menu)
 
