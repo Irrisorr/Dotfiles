@@ -1,0 +1,60 @@
+{
+ "version": 2,
+ "bookmarks": [
+  {
+   "path": "recent:///",
+   "label": "recent",
+   "icon": ""
+  },
+  {
+   "path": "/home/irrisorr",
+   "label": "irrisorr",
+   "icon": ""
+  },
+  {
+   "path": "/home/irrisorr/Desktop",
+   "label": "Desktop",
+   "icon": ""
+  },
+  {
+   "path": "/home/irrisorr/Documents",
+   "label": "Documents",
+   "icon": ""
+  },
+  {
+   "path": "/home/irrisorr/Downloads",
+   "label": "Downloads",
+   "icon": ""
+  },
+  {
+   "path": "/home/irrisorr/Music",
+   "label": "Music",
+   "icon": ""
+  },
+  {
+   "path": "/home/irrisorr/Pictures",
+   "label": "Pictures",
+   "icon": ""
+  },
+  {
+   "path": "/home/irrisorr/Videos",
+   "label": "Videos",
+   "icon": ""
+  },
+  {
+   "path": "/home/irrisorr/Public",
+   "label": "Public",
+   "icon": ""
+  },
+  {
+   "path": "/home/irrisorr/Templates",
+   "label": "Templates",
+   "icon": ""
+  },
+  {
+   "path": "trash:///",
+   "label": "trash",
+   "icon": ""
+  }
+ ]
+}

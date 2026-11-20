@@ -1,0 +1,14 @@
+# An update of Spotify drops spicetify's patch; this puts it back
+# (/usr/local/bin/spicetify-reapply, from etc/spicetify-reapply.sh).
+# Installed by the installer's Spicetify step (scripts/install/apps/spicetify.sh).
+
+[Trigger]
+Operation = Install
+Operation = Upgrade
+Type = Package
+Target = spotify
+
+[Action]
+Description = Re-applying spicetify to the updated Spotify...
+When = PostTransaction
+Exec = /usr/local/bin/spicetify-reapply

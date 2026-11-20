@@ -17,7 +17,7 @@ output "eDP-1" {
     position x=0 y=0            // Position of the output in the global coordinate space
 }
 
-output "LG Electronics LG FHD 0x01010101" {     // Home monitor
+output "LG Electronics LG FHD 0x01010101" {     // 1st Home monitor
     mode "1920x1080@74.973"
     scale 1
     transform "normal"
@@ -29,4 +29,17 @@ output "LG Electronics LG HDR WFHD 0x000278D4" { // Work monitor
     scale 1
     transform "normal"
     position x=-600 y=-1080     // y = 1080 / $scale (if ur default is 1920x1080, for )
+}
+
+output "PNP(BBK) BBK TV      0x000003E9" {       // 2nd Home monitor 
+    mode "1920x1080@60.000"
+    transform "90"
+    position x=-1090 y=-1080
+    layout {
+        struts {
+            right 16
+            top 32
+            bottom 32
+        }
+    }
 }

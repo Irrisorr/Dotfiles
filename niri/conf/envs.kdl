@@ -14,5 +14,5 @@ environment {
     MOZ_ENABLE_WAYLAND "1"              // Force Mozilla applications (like Firefox) to use the native Wayland display protocol instead of running through the XWayland compatibility layer
     GDK_BACKEND "wayland"               // Force GTK applications (like Gnome apps) to use the native Wayland display protocol instead of running through the XWayland compatibility layer
     OBSIDIAN_USE_WAYLAND "1"            // Force Obsidian to use the native Wayland display protocol instead of running through the XWayland compatibility layer
-    QT_QPA_PLATFORMTHEME "gtk3"         // Force Qt applications to use the GTK3 platform theme for better integration with the desktop environment
+    QT_QPA_PLATFORMTHEME "qt5ct"        // Qt apps take qt5ct / qt6ct (the qt6ct plugin answers to "qt5ct" too): the wallpaper palette DMS writes, Fusion, open/save dialogs through the portal. "gtk3" gave Qt5 no colors
 }

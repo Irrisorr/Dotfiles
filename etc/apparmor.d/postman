@@ -1,0 +1,10 @@
+# Postman's tarball (install_source_postman): its Electron sandbox needs user
+# namespaces, which Ubuntu's AppArmor only allows to profiles that say so.
+abi <abi/4.0>,
+include <tunables/global>
+
+profile postman @{HOME}/.local/share/postman/app/Postman flags=(unconfined) {
+  userns,
+
+  include if exists <local/postman>
+}

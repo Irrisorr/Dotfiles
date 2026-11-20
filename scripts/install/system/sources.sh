@@ -1,0 +1,670 @@
+#!/bin/bash
+#
+# Escape hatch for packages that no generic backend can express — anything
+# needing a clone, a build, or a vendor repository.
+#
+# Reach for this LAST. apt / aur / flatpak / snap / url / ppa cover nearly
+# everything, and they need no code at all — just a tail in packages.txt.
+#
+# Contract:  packages.txt "<distro>:source=<name>"  →  install_source_<name>
+#
+#   packages.txt:  clipse  ubuntu:source=clipse
+#   here:          install_source_clipse() { ... }
+#
+# Return 0 on success, non-zero on failure — the installer collects failures
+# and reports them at the end instead of aborting the whole run.
+#
+# Optional:  installed_source_<name>  — returns 0 when it is already installed,
+# so the package picker can mark it ✓. Without one the entry shows no mark.
+
+. "$HOME/Dotfiles/scripts/lib/common.sh"
+
+
+# clipse has no Debian package or PPA, but upstream publishes prebuilt Wayland
+# binaries. Installed into /usr/local/bin so it is on every PATH — including
+# niri's, which runs `clipse -listen` at startup (~/go/bin would not be).
+# Re-running the step upgrades it to the latest release.
+install_source_clipse() {
+  local arch tag tmp rc=0
+  case "$(uname -m)" in
+    x86_64)  arch=amd64 ;;
+    aarch64) arch=arm64 ;;
+    *) print_error_message "clipse: no release binary for $(uname -m)"; return 1 ;;
+  esac
+
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tag=$(curl -fsSL https://api.github.com/repos/savedra1/clipse/releases/latest)
+  tag=$(grep -m1 '"tag_name"' <<< "$tag" | cut -d'"' -f4)
+  [ -n "$tag" ] || { print_error_message "clipse: could not find the latest release"; return 1; }
+
+  tmp=$(mktemp -d)
+  curl -fsSL "https://github.com/savedra1/clipse/releases/download/$tag/clipse_${tag}_linux_wayland_${arch}.tar.gz" \
+    | tar -xz -C "$tmp" \
+    && sudo install -m 755 "$tmp/clipse-linux-wayland-$arch" /usr/local/bin/clipse \
+    || rc=1
+  rm -rf "$tmp"
+
+  [ $rc -eq 0 ] && echo ":: clipse $tag installed to /usr/local/bin/clipse"
+  return $rc
+}
+
+
+# FreeOffice ships no versioned .deb URL. SoftMaker's installer sets up their
+# apt repository, which is what makes the package upgrade with the system —
+# so the repository is configured here directly instead of piping their script
+# into a root shell. Values taken from install-softmaker-freeoffice-2024.sh.
+install_source_freeoffice() {
+  local keyring="/etc/apt/keyrings/softmaker.gpg"
+  local list="/etc/apt/sources.list.d/softmaker.list"
+  local key_url="https://shop.softmaker.com/repo/apt/softmaker-repo.asc"
+  local repo_url="https://shop.softmaker.com/repo/apt"
+
+  is_debian || { print_error_message "freeoffice: Debian-family only"; return 1; }
+
+  pkg_install gnupg ca-certificates curl || return 1
+
+  sudo mkdir -p /etc/apt/keyrings || return 1
+  curl -fsSL "$key_url" | sudo gpg --dearmor --yes -o "$keyring" || return 1
+  sudo chmod 0644 "$keyring"
+
+  echo "deb [arch=amd64 signed-by=$keyring] $repo_url stable non-free" \
+    | sudo tee "$list" >/dev/null || return 1
+
+  pkg_sync || return 1
+  pkg_install softmaker-freeoffice-2024
+}
+
+
+# Goodix 27c6:550a fingerprint driver.
+#
+# Arch: the AUR driver needs libfprint-tod, which conflicts with the plain
+# libfprint that fprintd pulls from the repos. pacman asks before swapping them
+# and --noconfirm answers "no", so the whole AUR transaction fails. Swap them
+# here instead: drop libfprint without its dependants (libfprint-tod provides
+# it, so fprintd stays satisfied), then install, and put libfprint back if that
+# fails so fprintd is never left without it.
+#
+# libfprint-tod itself is built from its AUR PKGBUILD with the thermal model
+# turned off (see _build_libfprint_tod). An AUR update of libfprint-tod brings
+# the stock build back — re-run the step then.
+#
+# Ubuntu: the PPA has no 26.04 build, so the noble .deb the AUR package
+# repackages is installed directly; apt pulls libfprint-2-tod1 from the archive.
+# Does not update by itself.
+install_source_goodix() {
+  if is_debian; then
+    url_install "https://launchpad.net/~libfprint-tod1-group/+archive/ubuntu/ppa/+files/libfprint-2-tod1-goodix-550a_0.0.11+2404-0ubuntu1_amd64.deb"
+    return
+  fi
+
+  # `pacman -Qq libfprint` resolves provides: it prints libfprint-tod once that
+  # is installed, so only the plain package is swapped out.
+  if [ "$(pacman -Qq libfprint 2>/dev/null)" = "libfprint" ]; then
+    sudo pacman -Rdd --noconfirm libfprint || return 1
+  fi
+
+  if ! _build_libfprint_tod || ! pkg_install libfprint-2-tod1-goodix-v2; then
+    pacman -Qq libfprint &>/dev/null || pkg_install libfprint
+    return 1
+  fi
+  sudo systemctl try-restart fprintd.service
+}
+
+
+# libfprint stops a reader after ~3 min of continuous use ("Device disabled to
+# prevent overheating") and keeps it off for minutes — a lock screen that waits
+# for a finger runs into it every time. Match-on-chip readers don't heat up
+# while waiting, so their drivers opt out (temp_hot_seconds = -1: goodixmoc,
+# synaptics, elanmoc, ...). The proprietary Goodix TOD driver predates that
+# field and gets the 3/9-minute default instead; the patch makes the default
+# "disabled". It also covers any other driver relying on the default — this
+# machine has only the Goodix reader.
+LIBFPRINT_TOD_PATCHED="no thermal limit"
+
+_build_libfprint_tod() {
+  local tmp rc=0
+  tmp=$(mktemp -d)
+  git clone -q https://aur.archlinux.org/libfprint-tod.git "$tmp/libfprint-tod" || { rm -rf "$tmp"; return 1; }
+
+  # pkgdesc marks the build, so `pacman -Qi libfprint-tod` tells which one is in.
+  # prepare() fails the build when the lines it replaces are gone upstream.
+  cat >> "$tmp/libfprint-tod/PKGBUILD" <<EOF
+
+pkgdesc+=" ($LIBFPRINT_TOD_PATCHED)"
+
+prepare() {
+  cd "\$_pkgdirname"
+  grep -q 'priv->temp_hot_seconds = DEFAULT_TEMP_HOT_SECONDS;' libfprint/fp-device.c || return 1
+  sed -i -e 's/priv->temp_hot_seconds = DEFAULT_TEMP_HOT_SECONDS;/priv->temp_hot_seconds = -1;/' \\
+         -e 's/priv->temp_cold_seconds = DEFAULT_TEMP_COLD_SECONDS;/priv->temp_cold_seconds = -1;/' \\
+         libfprint/fp-device.c
+}
+EOF
+
+  echo ":: Building libfprint-tod without the thermal limit (a minute or two)"
+  # -r drops the build-only dependencies again; no --needed, so an installed
+  # stock build of the same version is replaced.
+  (cd "$tmp/libfprint-tod" && makepkg -sri --nocheck --noconfirm) || rc=1
+  rm -rf "$tmp"
+  return $rc
+}
+
+libfprint_tod_patched() {
+  pacman -Qi libfprint-tod 2>/dev/null | grep -q "$LIBFPRINT_TOD_PATCHED"
+}
+
+
+# JetBrains Mono Nerd Font — kitty, fastfetch and DMS use its icons. apt ships
+# only the plain font, so the official nerd-fonts release is installed system
+# wide instead (the same font Arch's ttf-jetbrains-mono-nerd packages).
+# Re-running the step upgrades it to the latest release.
+install_source_jetbrains_nerd() {
+  local dir="/usr/local/share/fonts/JetBrainsMonoNerd"
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  command -v fc-cache &>/dev/null || pkg_install fontconfig || return 1
+
+  sudo mkdir -p "$dir" \
+    && curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz \
+       | sudo tar -xJ -C "$dir" \
+    && sudo fc-cache -f "$dir" >/dev/null \
+    || return 1
+
+  echo ":: JetBrainsMono Nerd Font installed to $dir"
+}
+
+
+# Google Antigravity — no .deb, apt repo or flatpak for the 2.x app; Google only
+# publishes a tarball whose URL carries a build id. The download page embeds the
+# current one, so it is read from there (the same tarball the AUR package uses).
+# Installed like the AUR package: /opt/Antigravity + a launcher and .desktop.
+# Re-running the step upgrades it.
+install_source_antigravity() {
+  local arch url tmp rc=0
+  case "$(uname -m)" in
+    x86_64)  arch=linux-x64 ;;
+    aarch64) arch=linux-arm ;;
+    *) print_error_message "antigravity: no build for $(uname -m)"; return 1 ;;
+  esac
+
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  url=$(curl -fsSL "https://antigravity.google/download?os=linux" \
+        | grep -oE "https://storage.googleapis.com/antigravity-public/antigravity-hub/[0-9][^\"]*/$arch/Antigravity\.tar\.gz" \
+        | head -n 1)
+  [ -n "$url" ] || { print_error_message "antigravity: download link not found on antigravity.google"; return 1; }
+
+  tmp=$(mktemp -d)
+  echo ":: Downloading $url"
+  if curl -fsSL "$url" | tar -xz -C "$tmp"; then
+    # chrome-sandbox must be setuid root: Ubuntu's AppArmor blocks the
+    # unprivileged user namespaces Electron would use instead.
+    # The tarball has no icon file; the AUR package ships one.
+    sudo rm -rf /opt/Antigravity \
+      && sudo cp -a "$tmp"/Antigravity-*/ /opt/Antigravity \
+      && sudo chown root:root /opt/Antigravity/chrome-sandbox \
+      && sudo chmod 4755 /opt/Antigravity/chrome-sandbox \
+      && sudo ln -sf /opt/Antigravity/antigravity /usr/local/bin/antigravity \
+      && curl -fsSL "https://aur.archlinux.org/cgit/aur.git/plain/antigravity.png?h=antigravity" \
+         | sudo tee /usr/share/pixmaps/antigravity.png >/dev/null \
+      && printf '%s\n' "[Desktop Entry]" "Name=Antigravity" "GenericName=Agentic Platform" \
+           "Exec=/usr/local/bin/antigravity %U" "Icon=antigravity" \
+           "Type=Application" "StartupWMClass=Antigravity" "Categories=Development;Utility;" \
+         | sudo tee /usr/share/applications/antigravity.desktop >/dev/null \
+      || rc=1
+  else
+    print_error_message "antigravity: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return $rc
+}
+
+
+# Zen — not in apt, and the flatpak's read-only app dir can't take Sine's
+# bootloader. The AUR package is upstream's tarball, so that is used here too,
+# unpacked into ~/.local/share/zen and owned by the user: Zen's own updater
+# (linux.mar) keeps it current from inside the browser, and Sine installs
+# without root. Linked into /usr/local/bin as zen-browser, the Arch package's
+# name, for niri's keybinds and the menu guards. Re-running the step reinstalls
+# the latest release; Sine's bootloader files are carried over.
+install_source_zen() {
+  local arch tmp f dir="$ZEN_TARBALL_DIR" rc=0
+  [ -n "$dir" ] || return 1   # rm -rf below
+  case "$(uname -m)" in
+    x86_64|aarch64) arch=$(uname -m) ;;
+    *) print_error_message "zen: no build for $(uname -m)"; return 1 ;;
+  esac
+  command -v curl &>/dev/null || pkg_install curl || return 1
+
+  tmp=$(mktemp -d)
+  echo ":: Downloading Zen ($arch)"
+  if curl -fsSL "https://github.com/zen-browser/desktop/releases/latest/download/zen.linux-$arch.tar.xz"        | tar -xJ -C "$tmp"; then
+    for f in config.js defaults/pref/config-prefs.js; do
+      [ -f "$dir/$f" ] || continue
+      mkdir -p "$tmp/zen/$(dirname "$f")" && cp -a "$dir/$f" "$tmp/zen/$f"
+    done
+    rm -rf "$dir" \
+      && mkdir -p "$(dirname "$dir")" "$HOME/.local/share/applications" \
+      && mv "$tmp/zen" "$dir" \
+      && sudo ln -sf "$dir/zen" /usr/local/bin/zen-browser \
+      && printf '%s\n' "[Desktop Entry]" "Name=Zen Browser" "GenericName=Web Browser" \
+           "Exec=/usr/local/bin/zen-browser %u" "Icon=$dir/browser/chrome/icons/default/default128.png" \
+           "Type=Application" "StartupWMClass=zen" "StartupNotify=true" \
+           "Categories=Network;WebBrowser;" \
+           "MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;" \
+         > "$HOME/.local/share/applications/zen.desktop" \
+      || rc=1
+  else
+    print_error_message "zen: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return $rc
+}
+
+
+# Latest GitHub release tag of <owner/repo>.
+_github_latest_tag() {
+  local json
+  json=$(curl -fsSL "https://api.github.com/repos/$1/releases/latest") || return 1
+  grep -m1 '"tag_name"' <<< "$json" | cut -d'"' -f4
+}
+
+
+# kitty — Ubuntu 26.04 freezes it at 0.45, which lacks custom_shaders and other
+# options kitty.conf uses. Upstream's own build (what its installer.sh fetches)
+# goes into /opt/kitty.app, linked into /usr/local/bin so niri's keybinds find
+# it. It bundles its own Python, terminfo and slangc — kitty looks slangc up on
+# PATH for custom_shaders, so that is linked too. Re-running the step upgrades it.
+install_source_kitty() {
+  local tag arch tmp rc=0
+  case "$(uname -m)" in
+    x86_64)  arch=x86_64 ;;
+    aarch64) arch=arm64 ;;
+    *) print_error_message "kitty: no build for $(uname -m)"; return 1 ;;
+  esac
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tag=$(_github_latest_tag kovidgoyal/kitty) || { print_error_message "kitty: could not find the latest release"; return 1; }
+
+  tmp=$(mktemp -d)
+  echo ":: Downloading kitty $tag"
+  if curl -fsSL "https://github.com/kovidgoyal/kitty/releases/download/$tag/kitty-${tag#v}-$arch.txz" | tar -xJ -C "$tmp"; then
+    sudo rm -rf /opt/kitty.app \
+      && sudo cp -a "$tmp" /opt/kitty.app \
+      && sudo chmod 755 /opt/kitty.app \
+      && sudo ln -sf /opt/kitty.app/bin/kitty /usr/local/bin/kitty \
+      && sudo ln -sf /opt/kitty.app/bin/kitten /usr/local/bin/kitten \
+      && sudo ln -sf /opt/kitty.app/bin/slangc /usr/local/bin/slangc \
+      && sed "s|^Icon=kitty|Icon=/opt/kitty.app/share/icons/hicolor/256x256/apps/kitty.png|; s|^Exec=kitty|Exec=/usr/local/bin/kitty|" \
+           /opt/kitty.app/share/applications/kitty.desktop \
+         | sudo tee /usr/share/applications/kitty.desktop >/dev/null \
+      || rc=1
+  else
+    print_error_message "kitty: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return $rc
+}
+
+
+# swayimg — Ubuntu 26.04 ships 4.7, older than the Lua config (5.0+) that
+# swayimg/init.lua is written in, and upstream has no binaries, flatpak or PPA.
+# Built from the release tag into /usr/local. Every image format is optional in
+# meson; the -dev packages here switch them on. EXR stays off: swayimg needs
+# OpenEXR >= 3.4, Ubuntu has 3.1. apt's 4.7 is removed so the menu has one
+# entry. Re-running the step upgrades it.
+_SWAYIMG_BUILD_DEPS=(
+  meson ninja-build g++ pkg-config python3
+  libwayland-dev wayland-protocols libxkbcommon-dev libfontconfig-dev
+  libfreetype-dev libluajit-5.1-dev libdrm-dev libexiv2-dev
+  libjpeg-dev libpng-dev libwebp-dev libgif-dev libheif-dev libavif-dev
+  libjxl-dev librsvg2-dev libtiff-dev libraw-dev libopenjp2-7-dev libsixel-dev
+  libminizip-ng-dev libavformat-dev libavcodec-dev libavutil-dev libswscale-dev
+)
+
+install_source_swayimg() {
+  local tag tmp jobs mem_kb rc=0
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  pkg_install "${_SWAYIMG_BUILD_DEPS[@]}" || return 1
+  tag=$(_github_latest_tag artemsen/swayimg) || { print_error_message "swayimg: could not find the latest release"; return 1; }
+
+  # The biggest g++ job here peaks at ~525 MB (measured on 5.7). ninja's
+  # default (cores + 2) swapped a 12-core VM with 4 GB to a standstill, so
+  # jobs follow free memory: one per 800 MB.
+  mem_kb=$(awk '/^MemAvailable:/ { print $2 }' /proc/meminfo)
+  jobs=$(( mem_kb / 800000 ))
+  [ "$jobs" -lt 1 ] && jobs=1
+  [ "$jobs" -gt "$(nproc)" ] && jobs=$(nproc)
+
+  tmp=$(mktemp -d)
+  echo ":: Building swayimg $tag ($jobs parallel jobs for $(( mem_kb / 1024 )) MB free)"
+  if curl -fsSL "https://github.com/artemsen/swayimg/archive/refs/tags/$tag.tar.gz" \
+       | tar -xz -C "$tmp" --strip-components=1; then
+    meson setup "$tmp/build" "$tmp" --prefix=/usr/local --buildtype=release \
+        -Dversion="${tag#v}" -Dexr=disabled \
+      && meson compile -C "$tmp/build" -j "$jobs" \
+      && sudo meson install -C "$tmp/build" --no-rebuild \
+      || rc=1
+  else
+    print_error_message "swayimg: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+
+  if [ $rc -eq 0 ] && pkg_installed swayimg; then
+    sudo apt-get remove -y swayimg
+  fi
+  return $rc
+}
+
+
+# gowall — no Debian package; upstream's release is one static binary (what the
+# AUR package installs), put into /usr/local/bin. Re-running the step upgrades it.
+install_source_gowall() {
+  local tag tmp rc=0
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "gowall: no Linux build for $(uname -m)"; return 1; }
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tag=$(_github_latest_tag Achno/gowall) || { print_error_message "gowall: could not find the latest release"; return 1; }
+
+  tmp=$(mktemp -d)
+  curl -fsSL "https://github.com/Achno/gowall/releases/download/$tag/gowall-amd64-linux.tar.gz" \
+    | tar -xz -C "$tmp" \
+    && sudo install -m 755 "$tmp/gowall" /usr/local/bin/gowall \
+    || rc=1
+  rm -rf "$tmp"
+
+  [ $rc -eq 0 ] && echo ":: gowall $tag installed to /usr/local/bin/gowall"
+  return $rc
+}
+
+
+# Spotify — from Spotify's own apt repository instead of the flatpak: spicetify
+# has to patch its files, which the flatpak keeps read-only and replaces on
+# every update. The repository's key changes now and then; the current one is
+# read off the download page (the key the instructions there use), with the
+# one known to sign the repository as a fallback.
+install_source_spotify() {
+  local keyring="/etc/apt/keyrings/spotify.gpg"
+  local list="/etc/apt/sources.list.d/spotify.list"
+  local key
+
+  is_debian || { print_error_message "spotify: Debian-family only"; return 1; }
+  pkg_install gnupg ca-certificates curl || return 1
+
+  key=$(curl -fsSL https://www.spotify.com/us/download/linux/ 2>/dev/null \
+        | grep -oE 'pubkey_[A-F0-9]+\.(asc|gpg)' | head -n 1)
+  key="https://download.spotify.com/debian/${key:-pubkey_5384CE82BA52C83A.asc}"
+
+  sudo mkdir -p /etc/apt/keyrings || return 1
+  curl -fsSL "$key" | sudo gpg --dearmor --yes -o "$keyring" || return 1
+  sudo chmod 0644 "$keyring"
+  echo "deb [signed-by=$keyring] https://repository.spotify.com stable non-free" \
+    | sudo tee "$list" >/dev/null || return 1
+
+  pkg_sync || return 1
+  pkg_install spotify-client
+}
+
+
+# _from_flatpak <app id> <shim> [<path under ~/.var/app/<id>> <native path>]...
+# Carries an older flatpak install over to the native one: copies its data
+# where the native app looks (a folder's contents, or a file; nothing that is
+# there already gets overwritten) and removes the /usr/local/bin shim that
+# would shadow the native command. The flatpak itself is left to uninstall.
+_from_flatpak() {
+  local id=$1 shim=$2 dir="$HOME/.var/app/$1"
+  shift 2
+  grep -qs -- "flatpak run $id" "/usr/local/bin/$shim" && sudo rm -f "/usr/local/bin/$shim"
+  [ -d "$dir" ] || return 0
+  while [ $# -ge 2 ]; do
+    if [ -d "$dir/$1" ]; then
+      mkdir -p "$2" && cp -an "$dir/$1/." "$2/"
+    elif [ -f "$dir/$1" ]; then
+      mkdir -p "$(dirname "$2")" && cp -n "$dir/$1" "$2"
+    fi
+    shift 2
+  done
+  echo ":: Carried over from the flatpak; remove it with: flatpak uninstall $id"
+}
+
+
+# _deb_install <name> <url> — a vendor's .deb through apt, so its dependencies
+# resolve. apt reads the file as _apt, hence world-readable.
+_deb_install() {
+  local tmp rc=0
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tmp=$(mktemp -d)
+  echo ":: Downloading $1"
+  if curl -fsSL -o "$tmp/$1.deb" "$2"; then
+    chmod a+rx "$tmp" && chmod a+r "$tmp/$1.deb"
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y "$tmp/$1.deb" || rc=1
+  else
+    print_error_message "$1: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return $rc
+}
+
+
+# VS Code — Microsoft's .deb instead of the flatpak, whose sandbox hides the
+# host's SDKs, docker and git setup from the editor and its terminal, and which
+# DMS's theme never reaches. The package's postinst adds Microsoft's apt
+# repository (and its key) when debconf says so, so apt updates it from then on;
+# its own repo file avoids clashing Signed-By entries with a hand-made one.
+install_source_vscode() {
+  local arch
+  is_debian || { print_error_message "vscode: Debian-family only"; return 1; }
+  case $(uname -m) in
+    x86_64) arch=x64 ;;
+    aarch64) arch=arm64 ;;
+    *) print_error_message "vscode: no .deb for $(uname -m)"; return 1 ;;
+  esac
+  echo "code code/add-microsoft-repo boolean true" | sudo debconf-set-selections || return 1
+  _deb_install code "https://update.code.visualstudio.com/latest/linux-deb-$arch/stable" || return 1
+  _from_flatpak com.visualstudio.code code \
+    config/Code/User "$HOME/.config/Code/User" \
+    data/vscode/extensions "$HOME/.vscode/extensions"
+}
+
+
+# IntelliJ IDEA Ultimate — JetBrains' own snap, in classic confinement: no
+# sandbox, so JDKs, Maven/Gradle, docker and the terminal see the host (the
+# Flathub build is unofficial and sandboxed). snap keeps it updated. Same
+# window class (jetbrains-idea) and config dir (~/.config/JetBrains) as Arch's.
+install_source_idea() {
+  is_debian || { print_error_message "idea: Debian-family only"; return 1; }
+  snap_install intellij-idea-ultimate:classic || return 1
+  _from_flatpak com.jetbrains.IntelliJ-IDEA-Ultimate intellij-idea-ultimate-edition \
+    config/JetBrains "$HOME/.config/JetBrains" \
+    data/JetBrains "$HOME/.local/share/JetBrains"
+}
+
+
+# Zed — zed.dev's own installer: ~/.local/zed.app, linked as ~/.local/bin/zed,
+# with its launcher entry. Owned by you, so it updates itself (no apt package;
+# the flatpak is sandboxed like any IDE's). Arch's package calls it zeditor.
+install_source_zed() {
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  curl -fsSL https://zed.dev/install.sh | sh
+}
+
+
+# Google Chrome — Google's .deb (the flatpak is a community repack that breaks
+# password-manager extensions and security keys). Its postinst adds Google's
+# apt repository, so apt updates it from then on.
+install_source_chrome() {
+  is_debian || { print_error_message "chrome: Debian-family only"; return 1; }
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "chrome: no Linux build for $(uname -m)"; return 1; }
+  _deb_install google-chrome "https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb" || return 1
+  _from_flatpak com.google.Chrome google-chrome \
+    config/google-chrome "$HOME/.config/google-chrome"
+}
+
+
+# Telegram — telegram.org's tarball into ~/.local/share/telegram (it is owned
+# by you, so Telegram updates itself, like Zen), linked as telegram-desktop,
+# Arch's command. The flatpak reaches files only through the portal, so it
+# would not see the wallpaper theme (~/.local/share/matugen) change. Telegram
+# writes its own launcher entry on the first start. The session (tdata) of a
+# flatpak install is carried over.
+install_source_telegram() {
+  local tmp dir="$HOME/.local/share/telegram" rc=0
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "telegram: no Linux build for $(uname -m)"; return 1; }
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tmp=$(mktemp -d)
+  echo ":: Downloading Telegram"
+  if curl -fsSL https://telegram.org/dl/desktop/linux | tar -xJ -C "$tmp"; then
+    rm -rf "$dir" \
+      && mv "$tmp/Telegram" "$dir" \
+      && sudo ln -sf "$dir/Telegram" /usr/local/bin/telegram-desktop \
+      || rc=1
+  else
+    print_error_message "telegram: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  [ $rc -eq 0 ] || return 1
+  _from_flatpak org.telegram.desktop telegram-desktop \
+    data/TelegramDesktop "$HOME/.local/share/TelegramDesktop"
+}
+
+
+# iMe (a Telegram fork) — imem.app's tarball, on both distros (no package
+# anywhere), into ~/.local/share/ime-desktop: owned by you, so it updates
+# itself, and the same path on every machine. Telegram-based apps name their
+# launcher entry after it — org.ime.desktop._<md5 of the binary's path> — so
+# the link handler saved in defapps/mimeapps.list finds it everywhere (for the
+# same user name). Linked as ime for niri's keybind. Its session lives in
+# ~/.local/share/iMe, apart from the program, so it survives the move; entries
+# an older install left for another path are removed.
+install_source_ime() {
+  local tmp dir="$HOME/.local/share/ime-desktop" apps="$HOME/.local/share/applications" id f rc=0
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "ime: no Linux build for $(uname -m)"; return 1; }
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tmp=$(mktemp -d)
+  echo ":: Downloading iMe"
+  if curl -fsSL https://imem.app/download/desktop/linux | tar -xJ -C "$tmp"; then
+    rm -rf "$dir" \
+      && mkdir -p "$(dirname "$dir")" \
+      && mv "$tmp/iMeDesktop" "$dir" \
+      && sudo ln -sf "$dir/iMe" /usr/local/bin/ime \
+      || rc=1
+  else
+    print_error_message "ime: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  [ $rc -eq 0 ] || return 1
+  id="org.ime.desktop._$(printf '%s' "$dir/iMe" | md5sum | cut -d' ' -f1).desktop"
+  for f in "$apps"/org.ime.desktop._*.desktop; do
+    [ -e "$f" ] && [ "${f##*/}" != "$id" ] && rm -f "$f"
+  done
+  echo ":: iMe installed: $dir (launcher entry $id after its first start)"
+}
+
+
+# Zoom — zoom.us's .deb (screen sharing on Wayland goes through the portal
+# either way, but the flatpak adds its own quirks). No apt repository: re-run
+# the package step to update. configure_zoom then edits ~/.config/zoomus.conf.
+install_source_zoom() {
+  is_debian || { print_error_message "zoom: Debian-family only"; return 1; }
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "zoom: no Linux build for $(uname -m)"; return 1; }
+  _deb_install zoom "https://zoom.us/client/latest/zoom_amd64.deb" || return 1
+  _from_flatpak us.zoom.Zoom zoom \
+    config/zoomus.conf "$HOME/.config/zoomus.conf"
+}
+
+
+# Postman — postman.com's tarball into ~/.local/share/postman (owned by you, so
+# it updates itself), linked as postman like the AUR package, with a launcher
+# entry. Its Electron sandbox needs user namespaces, which Ubuntu's AppArmor
+# only allows to apps with a profile saying so: etc/apparmor.d/postman.
+install_source_postman() {
+  local tmp dir="$HOME/.local/share/postman" rc=0
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "postman: no Linux build for $(uname -m)"; return 1; }
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tmp=$(mktemp -d)
+  echo ":: Downloading Postman"
+  if curl -fsSL https://dl.pstmn.io/download/latest/linux_64 | tar -xz -C "$tmp"; then
+    rm -rf "$dir" \
+      && mkdir -p "$(dirname "$dir")" "$HOME/.local/share/applications" \
+      && mv "$tmp/Postman" "$dir" \
+      && sudo ln -sf "$dir/Postman" /usr/local/bin/postman \
+      && printf '%s\n' "[Desktop Entry]" "Name=Postman" "Comment=API platform" \
+           "Exec=/usr/local/bin/postman %U" "Icon=$dir/app/resources/app/assets/icon.png" \
+           "Type=Application" "StartupWMClass=Postman" "Categories=Development;" \
+           "MimeType=x-scheme-handler/postman;" \
+         > "$HOME/.local/share/applications/postman.desktop" \
+      || rc=1
+  else
+    print_error_message "postman: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  [ $rc -eq 0 ] || return 1
+  if [ -d /etc/apparmor.d ]; then
+    sudo install -Dm644 "$HOME/Dotfiles/etc/apparmor.d/postman" /etc/apparmor.d/postman \
+      && sudo apparmor_parser -r /etc/apparmor.d/postman || return 1
+  fi
+  _from_flatpak com.getpostman.Postman postman \
+    config/Postman "$HOME/.config/Postman"
+}
+
+
+# spicetify — no Ubuntu package. Upstream's release tarball (the binary next to
+# its jsHelper, Extensions, Themes, CustomApps) goes into /opt/spicetify-cli,
+# where Arch's spicetify-cli keeps it, linked into /usr/local/bin. Its own
+# installer would put it in ~/.spicetify instead, which then has to be on every
+# PATH (DMS's matugen hook runs it too). Re-running the step upgrades it.
+install_source_spicetify() {
+  local tag tmp rc=0
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "spicetify: no Linux build for $(uname -m)"; return 1; }
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tag=$(_github_latest_tag spicetify/cli) || { print_error_message "spicetify: could not find the latest release"; return 1; }
+
+  tmp=$(mktemp -d)
+  echo ":: Downloading spicetify $tag"
+  if curl -fsSL "https://github.com/spicetify/cli/releases/download/$tag/spicetify-${tag#v}-linux-amd64.tar.gz" \
+       | tar -xz -C "$tmp"; then
+    sudo rm -rf /opt/spicetify-cli \
+      && sudo cp -a "$tmp" /opt/spicetify-cli \
+      && sudo chmod -R a+rX /opt/spicetify-cli \
+      && sudo ln -sf /opt/spicetify-cli/spicetify /usr/local/bin/spicetify \
+      || rc=1
+  else
+    print_error_message "spicetify: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  return $rc
+}
+
+
+# ─── Installed checks for the package picker (see the contract above) ─────────
+
+installed_source_clipse()         { command -v clipse &>/dev/null; }
+installed_source_jetbrains_nerd() { fc-list 2>/dev/null | grep -q "JetBrainsMono Nerd"; }
+installed_source_freeoffice()     { pkg_installed softmaker-freeoffice-2024; }
+installed_source_goodix() {
+  if is_debian; then
+    pkg_installed libfprint-2-tod1-goodix-550a
+  else
+    pkg_installed libfprint-2-tod1-goodix-v2
+  fi
+}
+installed_source_antigravity()     { [ -x /opt/Antigravity/antigravity ]; }
+installed_source_kitty()           { [ -x /opt/kitty.app/bin/kitty ]; }
+installed_source_swayimg()         { [ -x /usr/local/bin/swayimg ]; }
+installed_source_zen()             { [ -x "$ZEN_TARBALL_DIR/zen-bin" ]; }
+installed_source_gowall()          { [ -x /usr/local/bin/gowall ]; }
+installed_source_spotify()         { pkg_installed spotify-client; }
+installed_source_spicetify()       { [ -x /opt/spicetify-cli/spicetify ]; }
+installed_source_vscode()          { pkg_installed code; }
+installed_source_idea()            { snap list intellij-idea-ultimate &>/dev/null; }
+installed_source_chrome()          { pkg_installed google-chrome-stable; }
+installed_source_telegram()        { [ -x "$HOME/.local/share/telegram/Telegram" ]; }
+installed_source_zoom()            { pkg_installed zoom; }
+installed_source_ime()             { [ -x "$HOME/.local/share/ime-desktop/iMe" ]; }
+installed_source_zed()             { [ -x "$HOME/.local/bin/zed" ]; }
+installed_source_postman()         { [ -x "$HOME/.local/share/postman/Postman" ]; }

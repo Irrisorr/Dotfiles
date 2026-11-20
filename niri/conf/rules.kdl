@@ -6,6 +6,14 @@
 // ██║░░██║╚██████╔╝███████╗███████╗██████╔╝
 // ╚═╝░░╚═╝░╚═════╝░╚══════╝╚══════╝╚═════╝░
 
+include optional=true "sensitive_rules.kdl"
+
+// Wallpaper (swaybg / DMS)
+layer-rule {
+    match namespace="^wallpaper$"
+    match namespace="^quickshell$"
+    place-within-backdrop true
+}
 
 // Corner radius for all windows
 window-rule {
@@ -13,76 +21,107 @@ window-rule {
     clip-to-geometry true
 }
 
+// Background blur for all windows
+window-rule {
+    background-effect {
+        blur true
+        xray false
+    }
+}
+
 // Blocked apps from screencasting
 window-rule {
-    match app-id=r#"firefox$"# title="^Santander"
-    match app-id=r#"zen$"# title="^Santander"
-    match app-id="obsidian"
-    match app-id="clipse"
+    match title=r#"(?i)(santander|erste|centrum24|logowanie)"#
+    // …and the bare "Zen Browser" a page has until its own title loads (15-335 ms)
+    match title=r#"^Zen Browser$"#
+    match title=r#"(?i)(пароли|passwords) — "#
+    match title=r#"(?i)избранное"#
+    match app-id=r#"(?i)^clipse$"#
     block-out-from "screencast"
 }
 
-// Picture in picture mode
+// Picture in picture mode (any browser)
 window-rule {
-    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
-    match app-id=r#"firefox$"# title="^Картинка в картинке$"
-    match app-id=r#"zen$"# title="^Picture-in-Picture$"
-    match app-id=r#"zen$"# title="^Картинка в картинке$"
+    match title=r#"(?i)(picture.in.picture|картинка в картинке)"#
     open-floating true
 }
 
 // Clipse
 window-rule {
-    match app-id="clipse"
+    match app-id=r#"(?i)^clipse$"#
     open-floating true
     default-column-width { fixed 622; }
     default-window-height { fixed 652; }
 }
 
-// Kitty (terminal)
+// kitty, Alacritty (terminal)
 window-rule {
-    match app-id="kitty"
+    match app-id=r#"(?i)kitty"#
+    match app-id=r#"(?i)alacritty"#
     default-column-width { proportion 0.5; }
 }
 
 // Obsidian
 window-rule {
-    match app-id="obsidian"
+    match app-id=r#"(?i)obsidian"#
     scroll-factor 0.2
+}
+
+// Rofi
+layer-rule {
+    match namespace="^rofi$"
+    background-effect {
+        blur true
+        xray false
+        saturation 1.5
+        noise 0.05
+    }
+}
+
+// Telegram / iMe call: a new window of theirs takes focus (the call window has
+// the contact's name as its title, nothing else tells it apart). Not at login,
+// where the main window opens too.
+window-rule {
+    match app-id=r#"(?i)telegram"#
+    match app-id=r#"(?i)org\.ime\.desktop"#
+    exclude at-startup=true
+    open-focused true
 }
 
 // Apps that should open on the "_media" workspace
 window-rule {
-    match app-id=r#"^org\.telegram\.desktop$"#
-    match app-id=r#"^org\.ime\.desktop"#
-    match app-id=r#"spotify$"#
-    match app-id=r#"vesktop$"#
-    match app-id=r#"discord$"#
-    exclude app-id=r#"^org\.telegram\.desktop$"# title="Просмотр медиа"
+    match app-id=r#"(?i)telegram"#
+    match app-id=r#"(?i)org\.ime\.desktop"#
+    match app-id=r#"(?i)spotify"#
+    match app-id=r#"(?i)vesktop"#
+    match app-id=r#"(?i)discord"#
+    exclude title=r#"(?i)просмотр медиа"#
     
     open-on-workspace "_media"
 }
 
 // Apps that should open on the "browser" workspace
 window-rule {
-  match app-id=r#"zen$"#
-  match app-id=r#"firefox$"#
+  match app-id=r#"(?i)zen"#
+  match app-id=r#"(?i)chrome"#
+  match app-id=r#"(?i)firefox"#
 
   open-on-workspace "browser"
 }
 
 // Apps that should open on the "ide" workspace
 window-rule {
-    match app-id=r#"code$"#
-    match app-id=r#"jetbrains-idea$"#
-    match app-id=r#"antigravity$"#
+    match app-id=r#"(?i)code"#
+    match app-id=r#"(?i)jetbrains-idea"#
+    match app-id=r#"(?i)antigravity"#
+    match app-id=r#"(?i)zed"#
 
     open-on-workspace "ide"
 }
 
 // Apps that should open on the "notes" workspace
 window-rule {
-    match app-id=r#"obsidian$"#
+    match app-id=r#"(?i)obsidian"#
     
     open-on-workspace "notes"
 }

@@ -1,0 +1,75 @@
+/* The wallpaper colors (color.ini, from matugen/templates/spicetify-color.ini)
+   on Spotify's own color tokens. Spotify declares them inside @layer encore,
+   so these unlayered rules win without !important.
+   DMS's surfaces are near black for any wallpaper (matugenSpec "dms"), so the
+   backgrounds get some of the accent mixed in to show which wallpaper it is. */
+
+:root {
+  --dms-bg: color-mix(in srgb, var(--spice-main) 90%, var(--spice-button));
+  --dms-bg-elevated: color-mix(in srgb, var(--spice-main-elevated) 86%, var(--spice-button));
+  --dms-bg-highlight: color-mix(in srgb, var(--spice-highlight) 82%, var(--spice-button));
+  --dms-bg-highlight-elevated: color-mix(in srgb, var(--spice-highlight-elevated) 80%, var(--spice-button));
+  --dms-frame: color-mix(in srgb, var(--spice-player) 94%, var(--spice-button));
+}
+
+.encore-dark-theme,
+.encore-dark-theme .encore-base-set {
+  --background-base: var(--dms-bg);
+  --background-highlight: var(--dms-bg-highlight);
+  --background-press: var(--dms-bg);
+  --background-elevated-base: var(--dms-bg-elevated);
+  --background-elevated-highlight: var(--dms-bg-highlight-elevated);
+  --background-elevated-press: var(--dms-bg-elevated);
+  --background-tinted-base: rgba(var(--spice-rgb-text), 0.08);
+  --background-tinted-highlight: rgba(var(--spice-rgb-text), 0.12);
+  --background-tinted-press: rgba(var(--spice-rgb-text), 0.18);
+  --text-base: var(--spice-text);
+  --text-subdued: var(--spice-subtext);
+  --text-bright-accent: var(--spice-button);
+  --text-positive: var(--spice-button);
+  --text-negative: var(--spice-notification-error);
+  --essential-base: var(--spice-text);
+  --essential-subdued: var(--spice-button-disabled);
+  --essential-bright-accent: var(--spice-button);
+  --essential-positive: var(--spice-button);
+  --essential-negative: var(--spice-notification-error);
+  --decorative-base: var(--spice-text);
+  --decorative-subdued: var(--spice-misc);
+}
+
+/* Spotify's green: play buttons, toggles, "following" chips. */
+.encore-dark-theme .encore-bright-accent-set {
+  --background-base: var(--spice-button);
+  --background-highlight: var(--spice-button-active);
+  --background-press: var(--spice-button-active);
+  --background-elevated-base: var(--spice-button-active);
+  --background-elevated-highlight: var(--spice-button-active);
+  --background-elevated-press: var(--spice-button-active);
+  --background-tinted-base: var(--spice-button);
+  --background-tinted-highlight: var(--spice-button);
+  --background-tinted-press: var(--spice-button);
+  --text-base: var(--spice-main);
+  --text-subdued: var(--spice-main);
+  --essential-base: var(--spice-main);
+  --decorative-subdued: var(--spice-button-active);
+}
+
+/* White by default: the play button, tooltips. */
+.encore-dark-theme .encore-inverted-light-set {
+  --background-base: var(--spice-button);
+  --background-highlight: var(--spice-button-active);
+  --background-press: var(--spice-button-active);
+  --text-base: var(--spice-main);
+  --text-subdued: var(--spice-main);
+  --essential-base: var(--spice-main);
+}
+
+/* The played part of every progress / volume bar. */
+.progress-bar {
+  --fg-color: var(--spice-button);
+}
+
+/* The strip around the panels. */
+body {
+  background-color: var(--dms-frame);
+}
