@@ -481,6 +481,15 @@ install_source_idea() {
 }
 
 
+# Zed — zed.dev's own installer: ~/.local/zed.app, linked as ~/.local/bin/zed,
+# with its launcher entry. Owned by you, so it updates itself (no apt package;
+# the flatpak is sandboxed like any IDE's). Arch's package calls it zeditor.
+install_source_zed() {
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  curl -fsSL https://zed.dev/install.sh | sh
+}
+
+
 # Google Chrome — Google's .deb (the flatpak is a community repack that breaks
 # password-manager extensions and security keys). Its postinst adds Google's
 # apt repository, so apt updates it from then on.
@@ -622,4 +631,5 @@ installed_source_idea()            { snap list intellij-idea-ultimate &>/dev/nul
 installed_source_chrome()          { pkg_installed google-chrome-stable; }
 installed_source_telegram()        { [ -x "$HOME/.local/share/telegram/Telegram" ]; }
 installed_source_zoom()            { pkg_installed zoom; }
+installed_source_zed()             { [ -x "$HOME/.local/bin/zed" ]; }
 installed_source_postman()         { [ -x "$HOME/.local/share/postman/Postman" ]; }

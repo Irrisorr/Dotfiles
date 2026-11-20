@@ -24,6 +24,7 @@ neovim
 visual-studio-code-bin ubuntu:source=vscode (Ubuntu: Microsoft's .deb, then its apt repo — the flatpak hides the host's SDKs and docker)
 intellij-idea-ultimate-edition ubuntu:source=idea (Ubuntu: JetBrains' snap, classic — no sandbox between it and the JDKs, docker, terminal)
 antigravity            ubuntu:source=antigravity (Google's agentic IDE)
+zed                    ubuntu:source=zed (code editor | Ubuntu: zed.dev's installer, updates itself)
 postman-bin            ubuntu:source=postman (Ubuntu: postman.com's tarball, updates itself)
 podman-desktop-bin     ubuntu:flatpak=io.podman_desktop.PodmanDesktop
 podman

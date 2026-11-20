@@ -245,3 +245,10 @@ obsidian_vaults() {
     [ -d "$v/.obsidian" ] && echo "$v"
   done
 }
+
+
+# ─── Zed ──────────────────────────────────────────────────────────────────────
+
+# Arch's package calls the command zeditor, zed.dev's installer (Ubuntu) zed.
+# Menu guard: test:has_zed
+has_zed() { command -v zeditor &>/dev/null || command -v zed &>/dev/null || [ -x "$HOME/.local/bin/zed" ]; }

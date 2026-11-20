@@ -82,7 +82,8 @@ the same shell is a no-op.
   package's `settings.json`, or an old flatpak install's while there is no
   `~/.config/Code`; used by `configure_vscode` and `fonts`), `obsidian_vaults`
   (the vaults in Obsidian's `obsidian.json`, native or flatpak, that still
-  exist; used by `configure_obsidian` and the snippet hook). Standalone like `distro.sh`.
+  exist; used by `configure_obsidian` and the snippet hook), `has_zed` (menu guard: Arch's
+  `zeditor` or zed.dev's `zed`). Standalone like `distro.sh`.
 * **`gum.sh`** — UI wrappers around `gum` (`gum_choose_wrapper`, `confirm_action`,
   `confirm_step`,
   `print_success_message`, `print_error_message`, `print_styled_message`,

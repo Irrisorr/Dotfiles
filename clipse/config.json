@@ -32,7 +32,7 @@
     "imageDisplay": {
         "type": "kitty",
         "scaleX": 10,
-        "scaleY": 22,
-        "heightCut": 2
+        "scaleY": 18,
+        "heightCut": 3
     }
 }

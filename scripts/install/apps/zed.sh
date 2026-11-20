@@ -1,7 +1,7 @@
 #!/bin/bash
 . "$HOME/Dotfiles/scripts/lib/common.sh"
 
-# Menu guard: zed
+# Menu guard: test:has_zed
 #
 # DMS writes Zed's wallpaper theme itself (~/.config/zed/themes/dank-zed-theme.json,
 # matugenTemplateZed); our matugen hook builds "DankShell Soft" from its dark one
