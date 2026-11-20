@@ -18,7 +18,7 @@ binds {
     Mod+M       hotkey-overlay-title="Spotify"     { spawn "spotify"; }
     Mod+D       hotkey-overlay-title="Vesktop"     { spawn "vesktop"; }
     Mod+E       hotkey-overlay-title="File manager (Files)"     { spawn "dfiles" "open"; }
-    Mod+Shift+T hotkey-overlay-title="iMe (Telegram)"           { spawn-sh "~/Downloads/apps/iMe_Desktop_Linux/iMeDesktop/iMe"; }
+    Mod+Shift+T hotkey-overlay-title="iMe (Telegram)"           { spawn "ime"; }
     // Alt+Space   hotkey-overlay-title="App launcher (rofi)"      { spawn-sh "rofi -show drun"; }
     // Ctrl+space  hotkey-overlay-title="Window manager (rofi)"    { spawn-sh "rofi -show window"; }
     // Mod+Shift+L hotkey-overlay-title="Logout manager (Wlogout)" { spawn "wlogout"; }

@@ -32,7 +32,7 @@ podman
 # Media
 telegram-desktop       ubuntu:source=telegram (Ubuntu: telegram.org's tarball, updates itself — the flatpak can't follow the wallpaper theme)
 slack
-iMe (fork of telegram with some features | DONT INSTALL HERE WILL BE LATER IF U WANT)
+ime                    arch:source=ime ubuntu:source=ime (iMe: Telegram fork with extra features | imem.app's tarball in ~/.local/share/ime-desktop, updates itself)
 vesktop-bin            ubuntu:flatpak=dev.vencord.Vesktop
 discord                ubuntu:flatpak=com.discordapp.Discord
 spotify                ubuntu:source=spotify (Ubuntu: Spotify's apt repo, spicetify can't patch the flatpak)

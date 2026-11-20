@@ -530,6 +530,40 @@ install_source_telegram() {
 }
 
 
+# iMe (a Telegram fork) — imem.app's tarball, on both distros (no package
+# anywhere), into ~/.local/share/ime-desktop: owned by you, so it updates
+# itself, and the same path on every machine. Telegram-based apps name their
+# launcher entry after it — org.ime.desktop._<md5 of the binary's path> — so
+# the link handler saved in defapps/mimeapps.list finds it everywhere (for the
+# same user name). Linked as ime for niri's keybind. Its session lives in
+# ~/.local/share/iMe, apart from the program, so it survives the move; entries
+# an older install left for another path are removed.
+install_source_ime() {
+  local tmp dir="$HOME/.local/share/ime-desktop" apps="$HOME/.local/share/applications" id f rc=0
+  [ "$(uname -m)" = x86_64 ] || { print_error_message "ime: no Linux build for $(uname -m)"; return 1; }
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  tmp=$(mktemp -d)
+  echo ":: Downloading iMe"
+  if curl -fsSL https://imem.app/download/desktop/linux | tar -xJ -C "$tmp"; then
+    rm -rf "$dir" \
+      && mkdir -p "$(dirname "$dir")" \
+      && mv "$tmp/iMeDesktop" "$dir" \
+      && sudo ln -sf "$dir/iMe" /usr/local/bin/ime \
+      || rc=1
+  else
+    print_error_message "ime: download failed"
+    rc=1
+  fi
+  rm -rf "$tmp"
+  [ $rc -eq 0 ] || return 1
+  id="org.ime.desktop._$(printf '%s' "$dir/iMe" | md5sum | cut -d' ' -f1).desktop"
+  for f in "$apps"/org.ime.desktop._*.desktop; do
+    [ -e "$f" ] && [ "${f##*/}" != "$id" ] && rm -f "$f"
+  done
+  echo ":: iMe installed: $dir (launcher entry $id after its first start)"
+}
+
+
 # Zoom — zoom.us's .deb (screen sharing on Wayland goes through the portal
 # either way, but the flatpak adds its own quirks). No apt repository: re-run
 # the package step to update. configure_zoom then edits ~/.config/zoomus.conf.
@@ -631,5 +665,6 @@ installed_source_idea()            { snap list intellij-idea-ultimate &>/dev/nul
 installed_source_chrome()          { pkg_installed google-chrome-stable; }
 installed_source_telegram()        { [ -x "$HOME/.local/share/telegram/Telegram" ]; }
 installed_source_zoom()            { pkg_installed zoom; }
+installed_source_ime()             { [ -x "$HOME/.local/share/ime-desktop/iMe" ]; }
 installed_source_zed()             { [ -x "$HOME/.local/bin/zed" ]; }
 installed_source_postman()         { [ -x "$HOME/.local/share/postman/Postman" ]; }
