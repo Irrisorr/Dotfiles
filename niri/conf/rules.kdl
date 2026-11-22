@@ -37,6 +37,7 @@ window-rule {
     match title=r#"(?i)(пароли|passwords) — "#
     match title=r#"(?i)избранное"#
     match app-id=r#"(?i)^clipse$"#
+    match title=r#"(?i)bitwarden"#
     block-out-from "screencast"
 }
 
