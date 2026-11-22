@@ -1,3 +1,45 @@
+# Hypr Ecosystem | hyprland
+hyprshot               ubuntu:skip (Ubuntu: shell script, no .deb)
+hyprswitch             ubuntu:skip (Ubuntu: no releases, source only)
+ags-hyprpanel-git      ubuntu:skip (Ubuntu: not packaged)
+hyprpaper
+hyprlock
+xdg-desktop-portal
+xdg-user-dirs (for home directories)
+xdg-desktop-portal-hyprland
+hyprpicker
+nwg-displays (monitor control)
+
+# niri Ecosystem | niri
+niri                   ubuntu:ppa=duxlabs/dux-repo (the compositor itself)
+xdg-desktop-portal (default portal)
+xdg-desktop-portal-gtk (implements most of the basic functionality)
+xdg-desktop-portal-gnome (required for screencasting support)
+xdg-user-dirs (for home directories)
+xdg-user-dirs-gtk (for home gtk directories)
+gnome-keyring (implements the Secret portal, required for certain apps to work)
+xwayland-satellite     ubuntu:ppa=duxlabs/dux-repo (to run X11 apps like Steam or Discord)
+quickshell             ubuntu:ppa=duxlabs/dux-repo (DMS's framework | Ubuntu: dms needs it from this PPA, not only from its own)
+dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
+- matugen              ubuntu:ppa=duxlabs/dux-repo (wallpaper-based colors)
+- dux-gop              ubuntu:ppa=duxlabs/dux-repo (dgop: system stats for DMS widgets and the dgop top monitor)
+- cava (DMS audio visualizer widget)
+- qt6-multimedia       ubuntu:apt=qml6-module-qtmultimedia (DMS sound effects)
+- libinput-tools (Bongo Cat plugin: "All keyboards" mode)
+- evtest (Bongo Cat plugin: a single keyboard)
+- cliphist (clipboard history)
+- wl-clipboard (wayland clipboard)
+- jq (matugen hook: softens DMS's VS Code theme)
+- imagemagick (matugen hook: draws the Telegram theme's chat background)
+- python               ubuntu:apt=python3 (matugen hook: zips the Telegram theme)
+- qt5ct (Qt5 apps in the DMS wallpaper colors: QT_QPA_PLATFORMTHEME=qt5ct)
+- qt6ct (the same for Qt6 apps; its plugin answers to qt5ct too)
+dux-greeter-bin        ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-greeter (DMS login screen, replaces SDDM | Ubuntu: 26.04+)
+dux-calendar-bin       ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-calendar (dcal: Google/CalDAV calendar and tasks, DMS calendar backend | Ubuntu: 26.04+)
+dux-files-bin          ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-files (dfiles: file manager, also serves open/save dialogs | Ubuntu: 26.04+)
+hyprlock (lock manager)
+swaybg (wallpaper tool)
+
 # Browsers
 zen-browser-bin        ubuntu:source=zen (based on firefox | Ubuntu: upstream tarball, updates itself)
 firefox
@@ -100,48 +142,6 @@ logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unver
 # Games and Launchers
 steam                  ubuntu:apt=steam-installer
 lutris
-
-# Hypr Ecosystem | hyprland
-hyprshot               ubuntu:skip (Ubuntu: shell script, no .deb)
-hyprswitch             ubuntu:skip (Ubuntu: no releases, source only)
-ags-hyprpanel-git      ubuntu:skip (Ubuntu: not packaged)
-hyprpaper
-hyprlock
-xdg-desktop-portal
-xdg-user-dirs (for home directories)
-xdg-desktop-portal-hyprland
-hyprpicker
-nwg-displays (monitor control)
-
-# niri Ecosystem | niri
-niri                   ubuntu:ppa=duxlabs/dux-repo (the compositor itself)
-xdg-desktop-portal (default portal)
-xdg-desktop-portal-gtk (implements most of the basic functionality)
-xdg-desktop-portal-gnome (required for screencasting support)
-xdg-user-dirs (for home directories)
-xdg-user-dirs-gtk (for home gtk directories)
-gnome-keyring (implements the Secret portal, required for certain apps to work)
-xwayland-satellite     ubuntu:ppa=duxlabs/dux-repo (to run X11 apps like Steam or Discord)
-quickshell             ubuntu:ppa=duxlabs/dux-repo (DMS's framework | Ubuntu: dms needs it from this PPA, not only from its own)
-dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
-- matugen              ubuntu:ppa=duxlabs/dux-repo (wallpaper-based colors)
-- dux-gop              ubuntu:ppa=duxlabs/dux-repo (dgop: system stats for DMS widgets and the dgop top monitor)
-- cava (DMS audio visualizer widget)
-- qt6-multimedia       ubuntu:apt=qml6-module-qtmultimedia (DMS sound effects)
-- libinput-tools (Bongo Cat plugin: "All keyboards" mode)
-- evtest (Bongo Cat plugin: a single keyboard)
-- cliphist (clipboard history)
-- wl-clipboard (wayland clipboard)
-- jq (matugen hook: softens DMS's VS Code theme)
-- imagemagick (matugen hook: draws the Telegram theme's chat background)
-- python               ubuntu:apt=python3 (matugen hook: zips the Telegram theme)
-- qt5ct (Qt5 apps in the DMS wallpaper colors: QT_QPA_PLATFORMTHEME=qt5ct)
-- qt6ct (the same for Qt6 apps; its plugin answers to qt5ct too)
-dux-greeter-bin        ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-greeter (DMS login screen, replaces SDDM | Ubuntu: 26.04+)
-dux-calendar-bin       ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-calendar (dcal: Google/CalDAV calendar and tasks, DMS calendar backend | Ubuntu: 26.04+)
-dux-files-bin          ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-files (dfiles: file manager, also serves open/save dialogs | Ubuntu: 26.04+)
-hyprlock (lock manager)
-swaybg (wallpaper tool)
 
 # work
 nodejs
