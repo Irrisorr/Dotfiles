@@ -31,8 +31,8 @@ podman
 
 # Media
 telegram-desktop       ubuntu:source=telegram (Ubuntu: telegram.org's tarball, updates itself — the flatpak can't follow the wallpaper theme)
-slack
 ime                    arch:source=ime ubuntu:source=ime (iMe: Telegram fork with extra features | imem.app's tarball in ~/.local/share/ime-desktop, updates itself)
+slack
 vesktop-bin            ubuntu:flatpak=dev.vencord.Vesktop
 discord                ubuntu:flatpak=com.discordapp.Discord
 spotify                ubuntu:source=spotify (Ubuntu: Spotify's apt repo, spicetify can't patch the flatpak)
@@ -122,9 +122,12 @@ xdg-user-dirs (for home directories)
 xdg-user-dirs-gtk (for home gtk directories)
 gnome-keyring (implements the Secret portal, required for certain apps to work)
 xwayland-satellite     ubuntu:ppa=duxlabs/dux-repo (to run X11 apps like Steam or Discord)
+quickshell             ubuntu:ppa=duxlabs/dux-repo (DMS's framework | Ubuntu: dms needs it from this PPA, not only from its own)
 dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
 - matugen              ubuntu:ppa=duxlabs/dux-repo (wallpaper-based colors)
 - dux-gop              ubuntu:ppa=duxlabs/dux-repo (dgop: system stats for DMS widgets and the dgop top monitor)
+- cava (DMS audio visualizer widget)
+- qt6-multimedia       ubuntu:apt=qml6-module-qtmultimedia (DMS sound effects)
 - libinput-tools (Bongo Cat plugin: "All keyboards" mode)
 - evtest (Bongo Cat plugin: a single keyboard)
 - cliphist (clipboard history)
