@@ -121,6 +121,9 @@ _niri_home_path_filter() {
   grep -q '@HOME@\|@USER@' "$b" 2>/dev/null || return 0
   tmp=$(mktemp) && "$f" smudge <"$b" >"$tmp" && cat "$tmp" >"$b"
   rm -f "$tmp"
+  # Its size changed, so git status would list it with an empty diff; adding
+  # stages nothing (clean gives back the index version) but refreshes that.
+  git -C "$HOME/Dotfiles" add dfiles/bookmarks.json
 }
 
 _niri_link_hyprlock() {
