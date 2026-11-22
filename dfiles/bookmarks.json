@@ -27,28 +27,18 @@
    "icon": ""
   },
   {
-   "path": "/home/irrisorr/Music",
-   "label": "Music",
-   "icon": ""
-  },
-  {
    "path": "/home/irrisorr/Pictures",
    "label": "Pictures",
    "icon": ""
   },
   {
-   "path": "/home/irrisorr/Videos",
-   "label": "Videos",
+   "path": "/home/irrisorr/Dotfiles",
+   "label": "Dotfiles",
    "icon": ""
   },
   {
-   "path": "/home/irrisorr/Public",
-   "label": "Public",
-   "icon": ""
-  },
-  {
-   "path": "/home/irrisorr/Templates",
-   "label": "Templates",
+   "path": "/home/irrisorr/Obsidian",
+   "label": "Obsidian",
    "icon": ""
   },
   {
