@@ -246,6 +246,12 @@ obsidian_vaults() {
   done
 }
 
+# The documents folder lives in the Syncthing-synced vault: Syncthing doesn't
+# follow symlinks (and Android has none), so ~/Documents is the link, not it.
+VAULT_DOCUMENTS="$HOME/Obsidian/Быт/Документы"
+# Menu guard: test:has_vault_documents
+has_vault_documents() { [ -d "$VAULT_DOCUMENTS" ]; }
+
 
 # ─── Zed ──────────────────────────────────────────────────────────────────────
 

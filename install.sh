@@ -42,6 +42,7 @@ CONFIG_STEPS=(
   "Default apps (defapps)|configure_default_apps"
   "Fonts (fonts)|configure_fonts|fc-match"
   "Convert Russian XDG dirs to English|convert_xdg_dirs"
+  "Documents -> Obsidian vault (Быт/Документы)|link_documents_to_vault|test:has_vault_documents"
   "Fingerprint authentication|configure_fingerprint|fprintd-enroll"
   "Keyboard fixes (udev hwdb)|configure_hwdb|systemd-hwdb"
   "Git|configure_git|git"
