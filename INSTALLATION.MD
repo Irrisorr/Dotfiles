@@ -14,6 +14,7 @@ branches on the distro.
 Dotfiles/
   install.sh         # installer entry point  (./install.sh)
   post_install.sh    # runs once after reboot  (./post_install.sh)
+  systemd/user/      # user units configure_clipse links into ~/.config/systemd/user (clipse-prune.service/.timer)
   etc/               # system files the config steps copy into /etc (udev/hwdb.d: keyboard fixes, configure_hwdb;
                      #   spicetify-reapply.sh + pacman.d/hooks, apt/apt.conf.d: spicetify after Spotify updates, configure_spicetify;
                      #   apparmor.d/postman: user namespaces for Postman's tarball on Ubuntu, install_source_postman)
@@ -24,7 +25,7 @@ Dotfiles/
       paths.sh       # resolvers for paths that differ between distros (polkit, portals, sddm, fish, python, console font, zen, vscode)
       gum.sh         # gum bootstrap + UI wrappers
       helpers.sh     # universal menu(), execute_*, create_symlink, package engine, system_update
-    wrappers/        # tiny launchers called from WM configs (polkit agent, xdg portals), git (spicetify config filter) or matugen (VS Code, Telegram, Obsidian, Zed theme hooks), plus Chrome's launcher
+    wrappers/        # tiny launchers called from WM configs (polkit agent, xdg portals), git (spicetify config filter) or matugen (VS Code, Telegram, Obsidian, Zed theme hooks), plus Chrome's launcher and clipse's history expiry (systemd timer)
     install/
       main.sh        # installer engine: sourcing + core steps + run_final_steps (no menus)
       packages.txt   # package inventory by category, one line per package for both distros
@@ -497,6 +498,15 @@ instead of failing the session's autostart.
   signed 32-bit int), `color_variant2` 1 (tonal spot, as DMS's scheme), no
   GTK mode (`extensions.theme.system_theme` 0); then execs
   `/usr/bin/google-chrome-stable`.
+* `clipse-prune.sh` — not a hook: run every 5 min by
+  `systemd/user/clipse-prune.timer` (`configure_clipse` links and enables it).
+  Drops unpinned items of clipse's history older than `pruneAfter` seconds
+  (our key in `clipse/config.json`; clipse's own `deleteAfter` stays 0 — in
+  1.2.1 it removes by shifting indexes and keeps the images), comparing the
+  `recorded` strings (local time, sortable) with a cutoff; writes a temp file
+  and moves it over, only when something changed. Then removes images in
+  `tempDir` no item names, if older than a minute (`clipse -listen` saves the
+  image just before the item).
 
 ## `functions/` (aliases + `asd` menu)
 

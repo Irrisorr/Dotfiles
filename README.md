@@ -180,6 +180,7 @@ The generated files inside Dotfiles change with every wallpaper, so they are in 
     - syncs `~/Obsidian` with the phone. Documents live in the vault, `~/Obsidian/Быт/Документы`, and `~/Documents` is a link to it: Syncthing doesn't follow symlinks and Android has none, so the real folder has to be inside the synced one. The config step **Documents -> Obsidian vault** makes the link (merges a real `~/Documents` in first, stops on a file with the same name and other content)
     - `~/Obsidian/.stignore` (not in the dotfiles, Syncthing doesn't sync it either — add the same line on the phone): `(?d).obsidian/plugins/recent-files-obsidian/data.json` — the plugin rewrites it on every opened note on each device, so it only made conflicts; `(?d)` lets Syncthing delete it with its folder, without it a deleted vault stays on the other device
 - **clipse** - clipboard app
+    - history expires by time through our timer, not clipse's own `deleteAfter`: in clipse 1.2.1 that one only runs when the history is read (opening `Mod+V`, a new copy), removes by indexes that shift after every removal — so each run drops about every other expired item and may hit a pinned one — and leaves the items' images in `tmp_files`. So `clipse/config.json` has `deleteAfter: 0` and our own `pruneAfter` (seconds, 14400 = 4 h); `systemd/user/clipse-prune.timer` runs `scripts/wrappers/clipse-prune.sh` every 5 min: drops unpinned items older than that and images no item points to. Config step **Clipse → Expire history on time** links the units into `~/.config/systemd/user` and enables the timer
 - kill all **xdg-desktop-portals** for rerun while startup to avoid unexpected problems during the session
 
 ### Environment (`niri/conf/envs.kdl`)
@@ -350,6 +351,7 @@ The two entry points sit at the repo root; everything else lives under `scripts/
 Dotfiles/
   install.sh         # the installer MENUS only (sources the engine, then config_menu + first menu)  (./install.sh)
   post_install.sh    # runs once after reboot: ./post_install.sh
+  systemd/user/      # user units linked into ~/.config/systemd/user by config steps (clipse-prune.timer)
   etc/               # system files copied into /etc by config steps (udev hwdb keyboard fixes; spicetify-reapply + its pacman / apt hook; AppArmor profile for Postman's tarball on Ubuntu)
   scripts/
     lib/             # reusable helpers (no app-specific logic)
@@ -359,7 +361,7 @@ Dotfiles/
       gum.sh         # gum bootstrap + UI wrappers
       helpers.sh     # universal menu(), execute_*, create_symlink, package engine, system_update
       fzf.sh         # shared parts of the fzf pickers (modes, keys, footer) + fzf bootstrap
-    wrappers/        # launchers called from WM configs, resolve distro-specific paths (polkit, portals); git's filter for spicetify/config-xpui.ini; matugen's hooks (VS Code, Telegram, Obsidian, Zed themes); Chrome's launcher
+    wrappers/        # launchers called from WM configs, resolve distro-specific paths (polkit, portals); git's filter for spicetify/config-xpui.ini; matugen's hooks (VS Code, Telegram, Obsidian, Zed themes); Chrome's launcher; clipse's history expiry (clipse-prune.sh)
     install/
       main.sh        # installer ENGINE: sourcing + core-step functions + run_final_steps (no menus)
       packages.txt   # one line per package, works for both distros
