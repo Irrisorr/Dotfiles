@@ -449,6 +449,15 @@ instead of failing the session's autostart.
   blank values, which spicetify fills in on its first run. A size change alone
   makes `git status` list the file with an empty diff: `git add` it (nothing is
   staged; `spicetify-reapply` does it after a Spotify update).
+* `home-path-filter.sh clean|smudge` — git filter `home-path` for configs that
+  only take absolute paths, now `dfiles/bookmarks.json` (Dux files drops a
+  bookmark that isn't absolute). `clean` writes this user's `$HOME` as `@HOME@`
+  (where a `"` or `/` follows) and the home bookmark's label, the user name, as
+  `@USER@`; `smudge` puts them back. Registered per clone by `_niri_dux_files`
+  (`_niri_home_path_filter`), which also smudges a file checked out before the
+  filter existed. Everything else uses `~` / `$HOME`, which its app expands:
+  qt5ct / qt6ct `color_scheme_path`, fastfetch's logo, hyprlock, hyprpaper,
+  HyprPanel, fish (`$HOME/.local/bin`; `~/go/bin` in `fish/conf.d/paths.fish`).
 * `vscode-soften.sh <roles.json>` — not for a WM either: the `post_hook` of
   `matugen/templates/vscode-soften.json` (`matugen/config.toml`). The template
   renders a few matugen roles (editor / side / raised / popup backgrounds,

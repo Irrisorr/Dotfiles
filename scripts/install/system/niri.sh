@@ -106,7 +106,21 @@ _niri_dux_files() {
     "create_symlink $HOME/Dotfiles/dfiles $HOME/.config/dfiles \
      && create_symlink $HOME/Dotfiles/xdg-desktop-portal/niri-portals.conf $HOME/.config/xdg-desktop-portal/niri-portals.conf \
      && xdg-mime default dev.duxlabs.files.desktop inode/directory \
-     && systemctl --user try-restart xdg-desktop-portal.service"
+     && systemctl --user try-restart xdg-desktop-portal.service" &&
+    execute_command "Register the git filter for bookmarks.json" ". $HOME/Dotfiles/scripts/install/system/niri.sh && _niri_home_path_filter"
+}
+
+# bookmarks.json holds absolute paths (Dux files takes no "~"); the repo keeps
+# @HOME@ in their place (scripts/wrappers/home-path-filter.sh, .gitattributes).
+# Git runs filters only where they are registered: per clone. A file checked
+# out before that still has @HOME@, so it is smudged here once.
+_niri_home_path_filter() {
+  local f="$HOME/Dotfiles/scripts/wrappers/home-path-filter.sh" b="$HOME/Dotfiles/dfiles/bookmarks.json" tmp
+  git -C "$HOME/Dotfiles" config filter.home-path.clean "$f clean" &&
+    git -C "$HOME/Dotfiles" config filter.home-path.smudge "$f smudge" || return 1
+  grep -q '@HOME@\|@USER@' "$b" 2>/dev/null || return 0
+  tmp=$(mktemp) && "$f" smudge <"$b" >"$tmp" && cat "$tmp" >"$b"
+  rm -f "$tmp"
 }
 
 _niri_link_hyprlock() {

@@ -11,7 +11,7 @@ set --export BUN_INSTALL "$HOME/.bun"
 set --export PATH $BUN_INSTALL/bin $PATH
 
 # Created by `pipx` on 2025-05-15 18:52:29
-set PATH $PATH /home/irrisorr/.local/bin
+set PATH $PATH $HOME/.local/bin
 
 # Fish theme
 set --global fish_color_autosuggestion 4D5566
