@@ -517,6 +517,22 @@ install_source_claude_code() {
 }
 
 
+# Claude Desktop — Anthropic's apt repo (support.claude.com, "Install Claude
+# Desktop"): the app doesn't update itself, apt upgrade does.
+install_source_claude_desktop() {
+  local keyring="/usr/share/keyrings/claude-desktop-archive-keyring.asc"
+
+  is_debian || { print_error_message "claude-desktop: Debian-family only"; return 1; }
+  pkg_install ca-certificates curl || return 1
+  sudo curl -fsSLo "$keyring" https://downloads.claude.ai/claude-desktop/key.asc || return 1
+  echo "deb [signed-by=$keyring] https://downloads.claude.ai/claude-desktop/apt/stable stable main" \
+    | sudo tee /etc/apt/sources.list.d/claude-desktop.list >/dev/null || return 1
+
+  pkg_sync || return 1
+  pkg_install claude-desktop
+}
+
+
 # Google Chrome — Google's .deb (the flatpak is a community repack that breaks
 # password-manager extensions and security keys). Its postinst adds Google's
 # apt repository, so apt updates it from then on.
@@ -696,3 +712,4 @@ installed_source_ime()             { [ -x "$HOME/.local/share/ime-desktop/iMe" ]
 installed_source_zed()             { [ -x "$HOME/.local/bin/zed" ]; }
 installed_source_postman()         { [ -x "$HOME/.local/share/postman/Postman" ]; }
 installed_source_claude_code()     { [ -x "$HOME/.local/bin/claude" ] || command -v claude &>/dev/null; }
+installed_source_claude_desktop()  { pkg_installed claude-desktop; }

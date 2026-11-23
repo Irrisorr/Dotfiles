@@ -149,7 +149,7 @@ npm (JavaScript packages)
 git (version control)
 rsync (copies and syncs files)
 claude-code            ubuntu:source=claude_code (Claude in the terminal | Ubuntu: Anthropic's installer into ~/.local/bin, updates itself)
-claude-desktop         ubuntu:skip (Claude app | Ubuntu: no Linux build)
+claude-desktop         ubuntu:source=claude_desktop (Claude app | Ubuntu: Anthropic's apt repo, updates with apt)
 
 # Additional Packages
 sqlite                 ubuntu:apt=sqlite3 (needed to sync private dotfiles)
