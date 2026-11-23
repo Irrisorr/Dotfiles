@@ -27,4 +27,5 @@ menu "🚪 Exit" \
   "Image tools (gowall)|gowall_commands|gowall" \
   "Default apps|default_apps|fzf" \
   "Fonts|fonts|fzf" \
-  "Spotify (spicetify)|spice|spicetify"
+  "Spotify (spicetify)|spice|spicetify" \
+  "Wi-Fi (802.11ax fix, connection test)|wifi"
