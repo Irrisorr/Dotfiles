@@ -11,6 +11,7 @@ hyprpicker (color picker)
 nwg-displays (monitor layout tool)
 
 # niri Ecosystem | niri
+niri                   ubuntu:ppa=duxlabs/dux-repo (the compositor itself)
 xdg-desktop-portal (default portal)
 xdg-desktop-portal-gtk (implements most of the basic functionality)
 xdg-desktop-portal-gnome (required for screencasting support)
