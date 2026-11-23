@@ -1,5 +1,6 @@
 #!/bin/bash
 . "$HOME/Dotfiles/scripts/lib/common.sh"
+. "$FUNCTIONS_DIR/spicetify.sh"   # syn_install: Synthesis
 
 # Menu guard: spicetify
 #
@@ -17,6 +18,7 @@ configure_spicetify_steps=(
   "Apply (theme dms-colors)|_spicetify_apply|test:has_spotify_prefs"
   "Marketplace (latest release)|_spicetify_marketplace|curl+test:has_spotify_prefs"
   "Listening Stats (latest release)|_spicetify_listening_stats|curl+test:has_spotify_prefs"
+  "Synthesis: YouTube Music and SoundCloud in Spotify|_spicetify_synthesis|curl+test:has_spotify_prefs|optional"
 )
 
 # About: Spotify in the wallpaper colors with Marketplace and Listening Stats; applies after Spotify's first start.
@@ -96,4 +98,11 @@ _spicetify_marketplace() {
 _spicetify_listening_stats() {
   execute_command "Install Listening Stats" \
     "curl -fsSL https://raw.githubusercontent.com/Xndr2/listening-stats/main/install.sh | LISTENING_STATS_SKIP_SPICETIFY_INSTALL=1 bash"
+}
+
+# Per machine (optional): see syn_install in scripts/functions/spicetify.sh.
+# About: Adds YouTube Music and SoundCloud to Spotify's search, with a local Wisp server for playback.
+_spicetify_synthesis() {
+  syn_install || return
+  echo ":: In Spotify: profile menu → Synthesis Spicetify settings → Enable playback, pick the placeholder folder (e.g. ~/Music/Synthesis), Connection test"
 }

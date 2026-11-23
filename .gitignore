@@ -36,3 +36,5 @@ spicetify/Themes/dms-colors/color.ini
 # Installed by their official installers (installer step, `spice`)
 spicetify/CustomApps/marketplace/
 spicetify/CustomApps/listening-stats/
+# Synthesis is per machine (spice / post-install), not for every clone
+spicetify/Extensions/synthesis-spicetify.js

@@ -302,6 +302,9 @@ prints the numbered steps and waits for Enter (`s` skips):
   `has_spotify_prefs`) → the apply / Marketplace / Listening Stats actions of
   `configure_spicetify` (`STEP_ONLY`). In the config menu those actions are
   hidden until the prefs exist, and the step says to come here.
+* `post_synthesis` (only on machines that want it) — `syn_install` from
+  `functions/spicetify.sh`, then the Synthesis settings in Spotify: Enable
+  playback, the placeholder folder, Connection test.
 * `post_ime` — iMe started once (writes its `org.ime.desktop._<hash>.desktop`)
   → `_defapps_defaults`, so `tg://` / `ton://` open in it.
 * `post_telegram` (guard `test:has_telegram_client`) — copies the path of
@@ -479,6 +482,10 @@ instead of failing the session's autostart.
   blank values, which spicetify fills in on its first run. A size change alone
   makes `git status` list the file with an empty diff: `git add` it (nothing is
   staged; `spicetify-reapply` does it after a Spotify update).
+  Per-machine extensions (`local_exts`: `synthesis-spicetify.js`, its file in
+  `.gitignore`): `clean` drops them from the `extensions` line, `smudge` adds
+  back the ones whose file is in `spicetify/Extensions/` — so installing
+  Synthesis on one machine never puts it into the others' config.
 * `home-path-filter.sh clean|smudge` — git filter `home-path` for configs that
   only take absolute paths, now `dfiles/bookmarks.json` (Dux files drops a
   bookmark that isn't absolute). `clean` writes this user's `$HOME` as `@HOME@`

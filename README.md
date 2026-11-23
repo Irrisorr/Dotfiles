@@ -270,6 +270,7 @@ wallpaper change ─► DMS runs matugen ─► spicetify/Themes/dms-colors/colo
 | `Themes/dms-colors/user.css` | The wallpaper theme: paints Spotify's own color tokens (`--background-base`, `--text-subdued`, the green accent, …) with the matugen colors, mixes 10-20 % of the accent into the near-black DMS surfaces, accent on the play button and progress bars |
 | `Themes/dms-colors/color.ini` | The colors themselves, written by DMS on every wallpaper change. Not in git |
 | `Extensions/dms-live.js` | Repaints an open Spotify when `colors.css` / `user.css` change (swaps the stylesheet, nothing flashes) |
+| `Extensions/synthesis-spicetify.js` | [Synthesis Spicetify](https://github.com/kagamiomochi/Synthesis-Spicetify), only on machines that want it — see [Synthesis](#synthesis-youtube-music-and-soundcloud-optional). Not in git |
 | `Extensions/lyrics-settings.js` | Adds "Export / Import Spicy Lyrics settings" to the profile menu (Spicy Lyrics has no export of its own) |
 | `CustomApps/marketplace/`, `CustomApps/listening-stats/` | Downloaded by their official installers. Not in git: the installer step and `spice` → Update apps put them back |
 | `marketplace-backup.json` | What's installed in Marketplace (themes, extensions, snippets): Marketplace → Settings → Back up/Restore → Export, saved here |
@@ -287,12 +288,12 @@ Elsewhere in the dotfiles:
 | `etc/spicetify-reapply.sh` | Installed as `/usr/local/bin/spicetify-reapply`: when Spotify is stock (after an install / update), re-applies spicetify as the owner of each `~/.config/spicetify` |
 | `etc/pacman.d/hooks/spicetify.hook` | Arch: runs `spicetify-reapply` after `spotify` is installed / updated |
 | `etc/apt/apt.conf.d/99spicetify` | Ubuntu: runs `spicetify-reapply` after every dpkg run (it does nothing unless Spotify is stock) |
-| `.gitattributes`, `scripts/wrappers/spicetify-config-filter.sh` | The git filter for `config-xpui.ini`; this machine's values wait in `.git/spicetify-machine.ini` |
+| `.gitattributes`, `scripts/wrappers/spicetify-config-filter.sh` | The git filter for `config-xpui.ini`; this machine's values wait in `.git/spicetify-machine.ini`; keeps `synthesis-spicetify.js` out of the committed `extensions` line |
 | `scripts/install/system/sources.sh` | Ubuntu: `install_source_spotify` (Spotify's apt repo), `install_source_spicetify` (release into `/opt/spicetify-cli`, linked to `/usr/local/bin`) |
 
 #### `spice`
 
-The menu: update Marketplace / Listening Stats, Repair, Restore stock — see [Scripts](#scripts-just-type-name-of-script-in-terminal-or-use-asd-menu).
+The menu: update Marketplace / Listening Stats / Synthesis, Repair, Restore stock, install or remove Synthesis — see [Scripts](#scripts-just-type-name-of-script-in-terminal-or-use-asd-menu).
 
 #### Plugins and their settings
 
@@ -306,6 +307,32 @@ The menu: update Marketplace / Listening Stats, Repair, Restore stock — see [S
 - **Marketplace and Listening Stats themselves** are files in `CustomApps/`,
   not in git: the installer and `spice` → Update apps download them.
 - Listening Stats' history: export / import in its own Settings, if you want it.
+
+#### Synthesis: YouTube Music and SoundCloud (optional)
+
+[Synthesis Spicetify](https://github.com/kagamiomochi/Synthesis-Spicetify) adds
+Spotify / YouTube Music tabs to Spotify's search, plays the results, queues
+them with Spotify's own tracks and saves them to Spotify playlists (as silent
+local placeholder files). Installed per machine, never through Marketplace (its
+backup would carry it to every machine):
+
+- install: post-install → Spotify: Synthesis, installer → Spicetify step → the
+  Synthesis substep (optional), or `spice` → Synthesis — install;
+- it downloads `synthesis-spicetify.js` from the latest tag into
+  `spicetify/Extensions/` (`.gitignore`) and runs the repo's
+  `wisp_ondemand.py install`: wisp-js (npm, pinned by Synthesis) in
+  `~/.local/share/synthesis-spicetify/`, systemd user units
+  `synthesis-spicetify-wisp-proxy.socket` / `-proxy.service` / `-backend.service`
+  on `127.0.0.1:6001`, started on the first connection, stopped after 5 idle
+  minutes. Needs python3, npm and Node.js 22.18+ (or 24.11+); without them
+  search still works, playback doesn't;
+- then in Spotify: profile menu → Synthesis Spicetify settings → Enable
+  playback, pick the placeholder folder (e.g. `~/Music/Synthesis`), Connection test;
+- update: `spice` → Update apps; remove: `spice` → Synthesis — remove (the
+  placeholder folder stays: playlists may hold its files);
+- saved tracks play only where the placeholder folder is a Local Files source
+  and Synthesis is installed — sync the folder (Syncthing) to use them on
+  another PC; phones can't play them.
 
 #### New machine
 
@@ -427,7 +454,8 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
         - **GTK** (gsettings `font-name` / `document-font-name` / `monospace-font-name`, `gtk-font-name` in `settings.ini`), **Qt** (`qt5ct/`, `qt6ct/` — every Qt app), **DMS** (`fontFamily`, `monoFontFamily` in `dms/settings.json`; it was "Fira Code", which isn't installed), **Zen** (`font.name.*` in `zen-browser/user.js`, on Zen's next start), **kitty** (`font_family`, reloaded at once), **VS Code** (editor and terminal font; an old flatpak install's settings under `~/.var/app` while there is no `~/.config/Code`)
         - The choice lives in the dotfiles (families in `fontconfig/fonts.conf`, size in `qt5ct.conf`); the installer's Fonts step links `fontconfig/` and writes GTK and VS Code from them. Telegram and Obsidian (Appearance → Font) keep their own, set them there — post-install's Obsidian and Telegram / iMe steps say which. The Fonts step first checks that the chosen families are installed and installs JetBrains Mono Nerd (`ttf-jetbrains-mono-nerd`) if it's missing — otherwise every place would name a font fontconfig quietly replaces
     - `spice` - 'Spotify (spicetify)' (`scripts/functions/spicetify.sh`), the whole setup: [Spotify](#spotify-spicetify)
-        - Update apps — Marketplace and Listening Stats: installed → latest version, outdated ones preselected; runs each repo's official installer
+        - Update apps — Marketplace and Listening Stats (and Synthesis where it's installed): installed → latest version, outdated ones preselected; runs each repo's official installer
+        - Synthesis — install on this machine / remove from it: YouTube Music and SoundCloud in Spotify, see [Synthesis](#synthesis-youtube-music-and-soundcloud-optional)
         - Repair — applies spicetify again: `backup apply` when Spotify is stock after an update (what the pacman / apt hook does), else `apply`
         - Restore stock Spotify — removes spicetify (asks first), to see whether a problem is Spotify's or a plugin's; Repair puts it back
         - Plugins and Spicy Lyrics settings aren't in the menu: they are exported / imported in Spotify itself (`spicetify/marketplace-backup.json`, `spicetify/spicy-lyrics-settings.json`)

@@ -65,6 +65,16 @@ post_spicetify() {
   STEPS_CONFIRMED=1 STEP_ONLY="_spicetify_apply _spicetify_marketplace _spicetify_listening_stats" configure_spicetify
 }
 
+# Optional, per machine: YouTube Music and SoundCloud in Spotify's search.
+post_synthesis() {
+  has_spotify_prefs || { print_error_message "Start Spotify once first (Spotify: apply spicetify)"; return 2; }
+  syn_install || return
+  _post_wait "Synthesis: turn playback on in Spotify" \
+    "Profile menu → Synthesis Spicetify settings → Enable playback" \
+    "Pick a folder for its silent placeholder files (e.g. ~/Music/Synthesis); it becomes a Local Files source" \
+    "Connection test: every step should pass" || return 1
+}
+
 # iMe writes its launcher (the .desktop that handles tg://) on its first start;
 # the saved default apps point tg:// and ton:// links at that launcher.
 post_ime() {
@@ -135,6 +145,7 @@ menu ">>> Finish & reboot <<<" \
   "Auth GitHub (gh)|post_gh_auth|gh" \
   "Obsidian: vaults via Syncthing, Documents link, wallpaper colors|post_obsidian|obsidian" \
   "Spotify: apply spicetify (start Spotify once first)|post_spicetify|spicetify" \
+  "Spotify: Synthesis, YouTube Music and SoundCloud (only where you want it)|post_synthesis|spicetify" \
   "iMe: open tg:// links in it (start iMe once first)|post_ime|ime" \
   "Telegram / iMe: wallpaper colors and font (set once in the client)|post_telegram|test:has_telegram_client" \
   "Install RustDesk (latest)|install_rustdesk" \
