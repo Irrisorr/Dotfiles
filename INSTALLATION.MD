@@ -232,7 +232,12 @@ run_final_steps                              # defined in the engine
   list every backup `create_symlink` left in `~/.config` (`*.bak` and
   `*.bak.<date>`, dirs and files) and delete them all if you confirm — `find`
   does not follow symlinks, so nothing inside `~/Dotfiles` is touched through a
-  linked config dir. Then install the one-shot post-install fish hook (runs
+  linked config dir. Then write and enable the user unit
+  `~/.config/systemd/user/dotfiles-post-install.service` (only on this machine,
+  `WantedBy=graphical-session.target`): on the next login it runs
+  `scripts/wrappers/post-install-once.sh`, which opens the default terminal with
+  `post_install.sh` and removes the unit. As a fallback install the one-shot
+  post-install fish hook (runs
   `~/Dotfiles/post_install.sh` on the next interactive shell, then deletes
   itself), then ask to reboot. Either way it prints a "configuration complete"
   message — reboot-now warns it's seconds away and that post-install runs on the
@@ -532,6 +537,12 @@ instead of failing the session's autostart.
   signed 32-bit int), `color_variant2` 1 (tonal spot, as DMS's scheme), no
   GTK mode (`extensions.theme.system_theme` 0); then execs
   `/usr/bin/google-chrome-stable`.
+* `post-install-once.sh` — run once by `dotfiles-post-install.service`, the user
+  unit the installer leaves: disables and deletes that unit and the fish hook,
+  waits 3 s for DMS and the portals, and opens `post_install.sh` in the terminal
+  `xdg-terminals.list` names first (`defapps`), else kitty / alacritty / foot /
+  ghostty / wezterm — through `niri msg action spawn` / `hyprctl dispatch exec`,
+  so the terminal and what it starts aren't part of the finished oneshot unit.
 * `clipse-prune.sh` — not a hook: run every 5 min by
   `systemd/user/clipse-prune.timer` (`configure_clipse` links and enables it).
   Drops unpinned items of clipse's history older than `pruneAfter` seconds

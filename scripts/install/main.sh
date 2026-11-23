@@ -88,6 +88,29 @@ run_final_steps() {
     fi
   fi
 
+  # The first login opens a terminal with post_install.sh by itself: a user
+  # unit that runs scripts/wrappers/post-install-once.sh once and removes
+  # itself. Only on this machine, nothing in the dotfiles. The fish hook below
+  # is the fallback for a terminal opened before that (or a session that never
+  # reaches graphical-session.target).
+  local units="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+  mkdir -p "$units"
+  cat > "$units/dotfiles-post-install.service" << 'EOF'
+[Unit]
+Description=Open post_install.sh once after the dotfiles installer
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=oneshot
+ExecStart=%h/Dotfiles/scripts/wrappers/post-install-once.sh
+
+[Install]
+WantedBy=graphical-session.target
+EOF
+  systemctl --user daemon-reload &>/dev/null
+  systemctl --user enable dotfiles-post-install.service &>/dev/null
+
   if command -v fish &>/dev/null; then
     mkdir -p "$HOME/.config/fish/conf.d"
     cat > "$HOME/.config/fish/conf.d/post_install_hook.fish" << 'EOF'
@@ -96,6 +119,8 @@ run_final_steps() {
 if status is-interactive; and set -q WAYLAND_DISPLAY
     if test -x ~/Dotfiles/post_install.sh
         rm -f ~/.config/fish/conf.d/post_install_hook.fish
+        systemctl --user disable dotfiles-post-install.service &>/dev/null
+        rm -f ~/.config/systemd/user/dotfiles-post-install.service
         bash ~/Dotfiles/post_install.sh
     end
 end
@@ -105,13 +130,13 @@ EOF
   if confirm_action "reboot now"; then
     print_success_message "Configuration complete!
 Rebooting in a few seconds. After the reboot the changes take effect, and the
-post-install script will run automatically the first time you open a terminal."
+post-install script opens in a terminal by itself after the first login."
     sleep 5
     reboot 2>/dev/null || sudo reboot   # a text console (no polkit agent) needs sudo
   else
     print_success_message "Configuration complete!
 A reboot is recommended so all changes take effect.
-After you reboot, the post-install script will run automatically the first time
-you open a terminal."
+After you reboot, the post-install script opens in a terminal by itself after
+the first login."
   fi
 }
