@@ -35,7 +35,7 @@ Dotfiles/
       sync/          # an alias that needs its own folder
         sync.sh          # entry point: menu over the modules below
         sync_map.json    # dest -> [sources] mapping (used by modules/map.sh)
-        modules/         # one sync per file: map.sh (the map), zen.sh (Sine mod settings)
+        modules/         # one sync per file: map.sh (the map), zen.sh (Sine mod settings), dms.sh (DMS session state)
 ```
 
 ## `common.sh` (constants + includes)
@@ -299,6 +299,9 @@ prints the numbered steps and waits for Enter (`s` skips):
   hidden until the prefs exist, and the step says to come here.
 * `post_ime` — iMe started once (writes its `org.ime.desktop._<hash>.desktop`)
   → `_defapps_defaults`, so `tg://` / `ton://` open in it.
+* `post_telegram` (guard `test:has_telegram_client`) — copies the path of
+  `~/.local/share/matugen/dms.tdesktop-theme` with `wl-copy` and lists where
+  to pick it and the font (`ft_ui` from `functions/fonts.sh`).
 * `post_gh_auth`, `install_rustdesk` (latest release from GitHub's API:
   `.pkg.tar.zst` / `.deb`), `install_hypr_plugins` (guard `hyprpm`: only with
   Hyprland installed).
@@ -617,6 +620,10 @@ run in a subshell, so their helper names don't clash. Afterwards `sync.sh` shows
   the bootloader goes into the root-owned browser dir via pkexec), and put
   `sine-prefs.js` back into `prefs.js` (the profile's lines for those keys are
   dropped first; Zen must be closed).
+- `modules/dms.sh` — the `DMS_SESSION_KEYS` of `~/.local/state/dms/session.json`
+  (wallpaper transition and cycling, lock screen / greeter layout) →
+  `dms/session.json`, the wallpaper path with `~`; `_niri_dms_session` merges
+  them back.
 - `modules/map.sh` — the files listed in `sync_map.json`, described below.
 
 `sync_map.json` (next to `sync.sh`) is an array of objects. Two kinds of entry:

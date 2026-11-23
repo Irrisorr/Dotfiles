@@ -91,7 +91,9 @@ run_final_steps() {
   if command -v fish &>/dev/null; then
     mkdir -p "$HOME/.config/fish/conf.d"
     cat > "$HOME/.config/fish/conf.d/post_install_hook.fish" << 'EOF'
-if status is-interactive
+# Only in a terminal of the desktop: a login on a text console (a VM's serial
+# one) would run it where the steps can't start apps.
+if status is-interactive; and set -q WAYLAND_DISPLAY
     if test -x ~/Dotfiles/post_install.sh
         rm -f ~/.config/fish/conf.d/post_install_hook.fish
         bash ~/Dotfiles/post_install.sh

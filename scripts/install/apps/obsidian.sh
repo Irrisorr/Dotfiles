@@ -37,6 +37,9 @@ _obsidian_dms_snippet() {
     if jq '.enabledCssSnippets = ((.enabledCssSnippets // []) - ["dms-colors"] + ["dms-colors"])' "$conf" >"$tmp"; then
       cat "$tmp" >"$conf"
       n=$((n + 1))
+      # The snippet only fills AnuPpuccin's color hooks.
+      [ -d "$vault/.obsidian/themes/AnuPpuccin" ] ||
+        echo ":: $vault has no AnuPpuccin theme: Settings → Appearance → Themes → Manage → AnuPpuccin, or the colors won't show"
     else
       print_error_message "Could not parse $conf"
     fi

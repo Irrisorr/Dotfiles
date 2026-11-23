@@ -9,6 +9,7 @@ require_gum "post-install" || exit 1
 . "$APPS_DIR/spicetify.sh"
 . "$SYSTEM_DIR/xdg.sh"
 . "$SYSTEM_DIR/default_apps.sh"
+. "$FUNCTIONS_DIR/fonts.sh"   # ft_ui, ft_mono: the fonts chosen with `fonts`
 
 
 # ─── Step functions ──────────────────────────────────────────────────────────
@@ -16,6 +17,9 @@ require_gum "post-install" || exit 1
 post_gh_auth() {
   execute_command "Auth github via Github-cli (Browser Required)" "gh auth login"
 }
+
+# Menu guard: test:has_telegram_client
+has_telegram_client() { command -v telegram-desktop &>/dev/null || command -v ime &>/dev/null || command -v AyuGram &>/dev/null; }
 
 # Steps that need an app started by hand first: prints what to do, waits.
 # Returns 1 when the user skips.
@@ -37,6 +41,8 @@ post_obsidian() {
   _post_wait "Obsidian: get your vaults first" \
     "Syncthing (http://127.0.0.1:8384): add the phone, accept the Obsidian folder into ~/Obsidian, wait until it's Up to Date" \
     "Start Obsidian and open every vault once (Open folder as vault)" \
+    "In each vault: Settings → Appearance → Themes → AnuPpuccin (a copied vault has it; a new one: Manage → AnuPpuccin → Install and use) — the wallpaper colors only recolor that theme" \
+    "Settings → Appearance → Font: interface and text $(ft_ui), monospace $(ft_mono)" \
     "Close Obsidian completely (it writes its settings back on exit)" || return 1
   local rc=0
   if has_vault_documents; then
@@ -66,6 +72,18 @@ post_ime() {
     "Start iMe (ime, or Mod+Shift+T) — it writes its launcher" \
     "Close it" || return 1
   STEPS_CONFIRMED=1 STEP_ONLY="_defapps_defaults" configure_default_apps
+}
+
+# Telegram clients can't be pointed at a theme file from outside: the matugen
+# hook keeps one up to date, the client is told once where it is.
+post_telegram() {
+  local theme="$HOME/.local/share/matugen/dms.tdesktop-theme"
+  [ -s "$theme" ] || { print_error_message "No $theme yet: change the wallpaper once (DMS → Settings → Wallpaper)"; return 2; }
+  command -v wl-copy &>/dev/null && printf '%s' "$theme" | wl-copy && echo ":: The theme's path is in the clipboard"
+  _post_wait "Telegram / iMe: wallpaper colors and font (in each client you use)" \
+    "Settings → Chat Settings → ⋮ (top right) → Choose from file → Ctrl+L, paste: $theme → Apply theme" \
+    "Settings → Chat Settings → Font family: $(ft_ui)" \
+    "Done once: the client repaints by itself on every wallpaper change" || return 1
 }
 
 # The latest release from GitHub: Arch's .pkg.tar.zst or the .deb.
@@ -118,6 +136,7 @@ menu ">>> Finish & reboot <<<" \
   "Obsidian: vaults via Syncthing, Documents link, wallpaper colors|post_obsidian|obsidian" \
   "Spotify: apply spicetify (start Spotify once first)|post_spicetify|spicetify" \
   "iMe: open tg:// links in it (start iMe once first)|post_ime|ime" \
+  "Telegram / iMe: wallpaper colors and font (set once in the client)|post_telegram|test:has_telegram_client" \
   "Install RustDesk (latest)|install_rustdesk" \
   "Install Hyprland plugins|install_hypr_plugins|hyprpm"
 

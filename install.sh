@@ -38,6 +38,7 @@ CONFIG_STEPS=(
   "Start GNOME polkit agent|start_polkit_gnome|test:has_polkit_gnome"
   "Start MATE polkit agent|start_polkit_mate|test:has_polkit_mate"
   "GTK (window control buttons)|configure_gtk"
+  "Icon theme (Qt apps, Dux files, DMS tray, GTK)|configure_icon_theme"
   "Update user directories|update_user_dirs|xdg-user-dirs-update"
   "Default apps (defapps)|configure_default_apps"
   "Fonts (fonts)|configure_fonts|fc-match"

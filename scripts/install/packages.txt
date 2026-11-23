@@ -59,6 +59,7 @@ walker                 ubuntu:skip (app launcher | Ubuntu: no .deb, tarball only
 
 # Sync
 syncthing (syncs folders between devices, e.g. Obsidian with the phone)
+bitwarden              ubuntu:flatpak=com.bitwarden.desktop (password manager)
 
 # IDE's
 neovim (terminal editor)

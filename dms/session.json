@@ -1,0 +1,189 @@
+{
+  "materialWallpapers": {
+    "": {
+      "shared": {
+        "preset": "dank",
+        "seed": "#d0bcff"
+      }
+    }
+  },
+  "wallpaperPath": "~/Dotfiles/wallpaper/snow_leopard_wallpaper.png",
+  "desktopWidgetInstancePositions": {
+    "lock_auth": {
+      "_synced": {
+        "x": 0,
+        "y": 0.08920247395833333,
+        "anchorX": "center",
+        "anchorY": "end",
+        "width": 300.23046875,
+        "height": 56
+      }
+    },
+    "lock_clock": {
+      "_synced": {
+        "width": 454.390625,
+        "height": 454.390625,
+        "x": 0,
+        "y": -0.09648111979166667,
+        "anchorX": "center",
+        "anchorY": "center"
+      }
+    },
+    "lw_1794017221900_yn9hlagig": {
+      "_synced": {
+        "x": 0,
+        "y": 0.033662109375,
+        "width": 280.68359375,
+        "height": 49.60546875,
+        "anchorX": "center",
+        "anchorY": "end"
+      }
+    },
+    "lw_1794017394818_fy9qungzq": {
+      "_synced": {
+        "x": 0,
+        "y": 0.12896158854166667,
+        "anchorX": "center",
+        "anchorY": "center"
+      }
+    },
+    "lw_1794017526517_jxc4gd7r4": {
+      "_synced": {
+        "x": 0,
+        "y": 0.02,
+        "anchorX": "center"
+      }
+    },
+    "lw_1794181620477_qzhioltdv": {
+      "_synced": {
+        "x": 0,
+        "y": 0.02,
+        "anchorX": "center",
+        "anchorY": "end"
+      }
+    },
+    "gw_lock_clock": {
+      "_synced": {
+        "width": 544.18359375,
+        "height": 157.44921875,
+        "x": 0.0125,
+        "y": 0.022222222222222223
+      }
+    },
+    "gw_lock_auth": {
+      "_synced": {
+        "x": 0.0125,
+        "y": 0.02,
+        "anchorX": "end",
+        "anchorY": "end",
+        "width": 300.23046875,
+        "height": 56
+      }
+    },
+    "gw_lw_1794181620477_qzhioltdv": {
+      "_synced": {
+        "x": 0,
+        "y": 0.02,
+        "anchorX": "center",
+        "anchorY": "end"
+      }
+    },
+    "gw_1794613087788_i1qvaka18": {
+      "_synced": {
+        "x": 0.025,
+        "y": 0.15725188078703703,
+        "width": 479.03125,
+        "height": 46.453125
+      }
+    },
+    "greeter_session": {
+      "_synced": {
+        "x": 0.020833333333333332,
+        "y": 0.07833333333333334,
+        "anchorX": "end",
+        "anchorY": "end"
+      }
+    },
+    "gw_1794613145187_gidkkpr51": {
+      "_synced": {
+        "x": 0.005208333333333333,
+        "y": 0.011666666666666667,
+        "anchorY": "end"
+      }
+    }
+  },
+  "lockScreenAutoPositions": {
+    "eDP-1": {
+      "width": 1920,
+      "height": 1200,
+      "positions": {}
+    },
+    "DP-3": {
+      "width": 1920,
+      "height": 1080,
+      "positions": {}
+    },
+    "HDMI-A-1": {
+      "width": 1080,
+      "height": 1920,
+      "positions": {}
+    },
+    "LG FHD": {
+      "width": 1920,
+      "height": 1080,
+      "positions": {}
+    },
+    "BBK TV     ": {
+      "width": 1080,
+      "height": 1920,
+      "positions": {}
+    },
+    "TM140VDXP01": {
+      "width": 1920,
+      "height": 1200,
+      "positions": {}
+    }
+  },
+  "greeterAutoPositions": {
+    "LG FHD": {
+      "width": 1920,
+      "height": 1080,
+      "positions": {}
+    },
+    "BBK TV     ": {
+      "width": 1080,
+      "height": 1920,
+      "positions": {}
+    },
+    "TM140VDXP01": {
+      "width": 1920,
+      "height": 1200,
+      "positions": {}
+    }
+  },
+  "terminalOverride": "kitty",
+  "wallpaperTransition": "stripes",
+  "wallpaperCyclingRandom": true,
+  "wallpaperCyclingInterval": 5,
+  "showThirdPartyPlugins": true,
+  "lockScreenWidgetGridSettings": {
+    "eDP-1": {
+      "enabled": false,
+      "size": 10
+    },
+    "LG FHD": {
+      "enabled": false,
+      "size": 10
+    },
+    "TM140VDXP01": {
+      "enabled": false,
+      "size": 10
+    }
+  },
+  "islandFreePositions": {
+    "[\"eDP-1\",\"dot1794020117812\"]": {
+      "x": 0.27884114583333336,
+      "y": 0.8718131510416667
+    }
+  }
+}

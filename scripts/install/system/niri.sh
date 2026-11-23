@@ -10,6 +10,7 @@ configure_niri_steps=(
   "Dux shell config (panel bar, own matugen templates)|_niri_link_dux"
   "Qt apps: wallpaper colors (qt5ct / qt6ct)|_niri_qtct|qt5ct"
   "Dux shell plugins|_niri_restore_dux_plugins|dms"
+  "Dux shell state (wallpaper transition and cycling, lock screen layout)|_niri_dms_session|jq"
   "Add user to the input group (Bongo Cat)|_niri_input_group|test:_niri_not_in_input_group"
   "Dux greeter (login screen, replaces SDDM/GDM)|_niri_dux_greeter|dms-greeter"
   "Dux greeter: wait 5 min for a fingerprint|_niri_greeter_fprint_timeout|dms-greeter|optional"
@@ -58,6 +59,34 @@ _niri_qtct() {
     execute_command "Link qt6ct" ". $HOME/Dotfiles/scripts/install/system/niri.sh && _niri_link_qtct 6"
   [ -f "$HOME/.config/qt5ct/colors/matugen.conf" ] ||
     print_success_message "The colors appear once DMS sets a wallpaper (change it once)"
+}
+
+# DMS keeps some settings in ~/.local/state/dms/session.json, not settings.json:
+# these keys go to dms/session.json (sync.sh dms) and back. Not the rest of the
+# file: launcher history, last player, audio devices, weather location.
+DMS_SESSION_KEYS='["wallpaperTransition","wallpaperCyclingRandom","wallpaperCyclingInterval","wallpaperPath","materialWallpapers","desktopWidgetInstancePositions","lockScreenAutoPositions","lockScreenWidgetGridSettings","greeterAutoPositions","islandFreePositions","terminalOverride","showThirdPartyPlugins"]'
+
+# About: Restores the wallpaper transition and cycling, and the lock screen and greeter layout (they live outside settings.json).
+_niri_dms_session() {
+  local src="$HOME/Dotfiles/dms/session.json" dst="$HOME/.local/state/dms/session.json" tmp running=0 rc=0
+  [ -s "$src" ] || { echo ":: No $src yet (sync.sh dms writes it)"; return 1; }
+  mkdir -p "$(dirname "$dst")"
+  [ -s "$dst" ] || echo '{}' >"$dst"
+  # A running DMS writes the file back from memory, so it is stopped meanwhile.
+  pgrep -f '^dms run' &>/dev/null && running=1
+  [ $running -eq 1 ] && dms kill &>/dev/null
+  tmp=$(mktemp)
+  if jq --slurpfile s "$src" --arg h "$HOME" \
+       '. * ($s[0] | if .wallpaperPath then .wallpaperPath |= sub("^~"; $h) else . end)' "$dst" >"$tmp"; then
+    cat "$tmp" >"$dst"
+    print_success_message "Dux shell state restored into $dst"
+  else
+    print_error_message "Could not merge $src into $dst"
+    rc=2
+  fi
+  rm -f "$tmp"
+  [ $running -eq 1 ] && setsid -f dms run >/dev/null 2>&1
+  return $rc
 }
 
 # Plugin code isn't tracked (dms/plugins/ is ignored): the lockfile pins each
