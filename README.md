@@ -39,6 +39,7 @@ cd Dotfiles
 - Hardware fixes (both distros):
     - fingerprint (Arch): `libfprint-tod` is built from its AUR PKGBUILD with libfprint's thermal model turned off (its source is a signed git tag: the step first imports the PKGBUILD's `validpgpkeys` into your keyring, which a fresh system doesn't have — otherwise makepkg stops on the signature) — otherwise the Goodix reader is disabled "to prevent overheating" after ~3 min on the lock screen. `pacman -Qi libfprint-tod` shows `(no thermal limit)` on the patched build; an AUR update brings the stock one back, re-run the package step then
     - volume keys (ThinkBook 14 G8 IRL): the keyboard controller sometimes drops the key release, so volume keeps changing. `etc/udev/hwdb.d/61-thinkbook-volume-release.hwdb` makes the kernel release them itself; the **Keyboard fixes (udev hwdb)** config step installs it (a hardware quirk, so the same on Ubuntu). Check: `cat /sys/bus/serio/devices/serio0/force_release` lists `174,176`
+    - Wi-Fi (Intel Wi-Fi 6/6E, `iwlwifi`): an old TP-Link AP (WPA/WPA2 mixed, group TKIP) silently drops association requests carrying 802.11ax capabilities — authentication passes, association times out, NetworkManager keeps asking for the password. The **Wi-Fi: 802.11ax off on Intel** config step (only where `iwlwifi` is loaded; tick it on that laptop only) installs `etc/modprobe.d/iwlwifi-no-11ax.conf` (`options iwlwifi disable_11ax=1`), from the next driver load. It turns 11ax off on every network; the real fix is WPA2-PSK + AES on the router, then remove the file. Check: `cat /sys/module/iwlwifi/parameters/disable_11ax` → `Y`
 
 
 ### Adding a package
@@ -385,7 +386,7 @@ Dotfiles/
   install.sh         # the installer MENUS only (sources the engine, then config_menu + first menu)  (./install.sh)
   post_install.sh    # runs once after reboot: ./post_install.sh
   systemd/user/      # user units linked into ~/.config/systemd/user by config steps (clipse-prune.timer)
-  etc/               # system files copied into /etc by config steps (udev hwdb keyboard fixes; spicetify-reapply + its pacman / apt hook; AppArmor profile for Postman's tarball on Ubuntu)
+  etc/               # system files copied into /etc by config steps (udev hwdb keyboard fixes; iwlwifi 802.11ax off; spicetify-reapply + its pacman / apt hook; AppArmor profile for Postman's tarball on Ubuntu)
   scripts/
     lib/             # reusable helpers (no app-specific logic)
       common.sh      # path constants + sources lib/  (source this everywhere)
@@ -400,7 +401,7 @@ Dotfiles/
       packages.txt   # one line per package, works for both distros
       fzf_picker.sh  # fzf package picker (run on its own to try it: installs nothing)
       fzf_config.sh  # fzf config menu (run on its own: dry run)
-      system/        # system-level config functions: niri (+ Dux shell, plugins, greeter), hyprland, sddm, fingerprint, hwdb, gtk/bluetooth/polkit, xdg, flatpak, sources.sh (custom installers)
+      system/        # system-level config functions: niri (+ Dux shell, plugins, greeter), hyprland, sddm, fingerprint, hwdb, wifi (iwlwifi 802.11ax off), gtk/bluetooth/polkit, xdg, flatpak, sources.sh (custom installers)
       apps/          # per-app config functions: zen, kitty, fish, thunar, rofi, ...  (ONE file per app)
     functions/       # everyday shell aliases + alias_menu.sh (the `asd` menu)
       sync/          # sync.sh: copies live configs back into Dotfiles (modules/ + sync_map.json, see below)

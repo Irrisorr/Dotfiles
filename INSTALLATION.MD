@@ -17,7 +17,8 @@ Dotfiles/
   systemd/user/      # user units configure_clipse links into ~/.config/systemd/user (clipse-prune.service/.timer)
   etc/               # system files the config steps copy into /etc (udev/hwdb.d: keyboard fixes, configure_hwdb;
                      #   spicetify-reapply.sh + pacman.d/hooks, apt/apt.conf.d: spicetify after Spotify updates, configure_spicetify;
-                     #   apparmor.d/postman: user namespaces for Postman's tarball on Ubuntu, install_source_postman)
+                     #   apparmor.d/postman: user namespaces for Postman's tarball on Ubuntu, install_source_postman;
+                     #   modprobe.d/iwlwifi-no-11ax.conf: 802.11ax off for an AP that drops it, configure_wifi_no_11ax)
   scripts/
     lib/
       common.sh      # path constants + sources lib/  (source this everywhere)

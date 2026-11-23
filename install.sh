@@ -46,6 +46,7 @@ CONFIG_STEPS=(
   "Documents -> Obsidian vault (Быт/Документы)|link_documents_to_vault|test:has_vault_documents"
   "Fingerprint authentication|configure_fingerprint|fprintd-enroll"
   "Keyboard fixes (udev hwdb)|configure_hwdb|systemd-hwdb"
+  "Wi-Fi: 802.11ax off on Intel (only for an AP that drops Wi-Fi 6)|configure_wifi_no_11ax|test:has_iwlwifi"
   "Git|configure_git|git"
   "Zen Browser|configure_zen|zen-browser"
   "Kitty|configure_kitty|kitty"
