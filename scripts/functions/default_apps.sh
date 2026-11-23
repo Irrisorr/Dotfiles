@@ -1358,6 +1358,14 @@ da_restore_defaults() {
     IFS=';' read -ra i <<<"$ids"
     for id in "${i[@]}"; do
       grep -q "^${id}"$'\t' "$DA_STATE/apps.tsv" && break
+      # Telegram-based clients name their launcher after a hash of where the
+      # binary is (org.ime.desktop._<md5>.desktop) — another home, another
+      # hash: take this machine's launcher of the same client.
+      if [[ $id =~ ^(.+\.desktop)\._[0-9a-f]{32}\.desktop$ ]]; then
+        id=$(awk -F'\t' -v p="${BASH_REMATCH[1]}._" 'index($1, p) == 1 { print $1; exit }' "$DA_STATE/apps.tsv")
+        [ -n "$id" ] && break
+        continue
+      fi
       id=${DA_SAME_APP[$id]:-}
       [ -n "$id" ] && grep -q "^${id}"$'\t' "$DA_STATE/apps.tsv" && break
       id=""

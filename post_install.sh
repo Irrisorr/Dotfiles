@@ -41,7 +41,7 @@ post_obsidian() {
   _post_wait "Obsidian: get your vaults first" \
     "Syncthing (http://127.0.0.1:8384): add the phone, accept the Obsidian folder into ~/Obsidian, wait until it's Up to Date" \
     "Start Obsidian and open every vault once (Open folder as vault)" \
-    "In each vault: Settings → Appearance → Themes → AnuPpuccin (a copied vault has it; a new one: Manage → AnuPpuccin → Install and use) — the wallpaper colors only recolor that theme" \
+    "Dark mode on (Settings → Appearance); the wallpaper colors work with AnuPpuccin and with Obsidian's own theme" \
     "Settings → Appearance → Font: interface and text $(ft_ui), monospace $(ft_mono)" \
     "Close Obsidian completely (it writes its settings back on exit)" || return 1
   local rc=0

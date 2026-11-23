@@ -4,7 +4,7 @@
 # Menu guard: obsidian
 #
 # Obsidian in the wallpaper colors: matugen/templates/obsidian-colors.css fills
-# the AnuPpuccin theme's color hooks, its post_hook copies it into every vault
+# the AnuPpuccin theme's color hooks and Obsidian's own palette, its post_hook copies it into every vault
 # as the snippet dms-colors (scripts/wrappers/obsidian-snippet.sh). This step
 # turns the snippet on in every vault Obsidian knows.
 
@@ -37,9 +37,6 @@ _obsidian_dms_snippet() {
     if jq '.enabledCssSnippets = ((.enabledCssSnippets // []) - ["dms-colors"] + ["dms-colors"])' "$conf" >"$tmp"; then
       cat "$tmp" >"$conf"
       n=$((n + 1))
-      # The snippet only fills AnuPpuccin's color hooks.
-      [ -d "$vault/.obsidian/themes/AnuPpuccin" ] ||
-        echo ":: $vault has no AnuPpuccin theme: Settings → Appearance → Themes → Manage → AnuPpuccin, or the colors won't show"
     else
       print_error_message "Could not parse $conf"
     fi

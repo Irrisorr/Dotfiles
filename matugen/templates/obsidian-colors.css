@@ -1,9 +1,12 @@
 /* Obsidian in the wallpaper colors — DMS runs this template on every wallpaper
    change (matugen/config.toml); scripts/wrappers/obsidian-snippet.sh copies it
-   into every vault as the CSS snippet dms-colors. It fills the AnuPpuccin
-   theme's --ctp-custom-* hooks (R, G, B): its greys and text, and the accent.
-   Its other hues (red, green, tags, headings) stay Catppuccin's. Dark mode only.
-   Off: Settings → Appearance → CSS snippets → dms-colors. */
+   into every vault as the CSS snippet dms-colors. With the AnuPpuccin theme it
+   fills its --ctp-custom-* hooks (R, G, B): its greys and text, and the accent;
+   its other hues (red, green, tags, headings) stay Catppuccin's. Without it
+   (Obsidian's own theme) the same colors go into Obsidian's palette: each
+   --color-base-* reads AnuPpuccin's --ctp-* first, so with the theme on it is
+   exactly what AnuPpuccin sets, and the wallpaper color is only the fallback.
+   Dark mode only. Off: Settings → Appearance → CSS snippets → dms-colors. */
 .theme-dark {
   --ctp-custom-crust: {{colors.surface.dark.red}}, {{colors.surface.dark.green}}, {{colors.surface.dark.blue}};
   --ctp-custom-mantle: {{colors.surface_container_low.dark.red}}, {{colors.surface_container_low.dark.green}}, {{colors.surface_container_low.dark.blue}};
@@ -18,4 +21,21 @@
   --ctp-custom-subtext1: {{colors.on_surface_variant.dark.red}}, {{colors.on_surface_variant.dark.green}}, {{colors.on_surface_variant.dark.blue}};
   --ctp-custom-text: {{colors.on_surface.dark.red}}, {{colors.on_surface.dark.green}}, {{colors.on_surface.dark.blue}};
   --ctp-accent: {{colors.primary.dark.red}}, {{colors.primary.dark.green}}, {{colors.primary.dark.blue}} !important;
+
+  /* Obsidian's own theme (no AnuPpuccin: no --ctp-*) */
+  --color-base-00: rgb(var(--ctp-crust, {{colors.surface.dark.red}}, {{colors.surface.dark.green}}, {{colors.surface.dark.blue}}));
+  --color-base-05: rgb(var(--ctp-crust, {{colors.surface.dark.red}}, {{colors.surface.dark.green}}, {{colors.surface.dark.blue}}));
+  --color-base-10: rgb(var(--ctp-mantle, {{colors.surface_container_low.dark.red}}, {{colors.surface_container_low.dark.green}}, {{colors.surface_container_low.dark.blue}}));
+  --color-base-20: rgb(var(--ctp-base, {{colors.surface_container.dark.red}}, {{colors.surface_container.dark.green}}, {{colors.surface_container.dark.blue}}));
+  --color-base-25: rgb(var(--ctp-surface0, {{colors.surface_container_high.dark.red}}, {{colors.surface_container_high.dark.green}}, {{colors.surface_container_high.dark.blue}}));
+  --color-base-30: rgb(var(--ctp-surface1, {{colors.surface_container_highest.dark.red}}, {{colors.surface_container_highest.dark.green}}, {{colors.surface_container_highest.dark.blue}}));
+  --color-base-35: rgb(var(--ctp-surface2, {{colors.surface_bright.dark.red}}, {{colors.surface_bright.dark.green}}, {{colors.surface_bright.dark.blue}}));
+  --color-base-40: rgb(var(--ctp-overlay0, {{colors.outline_variant.dark.red}}, {{colors.outline_variant.dark.green}}, {{colors.outline_variant.dark.blue}}));
+  --color-base-50: rgb(var(--ctp-overlay1, {{colors.outline.dark.red}}, {{colors.outline.dark.green}}, {{colors.outline.dark.blue}}));
+  --color-base-60: rgb(var(--ctp-overlay2, {{colors.outline.dark.red}}, {{colors.outline.dark.green}}, {{colors.outline.dark.blue}}));
+  --color-base-70: rgb(var(--ctp-subtext0, {{colors.on_surface_variant.dark.red}}, {{colors.on_surface_variant.dark.green}}, {{colors.on_surface_variant.dark.blue}}));
+  --color-base-100: rgb(var(--ctp-text, {{colors.on_surface.dark.red}}, {{colors.on_surface.dark.green}}, {{colors.on_surface.dark.blue}}));
+  --accent-h: {{colors.primary.dark.hue}};
+  --accent-s: {{colors.primary.dark.saturation}}%;
+  --accent-l: {{colors.primary.dark.lightness}}%;
 }
