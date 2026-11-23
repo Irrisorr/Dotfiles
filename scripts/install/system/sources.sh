@@ -141,12 +141,31 @@ prepare() {
 }
 EOF
 
+  # Its source is a signed git tag: makepkg checks it against validpgpkeys,
+  # which a fresh keyring doesn't have yet.
+  _import_pkgbuild_keys "$tmp/libfprint-tod/PKGBUILD" || { rm -rf "$tmp"; return 1; }
+
   echo ":: Building libfprint-tod without the thermal limit (a minute or two)"
   # -r drops the build-only dependencies again; no --needed, so an installed
   # stock build of the same version is replaced.
   (cd "$tmp/libfprint-tod" && makepkg -sri --nocheck --noconfirm) || rc=1
   rm -rf "$tmp"
   return $rc
+}
+
+# The PGP keys a PKGBUILD names in validpgpkeys, into the user's keyring.
+_import_pkgbuild_keys() {
+  local key
+  local -a keys=()
+  mapfile -t keys < <(bash -c '. "$1" && printf "%s\n" "${validpgpkeys[@]}"' _ "$1" 2>/dev/null)
+  for key in "${keys[@]}"; do
+    [ -n "$key" ] || continue
+    gpg --list-keys "$key" &>/dev/null && continue
+    echo ":: Importing PGP key $key"
+    gpg --recv-keys "$key" ||
+      gpg --keyserver hkps://keyserver.ubuntu.com --recv-keys "$key" ||
+      { print_error_message "Could not import PGP key $key"; return 1; }
+  done
 }
 
 libfprint_tod_patched() {

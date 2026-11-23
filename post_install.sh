@@ -143,4 +143,4 @@ menu ">>> Finish & reboot <<<" \
 
 # ─── Final step ──────────────────────────────────────────────────────────────
 
-execute_command "Reboot device for changes to take effect" "reboot"
+execute_command "Reboot device for changes to take effect" "reboot 2>/dev/null || sudo reboot"

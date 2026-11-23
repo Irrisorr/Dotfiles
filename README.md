@@ -35,7 +35,7 @@ cd Dotfiles
     - fingerprint driver (`libfprint-2-tod1-goodix-v2`, 27c6:550a) is installed from the same `.deb` the AUR package repackages — it doesn't update by itself
     - `claude-code` comes from Anthropic's installer (`~/.local/bin/claude`, updates itself); `claude-desktop` has no Linux build and is skipped. **Slack** is the flatpak — apt's `slack` is an unrelated admin tool
 - Hardware fixes (both distros):
-    - fingerprint (Arch): `libfprint-tod` is built from its AUR PKGBUILD with libfprint's thermal model turned off — otherwise the Goodix reader is disabled "to prevent overheating" after ~3 min on the lock screen. `pacman -Qi libfprint-tod` shows `(no thermal limit)` on the patched build; an AUR update brings the stock one back, re-run the package step then
+    - fingerprint (Arch): `libfprint-tod` is built from its AUR PKGBUILD with libfprint's thermal model turned off (its source is a signed git tag: the step first imports the PKGBUILD's `validpgpkeys` into your keyring, which a fresh system doesn't have — otherwise makepkg stops on the signature) — otherwise the Goodix reader is disabled "to prevent overheating" after ~3 min on the lock screen. `pacman -Qi libfprint-tod` shows `(no thermal limit)` on the patched build; an AUR update brings the stock one back, re-run the package step then
     - volume keys (ThinkBook 14 G8 IRL): the keyboard controller sometimes drops the key release, so volume keeps changing. `etc/udev/hwdb.d/61-thinkbook-volume-release.hwdb` makes the kernel release them itself; the **Keyboard fixes (udev hwdb)** config step installs it (a hardware quirk, so the same on Ubuntu). Check: `cat /sys/bus/serio/devices/serio0/force_release` lists `174,176`
 
 

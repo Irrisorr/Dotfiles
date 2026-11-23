@@ -107,7 +107,7 @@ EOF
 Rebooting in a few seconds. After the reboot the changes take effect, and the
 post-install script will run automatically the first time you open a terminal."
     sleep 5
-    reboot
+    reboot 2>/dev/null || sudo reboot   # a text console (no polkit agent) needs sudo
   else
     print_success_message "Configuration complete!
 A reboot is recommended so all changes take effect.
