@@ -179,6 +179,7 @@ The generated files inside Dotfiles change with every wallpaper, so they are in 
 - **dms** - panel bar (Dux shell, formerly DankMaterialShell; the command is still `dms`)
 - **swaybg** - wallpaper tool
 - **syncthing** - local server for synchronize folders between laptop and phone or another devices in real time
+    - started as `syncthing serve --no-browser` (niri and Hyprland autostart), so it doesn't open its web UI in the browser on every login — that's http://127.0.0.1:8384 when needed
     - syncs `~/Obsidian` with the phone. Documents live in the vault, `~/Obsidian/Быт/Документы`, and `~/Documents` is a link to it: Syncthing doesn't follow symlinks and Android has none, so the real folder has to be inside the synced one. The config step **Documents -> Obsidian vault** makes the link (merges a real `~/Documents` in first, stops on a file with the same name and other content)
     - `~/Obsidian/.stignore` (not in the dotfiles, Syncthing doesn't sync it either — add the same line on the phone): `(?d).obsidian/plugins/recent-files-obsidian/data.json` — the plugin rewrites it on every opened note on each device, so it only made conflicts; `(?d)` lets Syncthing delete it with its folder, without it a deleted vault stays on the other device
 - **clipse** - clipboard app

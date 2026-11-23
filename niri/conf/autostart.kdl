@@ -22,6 +22,6 @@ spawn-at-startup "dms" "run"
 
 // Apps 
 // spawn-at-startup "waybar"
-spawn-at-startup "syncthing"
+spawn-at-startup "syncthing" "serve" "--no-browser"
 spawn-sh-at-startup "clipse -listen"
 spawn-sh-at-startup "killall xdg-desktop-portal xdg-desktop-portal-gtk xdg-desktop-portal-gnome xdg-desktop-portal-kde"
