@@ -433,7 +433,7 @@ add one line to `config_menu` in `install.sh` — the engine is never touched.
 #### Syncing live configs back (`scripts/functions/sync/`)
 
 - `sync.sh` lists the modules in `modules/` (fzf menu, Space ticks several); `sync.sh <name>...` runs them without the menu. A new `modules/<name>.sh` with `SYNC_TITLE`, `SYNC_DESC` and `sync_module` shows up on its own
-- `zen` - the settings of the Sine mods (only their own `prefs.js` keys) → `zen-browser/sine-prefs.js`; the mods themselves live in `zen-browser/chrome` (the profile's `chrome` links there). The other way round is `configure_zen` (config menu): it links `zen-browser/*` into the profile (`chrome/` as a whole), installs Sine with its official `updater.sh` (native package only — it asks for root via pkexec for the bootloader in `/opt`) and writes `sine-prefs.js` back into `prefs.js`
+- `zen` - the settings of the Sine mods (only their own `prefs.js` keys) → `zen-browser/sine-prefs.js`; the mods themselves live in `zen-browser/chrome` (the profile's `chrome` links there). The other way round is `configure_zen` (config menu): it links `zen-browser/*` into the profile (`chrome/` as a whole), installs Sine with its official `updater.sh` (native package only — it asks for root for the bootloader in `/opt`) and writes `sine-prefs.js` back into `prefs.js`
 - `dms` - the Dux shell state kept outside `settings.json` (wallpaper transition and cycling, lock screen / greeter layout) → `dms/session.json`, see [Dux shell plugins](#dux-shell-plugins-dms)
 - `map` - the files in `sync_map.json` (`sync-private` runs just this one):
 - Sensitive profile data (Zen sessions, etc.) lives in a separate **private** repo (`~/Dotfiles-private`), not here

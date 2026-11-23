@@ -617,7 +617,8 @@ run in a subshell, so their helper names don't clash. Afterwards `sync.sh` shows
   `zen-browser/*` into the profile (`chrome/` as a whole; Sine's engine `JS/`,
   `utils/` lands there too and is git-ignored), install Sine through its own
   `updater.sh` with the versions from Sine's `engine.json` (native package only:
-  the bootloader goes into the root-owned browser dir via pkexec), and put
+  the bootloader goes into the root-owned browser dir via sudo — the step swaps
+  its pkexec for sudo, which asks in the terminal), and put
   `sine-prefs.js` back into `prefs.js` (the profile's lines for those keys are
   dropped first; Zen must be closed).
 - `modules/dms.sh` — the `DMS_SESSION_KEYS` of `~/.local/state/dms/session.json`

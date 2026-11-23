@@ -169,7 +169,7 @@ _zen_sine_supported() {
 # Sine (github.com/CosmoCreeper/Sine) via its own updater.sh — what the GUI
 # installer runs too: the engine goes into <profile>/chrome (JS/, utils/; mods
 # are kept with -s), the bootloader (config.js) into the browser dir — through
-# pkexec when that dir is root's (Arch's /opt). Versions come from Sine's
+# sudo when that dir is root's (Arch's /opt). Versions come from Sine's
 # engine.json, like the GUI installer's.
 # About: Installs Sine, the mod manager the Zen mods come from.
 install_sine() {
@@ -188,6 +188,10 @@ install_sine() {
     return 2
   fi
   chmod +x "$tmp/updater.sh"
+  # It re-runs itself through pkexec for the bootloader: sudo instead, like
+  # every other step — it asks in the terminal (a text console has no polkit
+  # agent) and reuses the installer's sudo session.
+  sed -i 's/^\([[:space:]]*\)pkexec "\$0"/\1sudo "$0"/' "$tmp/updater.sh"
   # Absolute path: the script re-runs itself as "$0" through pkexec.
   "$tmp/updater.sh" -s --browser "$browser_dir" --profile "$ZEN_PROFILE" \
     --bootloader "$boot" --version "$sine"
