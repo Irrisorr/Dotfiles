@@ -6,6 +6,7 @@
 # udev hwdb rules from Dotfiles/etc/udev/hwdb.d (keyboard quirks of specific
 # hardware). Each rule matches its machine by DMI, so on any other machine it
 # is installed but does nothing — the step is the same on every distro.
+# About: Installs keyboard fixes for this laptop's keys (udev hwdb).
 configure_hwdb() {
   print_styled_message "Keyboard fixes (udev hwdb)"
   confirm_step "install the udev hwdb rules" || return 1

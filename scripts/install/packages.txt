@@ -1,26 +1,25 @@
 # Hypr Ecosystem | hyprland
-hyprshot               ubuntu:skip (Ubuntu: shell script, no .deb)
-hyprswitch             ubuntu:skip (Ubuntu: no releases, source only)
-ags-hyprpanel-git      ubuntu:skip (Ubuntu: not packaged)
-hyprpaper
-hyprlock
-xdg-desktop-portal
-xdg-user-dirs (for home directories)
-xdg-desktop-portal-hyprland
-hyprpicker
-nwg-displays (monitor control)
+hyprshot               ubuntu:skip (screenshots of a window, region or output | Ubuntu: shell script, no .deb)
+hyprswitch             ubuntu:skip (alt-tab window switcher | Ubuntu: no releases, source only)
+ags-hyprpanel-git      ubuntu:skip (HyprPanel: bar, notifications and menus | Ubuntu: not packaged)
+hyprpaper (wallpaper daemon)
+hyprlock (lock screen)
+xdg-desktop-portal (default portal)
+xdg-user-dirs (home directories: Desktop, Downloads, ...)
+xdg-desktop-portal-hyprland (screen sharing and screenshots for Hyprland)
+hyprpicker (color picker)
+nwg-displays (monitor layout tool)
 
 # niri Ecosystem | niri
-niri                   ubuntu:ppa=duxlabs/dux-repo (the compositor itself)
 xdg-desktop-portal (default portal)
 xdg-desktop-portal-gtk (implements most of the basic functionality)
 xdg-desktop-portal-gnome (required for screencasting support)
-xdg-user-dirs (for home directories)
-xdg-user-dirs-gtk (for home gtk directories)
+xdg-user-dirs (home directories: Desktop, Downloads, ...)
+xdg-user-dirs-gtk (the same directories in GTK's sidebar)
 gnome-keyring (implements the Secret portal, required for certain apps to work)
 xwayland-satellite     ubuntu:ppa=duxlabs/dux-repo (to run X11 apps like Steam or Discord)
 quickshell             ubuntu:ppa=duxlabs/dux-repo (DMS's framework | Ubuntu: dms needs it from this PPA, not only from its own)
-dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
+dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (Dux shell: panel bar, launcher, notifications, settings)
 - matugen              ubuntu:ppa=duxlabs/dux-repo (wallpaper-based colors)
 - dux-gop              ubuntu:ppa=duxlabs/dux-repo (dgop: system stats for DMS widgets and the dgop top monitor)
 - cava (DMS audio visualizer widget)
@@ -37,68 +36,67 @@ dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (panel bar)
 dux-greeter-bin        ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-greeter (DMS login screen, replaces SDDM | Ubuntu: 26.04+)
 dux-calendar-bin       ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-calendar (dcal: Google/CalDAV calendar and tasks, DMS calendar backend | Ubuntu: 26.04+)
 dux-files-bin          ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-files (dfiles: file manager, also serves open/save dialogs | Ubuntu: 26.04+)
-hyprlock (lock manager)
-swaybg (wallpaper tool)
+hyprlock (lock screen)
+swaybg (wallpaper tool, for when DMS doesn't set the wallpaper)
 
 # Browsers
 zen-browser-bin        ubuntu:source=zen (based on firefox | Ubuntu: upstream tarball, updates itself)
-firefox
+firefox (Mozilla's browser)
 vivaldi                ubuntu:flatpak=com.vivaldi.Vivaldi (based on chromium)
-google-chrome          ubuntu:source=chrome (Ubuntu: Google's .deb, then its apt repo — the flatpak is a community repack)
+google-chrome          ubuntu:source=chrome (Google's browser | Ubuntu: Google's .deb, then its apt repo — the flatpak is a community repack)
 
 # Terminals and shells
-kitty                  ubuntu:source=kitty
+kitty                  ubuntu:source=kitty (GPU terminal, the main one | Ubuntu: upstream build in /opt/kitty.app)
 - shader-slang         ubuntu:skip (custom shaders | Ubuntu: bundled with the upstream kitty build)
-alacritty
-fish
+alacritty (GPU terminal, the spare one)
+fish (the shell)
 
 # Runners
-wofi
-rofi
-anyrun                 ubuntu:skip (Ubuntu: no .deb, tarball only)
-walker                 ubuntu:skip (Ubuntu: no .deb, tarball only)
+wofi (app launcher)
+rofi (app launcher and menus)
+anyrun                 ubuntu:skip (app launcher with plugins | Ubuntu: no .deb, tarball only)
+walker                 ubuntu:skip (app launcher | Ubuntu: no .deb, tarball only)
 
 # Sync
-syncthing (sync service (f.e. for obsidian sync between devices))
+syncthing (syncs folders between devices, e.g. Obsidian with the phone)
 
 # IDE's
-neovim
-visual-studio-code-bin ubuntu:source=vscode (Ubuntu: Microsoft's .deb, then its apt repo — the flatpak hides the host's SDKs and docker)
-intellij-idea-ultimate-edition ubuntu:source=idea (Ubuntu: JetBrains' snap, classic — no sandbox between it and the JDKs, docker, terminal)
+neovim (terminal editor)
+visual-studio-code-bin ubuntu:source=vscode (VS Code | Ubuntu: Microsoft's .deb, then its apt repo — the flatpak hides the host's SDKs and docker)
+intellij-idea-ultimate-edition ubuntu:source=idea (IntelliJ IDEA | Ubuntu: JetBrains' snap, classic — no sandbox between it and the JDKs, docker, terminal)
 antigravity            ubuntu:source=antigravity (Google's agentic IDE)
 zed                    ubuntu:source=zed (code editor | Ubuntu: zed.dev's installer, updates itself)
-postman-bin            ubuntu:source=postman (Ubuntu: postman.com's tarball, updates itself)
-podman-desktop-bin     ubuntu:flatpak=io.podman_desktop.PodmanDesktop
-podman
+postman-bin            ubuntu:source=postman (API client | Ubuntu: postman.com's tarball, updates itself)
+podman-desktop         ubuntu:flatpak=io.podman_desktop.PodmanDesktop (GUI for containers)
+podman (containers, docker-compatible)
 
 # Media
-telegram-desktop       ubuntu:source=telegram (Ubuntu: telegram.org's tarball, updates itself — the flatpak can't follow the wallpaper theme)
+telegram-desktop       ubuntu:source=telegram (Telegram | Ubuntu: telegram.org's tarball, updates itself — the flatpak can't follow the wallpaper theme)
 ime                    arch:source=ime ubuntu:source=ime (iMe: Telegram fork with extra features | imem.app's tarball in ~/.local/share/ime-desktop, updates itself)
-slack
-vesktop-bin            ubuntu:flatpak=dev.vencord.Vesktop
-discord                ubuntu:flatpak=com.discordapp.Discord
-spotify                ubuntu:source=spotify (Ubuntu: Spotify's apt repo, spicetify can't patch the flatpak)
-spicetify-cli          ubuntu:source=spicetify (spotify extensions manager | Ubuntu: upstream release in /opt/spicetify-cli)
+slack                  ubuntu:flatpak=com.slack.Slack (work chat | Ubuntu: apt's "slack" is another program)
+vesktop-bin            ubuntu:flatpak=dev.vencord.Vesktop (Discord client with Vencord)
+discord                ubuntu:flatpak=com.discordapp.Discord (official Discord client)
+spotify                ubuntu:source=spotify (music | Ubuntu: Spotify's apt repo, spicetify can't patch the flatpak)
+- spicetify-cli        ubuntu:source=spicetify (Spotify themes and extensions | Ubuntu: upstream release in /opt/spicetify-cli)
 - unzip                 (Listening Stats' installer, `spice` → Update apps)
-zoom                   ubuntu:source=zoom (Ubuntu: zoom.us's .deb, re-run the package step to update)
+zoom                   ubuntu:source=zoom (video calls | Ubuntu: zoom.us's .deb, re-run the package step to update)
 
 # Notes and Offices
-obsidian               ubuntu:flatpak=md.obsidian.Obsidian
-freeoffice             ubuntu:source=freeoffice (Ubuntu: adds the SoftMaker apt repo)
-rnote                  ubuntu:flatpak=com.github.flxzt.rnote
+obsidian               ubuntu:flatpak=md.obsidian.Obsidian (notes)
+freeoffice             ubuntu:source=freeoffice (office suite | Ubuntu: adds the SoftMaker apt repo)
+rnote                  ubuntu:flatpak=com.github.flxzt.rnote (handwritten notes and sketches)
 
 # Themes
-vimix-gtk-themes       ubuntu:skip (Ubuntu: not packaged)
-adwaita-qt6
+vimix-gtk-themes       ubuntu:skip (GTK theme | Ubuntu: not packaged)
 
 # Cursors
-bibata-cursor-theme
+bibata-cursor-theme (cursor theme)
 
 # Icons
-papirus-icon-theme
+papirus-icon-theme (icon theme)
 
 # Fonts
-ttf-jetbrains-mono-nerd ubuntu:source=jetbrains_nerd (Ubuntu: official nerd-fonts release, re-run to update)
+ttf-jetbrains-mono-nerd ubuntu:source=jetbrains_nerd (terminal and code font | Ubuntu: official nerd-fonts release, re-run to update)
 
 # File managers
 thunar                (xfce/gtk fm)
@@ -106,21 +104,21 @@ thunar                (xfce/gtk fm)
 - thunar-archive-plugin (adds archive operations)
 - thunar-volman         (adds removable drives operations)
 - unzip                 (for archive operations in tui)
-- gvfs                  (for removable drivers)
+- gvfs                  (for removable drives)
 dolphin               (kde/qt fm)
 - ark                   (adds archive operations)
 nautilus              (gnome/gtk fm)
 
 # Virtual Machines
-gnome-boxes
-scrcpy (display and control ur Android device | duplicating screen on laptop through cabel)
+gnome-boxes (virtual machines)
+scrcpy (shows and controls an Android phone on the laptop over USB)
 waydroid               ubuntu:skip (android vm for wayland | Ubuntu: own repo at repo.waydro.id)
 
 # Packages For System
-gnome-calculator
-gnome-system-monitor
-baobab (disk viewer | on GTK)
-obs-studio
+gnome-calculator (calculator)
+gnome-system-monitor (processes and resources)
+baobab (disk usage viewer)
+obs-studio (screen recording and streaming)
 swayimg                ubuntu:source=swayimg (view images | Ubuntu: built from source)
 - libjpeg-turbo        ubuntu:apt=libjpeg-turbo-progs (lossless JPEG rotation on Ctrl+S | jpegtran)
 - imagemagick (saving rotation of other formats)
@@ -133,49 +131,49 @@ clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: rel
 # Settings packages
 pavucontrol (audio control)
 nwg-look (themes/icons/cursors etc. control)
-polkit-gnome           ubuntu:apt=policykit-1-gnome (for apps that required gui roots)
-mate-polkit (for apps that required gui roots)
+polkit-gnome           ubuntu:apt=policykit-1-gnome (password prompts for apps that need root)
+mate-polkit (password prompts for apps that need root, the one niri starts)
 libfprint-2-tod1-goodix-v2 arch:source=goodix ubuntu:source=goodix (driver for my fingerprint device (27c6:550a: Shenzhen Goodix Technology))
-fprintd (for setting ur fingerprint for lock-managers)
+fprintd (fingerprint login and sudo)
 logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
 
 # Games and Launchers
-steam                  ubuntu:apt=steam-installer
-lutris
+steam                  ubuntu:apt=steam-installer (games)
+lutris (games from other stores and emulators)
 
 # work
-nodejs
-npm
-git
-rsync
-claude-code
-claude-desktop
+nodejs (JavaScript runtime)
+npm (JavaScript packages)
+git (version control)
+rsync (copies and syncs files)
+claude-code            ubuntu:source=claude_code (Claude in the terminal | Ubuntu: Anthropic's installer into ~/.local/bin, updates itself)
+claude-desktop         ubuntu:skip (Claude app | Ubuntu: no Linux build)
 
 # Additional Packages
-sqlite                 ubuntu:apt=sqlite3 (needs for sync private dotfiles)
-jq (needs for sync private dotfiles)
+sqlite                 ubuntu:apt=sqlite3 (needed to sync private dotfiles)
+jq (needed to sync private dotfiles)
 gowall                 ubuntu:source=gowall (image converter | Ubuntu: upstream release binary)
 - librsvg              ubuntu:apt=librsvg2-bin (rsvg-convert: SVG icons in gw)
 - tesseract            ubuntu:apt=tesseract-ocr (local OCR in gw)
 - tesseract-data-eng   ubuntu:apt=tesseract-ocr-eng (its English)
 - tesseract-data-rus   ubuntu:apt=tesseract-ocr-rus (its Russian)
-inxi (tui app for get info about ur system)
+inxi (detailed system info in the terminal)
 terminal-rain-lightning ubuntu:skip (tui rain in terminal | Ubuntu: pip only)
-thefuck (tui app that fixes errors in previous console commands)
-python-pip             ubuntu:apt=python3-pip
+thefuck (fixes the previous mistyped command)
+python-pip             ubuntu:apt=python3-pip (Python packages)
 github-cli             ubuntu:apt=gh (github client for terminal)
-jdk21-openjdk          ubuntu:apt=openjdk-21-jdk
-jdk25-openjdk          ubuntu:apt=openjdk-25-jdk (current LTS)
+jdk21-openjdk          ubuntu:apt=openjdk-21-jdk (Java 21)
+jdk25-openjdk          ubuntu:apt=openjdk-25-jdk (Java 25, current LTS)
 maven (java project management)
-fastfetch (fast neofetch)
-figlet (for making large letters in terminal)
-playerctl (for control media player)
-brightnessctl (control brightness)
-sddm (welcome service on startup ur device)
+fastfetch (system info at terminal start)
+figlet (large letters in the terminal)
+playerctl (media keys: play, pause, next)
+brightnessctl (screen brightness)
+sddm (login screen, the old one before the Dux greeter)
 - weston (wayland compositor for the greeter)
 - qt6-5compat          ubuntu:apt=qml6-module-qt5compat-graphicaleffects (for the theme)
 - qt6-declarative      ubuntu:apt=qml6-module-qtquick-controls (for the theme)
 - qml6-module-qtqml-models arch:pacman=qt6-declarative (for the theme | Arch: part of qt6-declarative)
 - qt6-svg              ubuntu:apt=qt6-svg-plugins (for the theme)
-usbutils (tool for check model name of all bus devices like usb or fingerprint)
+usbutils (lsusb: model names of USB devices, e.g. the fingerprint reader)
 arronax                ubuntu:skip (for creating .desktop files | Ubuntu: not packaged)

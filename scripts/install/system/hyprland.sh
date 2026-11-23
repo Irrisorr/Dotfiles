@@ -14,23 +14,28 @@ configure_hyprland_steps=(
   "Wallpaper changer desktop entry|_hypr_wallpaper_entry|hyprpaper"
 )
 
+# About: The Hyprland desktop: config, lock screen, wallpaper and plugin manager.
 configure_hyprland() {
   print_styled_message "Configuring hyprland and apps/plugins for it"
   run_substeps "${configure_hyprland_steps[@]}"
 }
 
+# About: Builds the Hyprland plugin manager's headers, so plugins can be added.
 _hypr_hyprpm() {
   execute_command "Enable hyprpm (hyprland plugin manager)" "hyprpm update -s -v"
 }
 
+# About: Links hypr/ to ~/.config/hypr.
 _hypr_link_config() {
   execute_command "Configure hyprland directory" "create_symlink $HOME/Dotfiles/hypr $HOME/.config/hypr"
 }
 
+# About: Links the hyprlock config.
 _hypr_link_hyprlock() {
   execute_command "Configure hyprlock" "mkdir -p $HOME/.config/hypr && create_symlink $HOME/Dotfiles/hypr/hyprlock.conf $HOME/.config/hypr/hyprlock.conf"
 }
 
+# About: Makes nwg-displays write the monitor layout into hypr/conf, where our config includes it.
 _hypr_nwg_displays() {
   local main
   main="$(python_site_dir)/nwg_displays/main.py"
@@ -39,10 +44,12 @@ _hypr_nwg_displays() {
      sudo sed -i 's|hypr_config_dir = os.path.join(get_config_home(), \"hypr\")|hypr_config_dir = os.path.join(get_config_home(), \"hypr/conf\")|g' '$main'"
 }
 
+# About: Links the hyprpaper (wallpaper) config.
 _hypr_link_hyprpaper() {
   execute_command "Configure hyprpaper" "mkdir -p $HOME/.config/hypr && create_symlink $HOME/Dotfiles/hypr/hyprpaper.conf $HOME/.config/hypr/hyprpaper.conf"
 }
 
+# About: Adds a "Wallpaper changer" app that sets the wallpaper through hyprpaper.
 _hypr_wallpaper_entry() {
   local desktop_file="/usr/share/applications/Wallpaper changer.desktop"
   execute_command "Create wallpaper changer desktop entry" \

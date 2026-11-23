@@ -5,8 +5,7 @@
 #
 # Everything Zen-related lives here. configure_zen (install-time) picks the
 # profile — launching the browser once to create it on a fresh install — then
-# runs the actions below. Restoring the private files is done later by
-# post_install.sh (after Mozilla login) via restore_private_zen.
+# runs the actions below.
 #
 # Works for the native package (Arch) and the flatpak (Ubuntu, where
 # `zen-browser` is a shim around `flatpak run`). The profile root differs per
@@ -94,49 +93,7 @@ _zen_headless_run() {
 }
 
 
-# Restore private/sensitive Zen files from ~/Dotfiles-private/zen-browser into a
-# profile: copy the live files (sessions, search, ...) and import any *.sql table
-# dumps into the profile's places.sqlite. Shared by configure_zen + post_install.
-restore_private_zen() {
-  local profile_dir="$1"
-  [ -n "$profile_dir" ] || return 1
-
-  # Pull first so a repo cloned earlier isn't stale (files updated on GitHub
-  # would otherwise never reach an existing local clone).
-  if [ -d "$PRIVATE_DIR/.git" ] && command -v git &>/dev/null; then
-    echo ":: Updating private repo ($PRIVATE_DIR)..."
-    git -C "$PRIVATE_DIR" pull
-  fi
-
-  local private_zen="$PRIVATE_DIR/zen-browser"
-  [ -d "$private_zen" ] || return 0
-
-  # Copy (not symlink) — the browser rewrites these at runtime. Skip *.sql:
-  # those are sqlite table dumps, imported below rather than copied as files.
-  local item base
-  for item in "$private_zen"/{*,.*}; do
-    base="$(basename "$item")"
-    [[ "$base" == "." || "$base" == ".." ]] && continue
-    [ -e "$item" ] || continue
-    [[ "$base" == *.sql ]] && continue
-    cp -rf "$item" "$profile_dir/"
-  done
-
-  # Import table dumps into places.sqlite (dump filename == table name).
-  local places="$profile_dir/places.sqlite"
-  if command -v sqlite3 &>/dev/null && [ -f "$places" ]; then
-    local sql table
-    for sql in "$private_zen"/*.sql; do
-      [ -e "$sql" ] || continue
-      table="$(basename "$sql" .sql)"
-      echo ":: Importing table '$table' into places.sqlite"
-      sqlite3 "$places" "DROP TABLE IF EXISTS $table;"
-      sqlite3 "$places" < "$sql"
-    done
-  fi
-}
-
-
+# About: Zen Browser as it was: its configs, the Sine mod manager and the mods' settings.
 configure_zen() {
   print_styled_message "Configuring Zen-Browser"
   confirm_step "configure Zen-Browser" || return 1
@@ -175,6 +132,7 @@ configure_zen() {
 
 # Symlinks everything in Dotfiles/zen-browser into the profile — chrome/ as a
 # whole, so the mods Sine installs or updates land in Dotfiles.
+# About: Links Zen's userChrome, user.js and shortcuts into the profile.
 _zen_link_configs() {
   # The flatpak sandbox can't see ~/Dotfiles, so the symlinks below would point
   # at nothing from inside it. Let it read just the tracked Zen configs.
@@ -213,6 +171,7 @@ _zen_sine_supported() {
 # are kept with -s), the bootloader (config.js) into the browser dir — through
 # pkexec when that dir is root's (Arch's /opt). Versions come from Sine's
 # engine.json, like the GUI installer's.
+# About: Installs Sine, the mod manager the Zen mods come from.
 install_sine() {
   local browser_dir engine boot sine tmp
   browser_dir=$(zen_install_dir) || { print_error_message "Zen install dir not found"; return 2; }
@@ -250,6 +209,7 @@ install_sine() {
 
 # Puts sine-prefs.js into prefs.js: drops the profile's lines for those keys and
 # appends the tracked ones. Plain prefs, so the Sine UI can still change them.
+# About: Restores the Zen mods' settings into prefs.js; Zen must be closed.
 _zen_import_sine_prefs() {
   local src="$ZEN_DOTS/sine-prefs.js" prefs="$ZEN_PROFILE/prefs.js" tmp
   [ -f "$src" ] || { echo ":: No $src — nothing to restore"; return 1; }

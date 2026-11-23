@@ -10,6 +10,7 @@
 VESKTOP_SETTINGS="$HOME/.config/vesktop/settings/settings.json"
 VESKTOP_DMS_THEME="dank-discord.css"
 
+# About: Turns on DMS's wallpaper theme in Vesktop; Vesktop must be closed.
 configure_vesktop() {
   print_styled_message "Configuring Vesktop"
   confirm_step "enable the DMS wallpaper theme in Vesktop" || return 1

@@ -249,10 +249,15 @@ Each file in `install/system/` and `install/apps/` defines one or more
 . "$HOME/Dotfiles/scripts/lib/common.sh"
 
 # Menu guard: kitty
+# About: Links the kitty config.
 configure_kitty() {
   execute_command "Configure kitty" "create_symlink $HOME/Dotfiles/kitty $HOME/.config/kitty"
 }
 ```
+
+`# About:` is one sentence on what the step does, for the config menu's
+preview (`_about` in `fzf_config.sh` reads it from the comment block right
+above the function); every step and action has one.
 
 The engine (`main.sh`) sources every such file, so the functions exist; then
 `CONFIG_STEPS` (in `install.sh`) lists them with a label and (usually) a guard.
@@ -281,7 +286,24 @@ configure_niri() {
 ## `post_install.sh` (root entry point)
 
 Runs once after the reboot, triggered by the fish hook in
-`~/.config/fish/conf.d/` (which deletes itself after firing). Executed linearly
+`~/.config/fish/conf.d/` (which deletes itself after firing). A gum `menu` of
+steps that need something done by hand first. `_post_wait <title> <step>...`
+prints the numbered steps and waits for Enter (`s` skips):
+
+* `post_obsidian` — Syncthing brings `~/Obsidian`, every vault opened once,
+  Obsidian closed → `link_documents_to_vault` (if `Быт/Документы` is there)
+  and `configure_obsidian`.
+* `post_spicetify` — Spotify started once (it writes `~/.config/spotify/prefs`,
+  `has_spotify_prefs`) → the apply / Marketplace / Listening Stats actions of
+  `configure_spicetify` (`STEP_ONLY`). In the config menu those actions are
+  hidden until the prefs exist, and the step says to come here.
+* `post_ime` — iMe started once (writes its `org.ime.desktop._<hash>.desktop`)
+  → `_defapps_defaults`, so `tg://` / `ton://` open in it.
+* `post_gh_auth`, `install_rustdesk` (latest release from GitHub's API:
+  `.pkg.tar.zst` / `.deb`), `install_hypr_plugins` (guard `hyprpm`: only with
+  Hyprland installed).
+
+Last it offers a reboot.
 
 ## `packages.txt`
 
@@ -627,8 +649,5 @@ gum selection with **every conflicting file pre-selected** (= will be
 overwritten) — unselect the ones you want to keep. An optional `"comment"` field
 is ignored.
 
-**Restore** is handled by `restore_private_zen` in `install/apps/zen.sh` (reused
-by both `configure_zen` and `post_install.sh`): it copies the live files back
-into the profile and imports each `*.sql` dump into the profile's `places.sqlite`
-(dropping the table first, so sibling tables like history/bookmarks are
-untouched).
+Nothing restores them automatically: copy what you need back from
+`~/Dotfiles-private` by hand.

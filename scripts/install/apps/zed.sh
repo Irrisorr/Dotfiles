@@ -12,6 +12,7 @@ configure_zed_steps=(
   "Theme from the wallpaper (DankShell Soft / Light)|_zed_dms_theme"
 )
 
+# About: Zed follows the wallpaper with our softer theme.
 configure_zed() {
   print_styled_message "Configuring Zed"
   run_substeps "${configure_zed_steps[@]}"
@@ -20,6 +21,7 @@ configure_zed() {
 # settings.json is JSONC (comments, trailing commas), so no jq: the "light" and
 # "dark" lines inside "theme": { … } are rewritten in place, or the block is
 # added. Zed reloads its settings itself.
+# About: Selects DankShell Soft (dark) / DankShell Light in Zed's settings.
 _zed_dms_theme() {
   local settings="$HOME/.config/zed/settings.json" tmp
   mkdir -p "$(dirname "$settings")"

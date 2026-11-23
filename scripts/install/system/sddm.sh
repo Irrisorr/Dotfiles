@@ -2,6 +2,7 @@
 . "$HOME/Dotfiles/scripts/lib/common.sh"
 
 # Menu guard: sddm
+# About: Makes SDDM the login screen with the "corners" theme (the older choice, before the Dux greeter).
 configure_sddm() {
   print_styled_message "Configure SDDM"
   confirm_step "configure SDDM and make it the login screen" || return 1

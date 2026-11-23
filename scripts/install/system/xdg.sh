@@ -2,10 +2,12 @@
 . "$HOME/Dotfiles/scripts/lib/common.sh"
 
 # Menu guard: xdg-user-dirs-update
+# About: Creates the home folders (Desktop, Downloads, Documents, ...) and registers them for apps.
 update_user_dirs() {
   execute_command "Update user directories" "xdg-user-dirs-update"
 }
 
+# About: Renames Russian home folders (Загрузки, Документы, ...) to English and moves their files over.
 convert_xdg_dirs() {
   local russian_dirs=("$HOME/Рабочий стол" "$HOME/Загрузки" "$HOME/Шаблоны" "$HOME/Общедоступные" "$HOME/Документы" "$HOME/Музыка" "$HOME/Изображения" "$HOME/Видео")
   local russian_exists=false
@@ -58,6 +60,7 @@ EOL
 # ~/Documents becomes a link to the vault's documents folder (VAULT_DOCUMENTS,
 # scripts/lib/paths.sh). A real ~/Documents is merged in first; a file that
 # exists in both with other content stops it, nothing gets overwritten.
+# About: Makes ~/Documents a link to the documents in the Obsidian vault, so they sync with the phone.
 link_documents_to_vault() {
   local docs="$HOME/Documents" rel=${VAULT_DOCUMENTS#"$HOME"/} clash
   if [ "$(readlink "$docs")" = "$rel" ] || [ "$(readlink "$docs")" = "$VAULT_DOCUMENTS" ]; then

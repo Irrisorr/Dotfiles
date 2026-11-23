@@ -4,6 +4,7 @@
 # Menu guard: zoom
 # A flatpak install (older Ubuntu setups) reads its config from its own XDG dir,
 # not ~/.config; the native package (both distros now) wins when both are there.
+# About: Turns on Zoom's screen sharing under Wayland.
 configure_zoom() {
   print_styled_message "Configuring Zoom"
   if ! confirm_step "configure Zoom for Wayland"; then

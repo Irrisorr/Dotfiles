@@ -31,7 +31,8 @@ CMD="bash $(printf %q "$SELF")"     # works without the exec bit
 #   kind: H group header, S step, U action of a step (its parent's func)
 #   key:  H:<group>, S:<func>, U:<parent>:<func>
 # checked: ticked keys;  status: "<func>\t✓|✗" of the last run;
-# log/<func>: output of the last run;  src/<func>: the function's code
+# log/<func>: output of the last run;  src/<func>: the function's code;
+# about/<func>: the "# About: ..." line above the function, if it has one
 
 
 # ─── fzf callbacks (cache only, no installer libs) ────────────────────────────
@@ -143,7 +144,8 @@ _preview() {
   esac
   status=$(awk -F'\t' -v f="$func" '$1 == f { print $2 }' "$STATE/status")
 
-  awk -F'\t' -v k="$key" -v status="$status" -v has_log="$([ -s "$STATE/log/$func" ] && echo 1)" '
+  awk -F'\t' -v k="$key" -v status="$status" -v has_log="$([ -s "$STATE/log/$func" ] && echo 1)" \
+      -v about="$(cat "$STATE/about/$func" 2>/dev/null)" '
     BEGIN {
       while ((getline line < (ENVIRON["STATE"] "/checked")) > 0) chk[line] = 1
       T = "\033[1;36m"; L = "\033[90m"; G = "\033[32m"; E = "\033[31m"; R = "\033[0m"
@@ -157,6 +159,7 @@ _preview() {
       split(row[hit], f, "\t")
       print T f[4] R
       print RULE
+      if (about != "") { print about; print "" }
       if (f[1] == "U") field("Part of", step_label[f[7]])
       field("Function", f[5])
       field("File", f[6])
@@ -244,7 +247,7 @@ command -v script &>/dev/null || { echo ":: 'script' (util-linux) is not install
 STATE=$(mktemp -d)
 export STATE
 trap 'rm -rf "$STATE"' EXIT
-mkdir -p "$STATE/src" "$STATE/log"
+mkdir -p "$STATE/src" "$STATE/log" "$STATE/about"
 : > "$STATE/checked"
 : > "$STATE/status"
 
@@ -262,6 +265,15 @@ fi
 
 _row() { local IFS=$'\t'; printf '%s\n' "$*"; }
 
+# The "# About: ..." line in the comment block right above "<func>() {".
+_about() {
+  awk -v f="$2" '
+    /^#/ { if ($0 ~ /^# About: /) about = substr($0, 10); next }
+    $0 ~ "^" f "\\(\\)" { if (about != "") print about; exit }
+    { about = "" }
+  ' "$1"
+}
+
 # Group = the directory the function is defined in.
 shopt -s extdebug
 declare -A group_rows=()
@@ -275,6 +287,7 @@ for e in "${entries[@]}"; do
     *)               group="Other" ;;
   esac
   declare -f "$func" > "$STATE/src/$func"
+  _about "$file" "$func" > "$STATE/about/$func"
 
   # Actions that apply on this machine, from <func>_steps
   subs=""
@@ -284,6 +297,7 @@ for e in "${entries[@]}"; do
       IFS='|' read -r slabel sfunc sguard sopt <<< "$s"
       [ -n "$sguard" ] && ! guard_passes "$sguard" && continue
       declare -f "$sfunc" > "$STATE/src/$sfunc"
+      _about "$(declare -F "$sfunc" | cut -d' ' -f3-)" "$sfunc" > "$STATE/about/$sfunc"
       subs+="$(_row U "U:$func:$sfunc" "$group" "$slabel" "$sfunc" "${file#"$HOME/Dotfiles/"}" "$func" 0 "$([ "$sopt" = optional ] && echo 1 || echo 0)")"$'\n'
     done
     unset -n _steps

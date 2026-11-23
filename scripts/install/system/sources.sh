@@ -490,6 +490,14 @@ install_source_zed() {
 }
 
 
+# Claude Code — Anthropic's native installer (no .deb): the claude binary in
+# ~/.local/bin, which it keeps up to date itself.
+install_source_claude_code() {
+  command -v curl &>/dev/null || pkg_install curl || return 1
+  curl -fsSL https://claude.ai/install.sh | bash
+}
+
+
 # Google Chrome — Google's .deb (the flatpak is a community repack that breaks
 # password-manager extensions and security keys). Its postinst adds Google's
 # apt repository, so apt updates it from then on.
@@ -668,3 +676,4 @@ installed_source_zoom()            { pkg_installed zoom; }
 installed_source_ime()             { [ -x "$HOME/.local/share/ime-desktop/iMe" ]; }
 installed_source_zed()             { [ -x "$HOME/.local/bin/zed" ]; }
 installed_source_postman()         { [ -x "$HOME/.local/share/postman/Postman" ]; }
+installed_source_claude_code()     { [ -x "$HOME/.local/bin/claude" ] || command -v claude &>/dev/null; }

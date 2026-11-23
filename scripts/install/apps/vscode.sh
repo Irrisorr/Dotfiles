@@ -10,6 +10,7 @@
 VSCODE_DMS_EXTENSION="DankLinux.dms-theme"
 VSCODE_DMS_THEME="Dynamic Base16 DankShell"
 
+# About: Installs DMS's theme extension and selects it, so VS Code follows the wallpaper.
 configure_vscode() {
   print_styled_message "Configuring VS Code"
   confirm_step "install the DMS theme extension and select it" || return 1

@@ -2,6 +2,7 @@
 . "$HOME/Dotfiles/scripts/lib/common.sh"
 
 # Menu guard: fish
+# About: Links the fish config and makes fish your login shell.
 configure_fish() {
   # ensure_login_shell registers fish in /etc/shells before chsh — Ubuntu ships
   # fish at /usr/bin/fish and chsh rejects any shell missing from that file.

@@ -5,7 +5,10 @@
 
 . "$HOME/Dotfiles/scripts/lib/common.sh"
 require_gum "post-install" || exit 1
-. "$APPS_DIR/zen.sh"   # for _zen_find_profile + restore_private_zen
+. "$APPS_DIR/obsidian.sh"
+. "$APPS_DIR/spicetify.sh"
+. "$SYSTEM_DIR/xdg.sh"
+. "$SYSTEM_DIR/default_apps.sh"
 
 
 # ─── Step functions ──────────────────────────────────────────────────────────
@@ -14,88 +17,66 @@ post_gh_auth() {
   execute_command "Auth github via Github-cli (Browser Required)" "gh auth login"
 }
 
-# Restore private Zen files (sessions, bookmark↔workspace links, ...).
-# MUST run after the Mozilla account is signed in and bookmarks have synced —
-# otherwise the workspace links reference bookmarks that don't exist yet.
-restore_private_dotfiles() {
-  print_styled_message "IMPORTANT — do this AFTER signing in
-Sign into your Mozilla account in Zen and let your bookmarks finish syncing
-BEFORE restoring. Otherwise bookmarks won't be linked to their workspaces."
-
-  local private_dotfiles_zen="$PRIVATE_DIR/zen-browser"
-
-  if [ ! -d "$PRIVATE_DIR" ]; then
-    if confirm_action "clone your private Dotfiles repository (Dotfiles-private)"; then
-      echo ":: Cloning via gh cli..."
-      gh repo clone Irrisorr/Dotfiles-private "$PRIVATE_DIR" < /dev/tty
-    fi
-  fi
-
-  if [ -d "$private_dotfiles_zen" ] \
-     && confirm_action "restore private Zen Browser files into your profile"; then
-    echo ":: Searching for Zen Browser profile directory..."
-    local profile_dir
-    profile_dir=$(_zen_find_profile)
-    if [ -n "$profile_dir" ]; then
-      echo ":: Restoring private Zen files into $profile_dir"
-      restore_private_zen "$profile_dir"
-      check_success "Private Zen-Browser Dotfiles restored"
-    else
-      print_error_message "Zen Browser release profile not found. Cannot restore."
-    fi
-  fi
+# Steps that need an app started by hand first: prints what to do, waits.
+# Returns 1 when the user skips.
+_post_wait() {
+  local title=$1 i=1 step answer
+  shift
+  print_styled_message "$title"
+  for step in "$@"; do
+    echo "  $i. $step"
+    i=$((i + 1))
+  done
+  read -rp ":: Press Enter when done (s + Enter to skip): " answer </dev/tty
+  [ "$answer" != s ]
 }
 
-install_ime() {
-  print_styled_message "Installing iMe Desktop"
-  if ! confirm_action "install iMe Desktop"; then
-    return 1
+# The vaults come from the phone through Syncthing; then ~/Documents can link
+# into the vault and every vault gets the wallpaper-colors snippet.
+post_obsidian() {
+  _post_wait "Obsidian: get your vaults first" \
+    "Syncthing (http://127.0.0.1:8384): add the phone, accept the Obsidian folder into ~/Obsidian, wait until it's Up to Date" \
+    "Start Obsidian and open every vault once (Open folder as vault)" \
+    "Close Obsidian completely (it writes its settings back on exit)" || return 1
+  local rc=0
+  if has_vault_documents; then
+    link_documents_to_vault || rc=$?
   fi
-
-  mkdir -p $HOME/Downloads/apps
-  cd $HOME/Downloads/apps
-
-  print_styled_message "Downloading iMe Desktop"
-  echo ":: Opening browser to download iMe Desktop..."
-  xdg-open "https://imem.app/download/desktop/linux"
-
-  print_styled_message "Waiting for download"
-  echo ":: Please download the iMe Desktop package from the browser."
-  echo ":: After downloading, press Enter to continue..."
-  read -p "Press Enter when download is complete: " dummy
-
-  # Find the most recent iMe download
-  IME_ARCHIVE=$(find $HOME/Downloads -name "iMe*.tar.xz" -type f -printf '%T@ %p\n' | sort -n | tail -1 | cut -f2- -d" ")
-
-  if [ -z "$IME_ARCHIVE" ]; then
-    print_error_message "iMe Desktop archive not found in Downloads folder"
-    echo ":: Please download iMe Desktop manually and extract it to $HOME/Downloads/apps/iMeDesktop"
-  else
-    print_styled_message "Extracting iMe Desktop"
-    execute_command tar -xf "$IME_ARCHIVE" -C $HOME/Downloads/apps
-
-    if [ -d $HOME/Downloads/apps/iMeDesktop ]; then
-      print_styled_message "Running iMe Desktop to create desktop file"
-      echo ":: Starting iMe Desktop, it will be terminated after 2 seconds..."
-      cd $HOME/Downloads/apps/iMeDesktop
-      ./iMe &
-      IME_PID=$!
-      sleep 2
-      kill $IME_PID 2>/dev/null
-      print_success_message "iMe Desktop desktop file created"
-    else
-      print_error_message "iMe Desktop directory not found after extraction"
-    fi
-  fi
-
-  cd - >/dev/null
+  configure_obsidian
+  local r=$?
+  [ $r -gt $rc ] && rc=$r
+  return $rc
 }
 
+# spicetify can't apply before Spotify's first start has written its prefs.
+post_spicetify() {
+  if ! has_spotify_prefs; then
+    _post_wait "Spotify: start it once" \
+      "Start Spotify and log in (it creates ~/.config/spotify/prefs)" \
+      "Close Spotify" || return 1
+    has_spotify_prefs || { print_error_message "Still no ~/.config/spotify/prefs"; return 2; }
+  fi
+  STEPS_CONFIRMED=1 STEP_ONLY="_spicetify_apply _spicetify_marketplace _spicetify_listening_stats" configure_spicetify
+}
+
+# iMe writes its launcher (the .desktop that handles tg://) on its first start;
+# the saved default apps point tg:// and ton:// links at that launcher.
+post_ime() {
+  _post_wait "iMe: start it once" \
+    "Start iMe (ime, or Mod+Shift+T) — it writes its launcher" \
+    "Close it" || return 1
+  STEPS_CONFIRMED=1 STEP_ONLY="_defapps_defaults" configure_default_apps
+}
+
+# The latest release from GitHub: Arch's .pkg.tar.zst or the .deb.
 install_rustdesk() {
-  local version="1.3.7" base url
+  local version base url
 
   print_styled_message "Installing RustDesk"
-  confirm_action "install RustDesk version $version" || return 1
+  version=$(curl -fsSL https://api.github.com/repos/rustdesk/rustdesk/releases/latest |
+    sed -n 's/.*"tag_name": *"\([^"]*\)".*/\1/p' | head -1)
+  [ -n "$version" ] || { print_error_message "Could not find RustDesk's latest release"; return 2; }
+  confirm_action "install RustDesk $version" || return 1
 
   base="https://github.com/rustdesk/rustdesk/releases/download/$version/rustdesk-$version"
   if is_arch; then
@@ -134,9 +115,10 @@ install_hypr_plugins() {
 menu ">>> Finish & reboot <<<" \
   "Update system|system_update" \
   "Auth GitHub (gh)|post_gh_auth|gh" \
-  "Restore private Zen dotfiles (AFTER Mozilla login!)|restore_private_dotfiles|gh" \
-  "Install iMe Desktop|install_ime" \
-  "Install RustDesk 1.3.7|install_rustdesk" \
+  "Obsidian: vaults via Syncthing, Documents link, wallpaper colors|post_obsidian|obsidian" \
+  "Spotify: apply spicetify (start Spotify once first)|post_spicetify|spicetify" \
+  "iMe: open tg:// links in it (start iMe once first)|post_ime|ime" \
+  "Install RustDesk (latest)|install_rustdesk" \
   "Install Hyprland plugins|install_hypr_plugins|hyprpm"
 
 

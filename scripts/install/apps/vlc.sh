@@ -10,12 +10,14 @@ configure_vlc_steps=(
   "Window fills the column, not the video size|_vlc_no_autoresize"
 )
 
+# About: VLC settings that differ from its defaults.
 configure_vlc() {
   print_styled_message "Configuring VLC"
   run_substeps "${configure_vlc_steps[@]}"
 }
 
 # VLC resizes its window to the video, wider than a niri column for 1080p.
+# About: Stops VLC from resizing its window to the video, so it keeps the niri column size.
 _vlc_no_autoresize() {
   local rc="$HOME/.config/vlc/vlcrc"
   if [ -f "$rc" ] && grep -q '^#\?qt-video-autoresize=' "$rc"; then
