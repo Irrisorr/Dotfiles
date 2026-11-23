@@ -2,6 +2,8 @@
 
 Works on **Arch** (and Arch-based: CachyOS, EndeavourOS) and **Ubuntu 26.04** (and Debian-based). One repo for both — the installer detects the distro by itself and installs every package with the right package manager.
 
+![alt text](image.png)
+
 # Installation with config/packages choices
 
 - Type in terminal next commands (**IMPORTANT**: clone repo to home directory — `~/Dotfiles` on every machine, all configs and scripts rely on this path):
