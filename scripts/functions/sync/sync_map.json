@@ -1,0 +1,25 @@
+[
+  {
+    "dest": "~/Dotfiles-private/zen-browser",
+    "sources": [
+      "~/.config/zen/*release*/zen-sessions.jsonlz4",
+      "~/.config/zen/*release*/zen-live-folders.jsonlz4",
+      "~/.config/zen/*release*/search.json.mozlz4",
+      "~/.zen/2oa3mlp3.Default (release)/zen-sessions.jsonlz4",
+      "~/.zen/2oa3mlp3.Default (release)/zen-live-folders.jsonlz4",
+      "~/.zen/2oa3mlp3.Default (release)/search.json.mozlz4"
+    ]
+  },
+  {
+    "dest": "~/Dotfiles-private/zen-browser",
+    "sqlite": "~/.zen/2oa3mlp3.Default (release)/places.sqlite",
+    "table": "zen_bookmarks_workspaces"
+  },
+  {
+    "dest": "~/Dotfiles/zen-browser",
+    "sources": [
+      "~/.config/zen/*release*/zen-keyboard-shortcuts.json",
+      "~/.zen/2oa3mlp3.Default (release)/zen-keyboard-shortcuts.json"
+    ]
+  }
+]

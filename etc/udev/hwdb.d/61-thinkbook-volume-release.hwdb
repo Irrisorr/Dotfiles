@@ -1,0 +1,8 @@
+# ThinkBook 14 G8 IRL: the EC drops the break code of the Fn volume keys after a
+# hold or fast taps, so the key stays "down" and the compositor repeats it
+# forever. Force a release after every make; holding still works through the
+# keyboard's own repeated makes. Matched on the model name (pvr), so every
+# machine type of this model gets it, and no other machine does.
+evdev:atkbd:dmi:*:svnLENOVO:*:pvrThinkBook14G8IRL:*
+ KEYBOARD_KEY_b0=!volumeup
+ KEYBOARD_KEY_ae=!volumedown

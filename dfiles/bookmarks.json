@@ -1,0 +1,50 @@
+{
+ "version": 2,
+ "bookmarks": [
+  {
+   "path": "recent:///",
+   "label": "recent",
+   "icon": ""
+  },
+  {
+   "path": "@HOME@",
+   "label": "@USER@",
+   "icon": ""
+  },
+  {
+   "path": "@HOME@/Desktop",
+   "label": "Desktop",
+   "icon": ""
+  },
+  {
+   "path": "@HOME@/Documents",
+   "label": "Documents",
+   "icon": ""
+  },
+  {
+   "path": "@HOME@/Downloads",
+   "label": "Downloads",
+   "icon": ""
+  },
+  {
+   "path": "@HOME@/Pictures",
+   "label": "Pictures",
+   "icon": ""
+  },
+  {
+   "path": "@HOME@/Dotfiles",
+   "label": "Dotfiles",
+   "icon": ""
+  },
+  {
+   "path": "@HOME@/Obsidian",
+   "label": "Obsidian",
+   "icon": ""
+  },
+  {
+   "path": "trash:///",
+   "label": "trash",
+   "icon": ""
+  }
+ ]
+}

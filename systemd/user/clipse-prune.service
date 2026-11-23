@@ -1,0 +1,6 @@
+[Unit]
+Description=Expire old clipse clipboard history (pruneAfter in clipse/config.json)
+
+[Service]
+Type=oneshot
+ExecStart=%h/Dotfiles/scripts/wrappers/clipse-prune.sh

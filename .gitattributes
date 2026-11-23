@@ -1,0 +1,5 @@
+# spicetify writes machine-specific paths into it; scripts/wrappers/spicetify-config-filter.sh
+spicetify/config-xpui.ini filter=spicetify-config
+
+# Dux files takes only absolute paths; scripts/wrappers/home-path-filter.sh
+dfiles/bookmarks.json filter=home-path

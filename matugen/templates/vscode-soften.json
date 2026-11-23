@@ -1,0 +1,20 @@
+{
+  "dark": {
+    "editor": "{{colors.surface_container_high.dark.hex}}",
+    "side": "{{colors.surface_container.dark.hex}}",
+    "raised": "{{colors.surface_container_highest.dark.hex}}",
+    "popup": "{{colors.surface_bright.dark.hex}}",
+    "text": "{{colors.on_surface_variant.dark.hex | lighten: 8}}",
+    "brightText": "{{colors.on_surface.dark.hex}}",
+    "comment": "{{colors.outline.dark.hex}}"
+  },
+  "default": {
+    "editor": "{{colors.surface_container_high.default.hex}}",
+    "side": "{{colors.surface_container.default.hex}}",
+    "raised": "{{colors.surface_container_highest.default.hex}}",
+    "popup": "{{colors.surface_bright.default.hex}}",
+    "text": "{{colors.on_surface_variant.default.hex | lighten: 8}}",
+    "brightText": "{{colors.on_surface.default.hex}}",
+    "comment": "{{colors.outline.default.hex}}"
+  }
+}

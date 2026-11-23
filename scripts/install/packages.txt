@@ -1,0 +1,180 @@
+# Hypr Ecosystem | hyprland
+hyprshot               ubuntu:skip (screenshots of a window, region or output | Ubuntu: shell script, no .deb)
+hyprswitch             ubuntu:skip (alt-tab window switcher | Ubuntu: no releases, source only)
+ags-hyprpanel-git      ubuntu:skip (HyprPanel: bar, notifications and menus | Ubuntu: not packaged)
+hyprpaper (wallpaper daemon)
+hyprlock (lock screen)
+xdg-desktop-portal (default portal)
+xdg-user-dirs (home directories: Desktop, Downloads, ...)
+xdg-desktop-portal-hyprland (screen sharing and screenshots for Hyprland)
+hyprpicker (color picker)
+nwg-displays (monitor layout tool)
+
+# niri Ecosystem | niri
+xdg-desktop-portal (default portal)
+xdg-desktop-portal-gtk (implements most of the basic functionality)
+xdg-desktop-portal-gnome (required for screencasting support)
+xdg-user-dirs (home directories: Desktop, Downloads, ...)
+xdg-user-dirs-gtk (the same directories in GTK's sidebar)
+gnome-keyring (implements the Secret portal, required for certain apps to work)
+xwayland-satellite     ubuntu:ppa=duxlabs/dux-repo (to run X11 apps like Steam or Discord)
+quickshell             ubuntu:ppa=duxlabs/dux-repo (DMS's framework | Ubuntu: dms needs it from this PPA, not only from its own)
+dux-shell              ubuntu:ppa=duxlabs/dms ubuntu:apt=dms (Dux shell: panel bar, launcher, notifications, settings)
+- matugen              ubuntu:ppa=duxlabs/dux-repo (wallpaper-based colors)
+- dux-gop              ubuntu:ppa=duxlabs/dux-repo (dgop: system stats for DMS widgets and the dgop top monitor)
+- cava (DMS audio visualizer widget)
+- qt6-multimedia       ubuntu:apt=qml6-module-qtmultimedia (DMS sound effects)
+- libinput-tools (Bongo Cat plugin: "All keyboards" mode)
+- evtest (Bongo Cat plugin: a single keyboard)
+- cliphist (clipboard history)
+- wl-clipboard (wayland clipboard)
+- jq (matugen hook: softens DMS's VS Code theme)
+- imagemagick (matugen hook: draws the Telegram theme's chat background)
+- python               ubuntu:apt=python3 (matugen hook: zips the Telegram theme)
+- qt5ct (Qt5 apps in the DMS wallpaper colors: QT_QPA_PLATFORMTHEME=qt5ct)
+- qt6ct (the same for Qt6 apps; its plugin answers to qt5ct too)
+dux-greeter-bin        ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-greeter (DMS login screen, replaces SDDM | Ubuntu: 26.04+)
+dux-calendar-bin       ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-calendar (dcal: Google/CalDAV calendar and tasks, DMS calendar backend | Ubuntu: 26.04+)
+dux-files-bin          ubuntu:ppa=duxlabs/dux-repo ubuntu:apt=dux-files (dfiles: file manager, also serves open/save dialogs | Ubuntu: 26.04+)
+hyprlock (lock screen)
+swaybg (wallpaper tool, for when DMS doesn't set the wallpaper)
+
+# Browsers
+zen-browser-bin        ubuntu:source=zen (based on firefox | Ubuntu: upstream tarball, updates itself)
+firefox (Mozilla's browser)
+vivaldi                ubuntu:flatpak=com.vivaldi.Vivaldi (based on chromium)
+google-chrome          ubuntu:source=chrome (Google's browser | Ubuntu: Google's .deb, then its apt repo — the flatpak is a community repack)
+
+# Terminals and shells
+kitty                  ubuntu:source=kitty (GPU terminal, the main one | Ubuntu: upstream build in /opt/kitty.app)
+- shader-slang         ubuntu:skip (custom shaders | Ubuntu: bundled with the upstream kitty build)
+alacritty (GPU terminal, the spare one)
+fish (the shell)
+
+# Runners
+wofi (app launcher)
+rofi (app launcher and menus)
+anyrun                 ubuntu:skip (app launcher with plugins | Ubuntu: no .deb, tarball only)
+walker                 ubuntu:skip (app launcher | Ubuntu: no .deb, tarball only)
+
+# Sync
+syncthing (syncs folders between devices, e.g. Obsidian with the phone)
+bitwarden              ubuntu:flatpak=com.bitwarden.desktop (password manager)
+
+# IDE's
+neovim (terminal editor)
+visual-studio-code-bin ubuntu:source=vscode (VS Code | Ubuntu: Microsoft's .deb, then its apt repo — the flatpak hides the host's SDKs and docker)
+intellij-idea-ultimate-edition ubuntu:source=idea (IntelliJ IDEA | Ubuntu: JetBrains' snap, classic — no sandbox between it and the JDKs, docker, terminal)
+antigravity            ubuntu:source=antigravity (Google's agentic IDE)
+zed                    ubuntu:source=zed (code editor | Ubuntu: zed.dev's installer, updates itself)
+postman-bin            ubuntu:source=postman (API client | Ubuntu: postman.com's tarball, updates itself)
+podman-desktop         ubuntu:flatpak=io.podman_desktop.PodmanDesktop (GUI for containers)
+podman (containers, docker-compatible)
+
+# Media
+telegram-desktop       ubuntu:source=telegram (Telegram | Ubuntu: telegram.org's tarball, updates itself — the flatpak can't follow the wallpaper theme)
+ime                    arch:source=ime ubuntu:source=ime (iMe: Telegram fork with extra features | imem.app's tarball in ~/.local/share/ime-desktop, updates itself)
+slack                  ubuntu:flatpak=com.slack.Slack (work chat | Ubuntu: apt's "slack" is another program)
+vesktop-bin            ubuntu:flatpak=dev.vencord.Vesktop (Discord client with Vencord)
+discord                ubuntu:flatpak=com.discordapp.Discord (official Discord client)
+spotify                ubuntu:source=spotify (music | Ubuntu: Spotify's apt repo, spicetify can't patch the flatpak)
+- spicetify-cli        ubuntu:source=spicetify (Spotify themes and extensions | Ubuntu: upstream release in /opt/spicetify-cli)
+- unzip                 (Listening Stats' installer, `spice` → Update apps)
+zoom                   ubuntu:source=zoom (video calls | Ubuntu: zoom.us's .deb, re-run the package step to update)
+
+# Notes and Offices
+obsidian               ubuntu:flatpak=md.obsidian.Obsidian (notes)
+freeoffice             ubuntu:source=freeoffice (office suite | Ubuntu: adds the SoftMaker apt repo)
+rnote                  ubuntu:flatpak=com.github.flxzt.rnote (handwritten notes and sketches)
+
+# Themes
+vimix-gtk-themes       ubuntu:skip (GTK theme | Ubuntu: not packaged)
+
+# Cursors
+bibata-cursor-theme (cursor theme)
+
+# Icons
+papirus-icon-theme (icon theme)
+
+# Fonts
+ttf-jetbrains-mono-nerd ubuntu:source=jetbrains_nerd (terminal and code font | Ubuntu: official nerd-fonts release, re-run to update)
+
+# File managers
+thunar                (xfce/gtk fm)
+- tumbler               (file preview)
+- thunar-archive-plugin (adds archive operations)
+- thunar-volman         (adds removable drives operations)
+- unzip                 (for archive operations in tui)
+- gvfs                  (for removable drives)
+dolphin               (kde/qt fm)
+- ark                   (adds archive operations)
+nautilus              (gnome/gtk fm)
+
+# Virtual Machines
+gnome-boxes (virtual machines)
+scrcpy (shows and controls an Android phone on the laptop over USB)
+waydroid               ubuntu:skip (android vm for wayland | Ubuntu: own repo at repo.waydro.id)
+
+# Packages For System
+gnome-calculator (calculator)
+gnome-system-monitor (processes and resources)
+baobab (disk usage viewer)
+obs-studio (screen recording and streaming)
+swayimg                ubuntu:source=swayimg (view images | Ubuntu: built from source)
+- libjpeg-turbo        ubuntu:apt=libjpeg-turbo-progs (lossless JPEG rotation on Ctrl+S | jpegtran)
+- imagemagick (saving rotation of other formats)
+- exiv2 (resetting EXIF orientation after rotation)
+vlc (view videos)
+wlogout (logout app for wayland)
+clipse                 ubuntu:source=clipse (clipboard tui manager | Ubuntu: release binary, re-run to update)
+- wl-clipboard (wayland clipboard)
+
+# Settings packages
+pavucontrol (audio control)
+nwg-look (themes/icons/cursors etc. control)
+polkit-gnome           ubuntu:apt=policykit-1-gnome (password prompts for apps that need root)
+mate-polkit (password prompts for apps that need root, the one niri starts)
+libfprint-2-tod1-goodix-v2 arch:source=goodix ubuntu:source=goodix (driver for my fingerprint device (27c6:550a: Shenzhen Goodix Technology))
+fprintd (fingerprint login and sudo)
+logmein-hamachi        ubuntu:skip (VPN service | Ubuntu: .deb at vpn.net, unversioned URL)
+
+# Games and Launchers
+steam                  ubuntu:apt=steam-installer (games)
+lutris (games from other stores and emulators)
+
+# work
+nodejs (JavaScript runtime)
+npm (JavaScript packages)
+git (version control)
+rsync (copies and syncs files)
+claude-code            ubuntu:source=claude_code (Claude in the terminal | Ubuntu: Anthropic's installer into ~/.local/bin, updates itself)
+claude-desktop         ubuntu:skip (Claude app | Ubuntu: no Linux build)
+
+# Additional Packages
+sqlite                 ubuntu:apt=sqlite3 (needed to sync private dotfiles)
+jq (needed to sync private dotfiles)
+gowall                 ubuntu:source=gowall (image converter | Ubuntu: upstream release binary)
+- librsvg              ubuntu:apt=librsvg2-bin (rsvg-convert: SVG icons in gw)
+- tesseract            ubuntu:apt=tesseract-ocr (local OCR in gw)
+- tesseract-data-eng   ubuntu:apt=tesseract-ocr-eng (its English)
+- tesseract-data-rus   ubuntu:apt=tesseract-ocr-rus (its Russian)
+inxi (detailed system info in the terminal)
+terminal-rain-lightning ubuntu:skip (tui rain in terminal | Ubuntu: pip only)
+thefuck (fixes the previous mistyped command)
+python-pip             ubuntu:apt=python3-pip (Python packages)
+github-cli             ubuntu:apt=gh (github client for terminal)
+jdk21-openjdk          ubuntu:apt=openjdk-21-jdk (Java 21)
+jdk25-openjdk          ubuntu:apt=openjdk-25-jdk (Java 25, current LTS)
+maven (java project management)
+fastfetch (system info at terminal start)
+figlet (large letters in the terminal)
+playerctl (media keys: play, pause, next)
+brightnessctl (screen brightness)
+sddm (login screen, the old one before the Dux greeter)
+- weston (wayland compositor for the greeter)
+- qt6-5compat          ubuntu:apt=qml6-module-qt5compat-graphicaleffects (for the theme)
+- qt6-declarative      ubuntu:apt=qml6-module-qtquick-controls (for the theme)
+- qml6-module-qtqml-models arch:pacman=qt6-declarative (for the theme | Arch: part of qt6-declarative)
+- qt6-svg              ubuntu:apt=qt6-svg-plugins (for the theme)
+usbutils (lsusb: model names of USB devices, e.g. the fingerprint reader)
+arronax                ubuntu:skip (for creating .desktop files | Ubuntu: not packaged)
