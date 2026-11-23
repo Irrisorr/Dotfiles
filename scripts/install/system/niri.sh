@@ -86,8 +86,13 @@ _niri_input_group() {
 # About: Makes the Dux greeter the login screen instead of SDDM/GDM, with fingerprint if it's on in Settings → Greeter.
 _niri_dux_greeter() {
   _niri_greeter_pam_split || return
+  # It still asks two things despite --yes: which of sudo / run0 to use
+  # (DMS_PRIVESC), and whether to go on after a display manager "could not be
+  # disabled" — on Ubuntu always gdm3, an alias of gdm.service that stays
+  # "alias" after its disable, while gdm itself is off. sudo reads the password
+  # from the terminal, not from that pipe.
   execute_command "Make the Dux greeter the login screen (re-login, then: dms-greeter status; back: dms-greeter uninstall)" \
-    "dms-greeter install --yes"
+    "printf 'y\\n' | DMS_PRIVESC=sudo dms-greeter install --yes"
 }
 
 # dms-greeter puts its fingerprint block before the first line that starts with
