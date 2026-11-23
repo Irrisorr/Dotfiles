@@ -44,7 +44,8 @@
     "reduceMotion": false,
     "registerFileManager": true,
     "rememberFolderViews": true,
-    "searchExcludes": [],
+    "searchExcludes": [
+    ],
     "searchHidden": false,
     "showDevicesSidebar": true,
     "showExtensions": true,
@@ -60,7 +61,7 @@
     "showSystemPartitions": false,
     "sidebarCollapsed": false,
     "springBounce": 1,
-    "startupFolder": "last",
+    "startupFolder": "home",
     "terminal": "",
     "themeMode": "auto",
     "thumbnailSizeLimitMb": 64,
